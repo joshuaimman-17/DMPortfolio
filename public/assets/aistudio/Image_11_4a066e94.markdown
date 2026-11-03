@@ -1,0 +1,239 @@
+---
+name: Performance Portfolio
+colors:
+  surface: '#fbf9f8'
+  surface-dim: '#dbd9d9'
+  surface-bright: '#fbf9f8'
+  surface-container-lowest: '#ffffff'
+  surface-container-low: '#f5f3f3'
+  surface-container: '#efeded'
+  surface-container-high: '#eae8e7'
+  surface-container-highest: '#e4e2e2'
+  on-surface: '#1b1c1c'
+  on-surface-variant: '#434655'
+  inverse-surface: '#303030'
+  inverse-on-surface: '#f2f0f0'
+  outline: '#737686'
+  outline-variant: '#c3c6d7'
+  surface-tint: '#0053db'
+  primary: '#004ac6'
+  on-primary: '#ffffff'
+  primary-container: '#2563eb'
+  on-primary-container: '#eeefff'
+  inverse-primary: '#b4c5ff'
+  secondary: '#006e2d'
+  on-secondary: '#ffffff'
+  secondary-container: '#7cf994'
+  on-secondary-container: '#007230'
+  tertiary: '#943700'
+  on-tertiary: '#ffffff'
+  tertiary-container: '#bc4800'
+  on-tertiary-container: '#ffede6'
+  error: '#ba1a1a'
+  on-error: '#ffffff'
+  error-container: '#ffdad6'
+  on-error-container: '#93000a'
+  primary-fixed: '#dbe1ff'
+  primary-fixed-dim: '#b4c5ff'
+  on-primary-fixed: '#00174b'
+  on-primary-fixed-variant: '#003ea8'
+  secondary-fixed: '#7ffc97'
+  secondary-fixed-dim: '#62df7d'
+  on-secondary-fixed: '#002109'
+  on-secondary-fixed-variant: '#005320'
+  tertiary-fixed: '#ffdbcd'
+  tertiary-fixed-dim: '#ffb596'
+  on-tertiary-fixed: '#360f00'
+  on-tertiary-fixed-variant: '#7d2d00'
+  background: '#fbf9f8'
+  on-background: '#1b1c1c'
+  surface-variant: '#e4e2e2'
+typography:
+  headline-xl:
+    fontFamily: Inter
+    fontSize: 48px
+    fontWeight: '700'
+    lineHeight: 56px
+    letterSpacing: -0.02em
+  headline-xl-mobile:
+    fontFamily: Inter
+    fontSize: 32px
+    fontWeight: '700'
+    lineHeight: 40px
+    letterSpacing: -0.015em
+  headline-lg:
+    fontFamily: Inter
+    fontSize: 30px
+    fontWeight: '700'
+    lineHeight: 38px
+    letterSpacing: -0.015em
+  headline-lg-mobile:
+    fontFamily: Inter
+    fontSize: 24px
+    fontWeight: '700'
+    lineHeight: 32px
+    letterSpacing: -0.01em
+  headline-md:
+    fontFamily: Inter
+    fontSize: 20px
+    fontWeight: '600'
+    lineHeight: 28px
+    letterSpacing: -0.01em
+  body-lg:
+    fontFamily: Inter
+    fontSize: 18px
+    fontWeight: '400'
+    lineHeight: 28px
+  body-base:
+    fontFamily: Inter
+    fontSize: 16px
+    fontWeight: '400'
+    lineHeight: 26px
+  body-sm:
+    fontFamily: Inter
+    fontSize: 14px
+    fontWeight: '400'
+    lineHeight: 20px
+  label-md:
+    fontFamily: Inter
+    fontSize: 14px
+    fontWeight: '600'
+    lineHeight: 20px
+    letterSpacing: 0.01em
+  label-sm:
+    fontFamily: Inter
+    fontSize: 12px
+    fontWeight: '600'
+    lineHeight: 16px
+    letterSpacing: 0.025em
+rounded:
+  sm: 0.25rem
+  DEFAULT: 0.5rem
+  md: 0.75rem
+  lg: 1rem
+  xl: 1.5rem
+  full: 9999px
+spacing:
+  gutter: 1.5rem
+  gutter-mobile: 1rem
+  margin: 2.5rem
+  margin-mobile: 1rem
+  space-xs: 0.25rem
+  space-sm: 0.5rem
+  space-md: 1rem
+  space-lg: 1.5rem
+  space-xl: 2.5rem
+---
+
+## Brand & Style
+
+This design system establishes an authoritative yet accessible personal brand identity for a senior digital marketing expert. Built around the principles of analytical clarity, high-trust professionalism, and clear return-on-investment demonstration, the visual tone balances corporate credibility with modern digital craft.
+
+The aesthetic follows **Corporate Modern with Tactile Elevation**: clean grid discipline, generous whitespace, structured data display, and distinct physical separation between the canvas and interactive content layers. It rejects visual gimmicks in favor of crisp typography, confident color accents, and dimensional card tiers that highlight metrics, client transformations, and strategic case studies.
+
+## Colors
+
+The palette establishes immediate executive confidence with a rich primary blue, paired with an intentional growth-oriented green reserved strictly for performance metrics and positive outcomes.
+
+### Core Swatches
+- **Primary Blue (`#2563EB`)**: Anchor brand color used for primary actions, active navigational states, and high-priority anchors.
+  - Hover: `#1D4ED8`
+  - Deep / Pressed: `#1E40AF`
+- **Accent Green (`#16A34A`)**: Performance indicator reserved for ROI metrics, uptrend pills, conversion badges, and validated growth statistics.
+  - Hover / Light tint: `#DCFCE7` (background surfaces for metric badges)
+  - Deep: `#15803D`
+- **Canvas & Surface Palette**:
+  - Global Page Canvas: `#F5F5F5` (creates strong visual separation beneath floating content containers).
+  - Primary Container Surface: `#FFFFFF` (pure white for cards and primary floating blocks).
+  - Alternating Section Fill: `#FAFAFA` (subtle contrast for secondary stacked zones).
+- **Text & Structure Neutrals**:
+  - Headings & High-Emphasis Titles: `#171717` (neutral-900 equivalent for maximum legibility).
+  - Body Copy & Secondary Text: `#525252` (neutral-600 providing balanced contrast without visual harshness).
+  - Subtle Borders & Rings: `#E5E7EB` (neutral-200 with 80% opacity on floating borders).
+- **Dark Anchor Base**:
+  - Footer & Closing CTA Background: `#0F172A` / `#111827` (slate/neutral-900 providing a grounded, high-contrast conclusion to the narrative).
+
+## Typography
+
+The type system relies universally on **Inter** to project systematic precision, data clarity, and effortless readability across diverse device categories.
+
+### Hierarchy & Usage
+- **Display & Section Titles (H1, H2)**: Tight negative tracking (`-0.015em` to `-0.02em`) creates editorial authority, while strict line height bounds prevent multi-line collisions.
+- **Body Text**: Generous vertical line-height (`1.625` multiplier on base copy) prevents fatigue when reviewing detailed campaign case studies and strategic breakdowns.
+- **Metric Numbers**: Rendered with tabular figures (`font-variant-numeric: tabular-nums`) using weight `700` for clear scannability across ROI comparisons and conversion ratios.
+
+## Layout & Spacing
+
+The layout is built upon a **12-column responsive fluid grid** constrained to a `1280px` maximum content container on desktop screens, centering content over the `#F5F5F5` canvas.
+
+### Section Architecture
+- **Section Stacking**: Primary sections appear as island panels or alternate between `#FFFFFF` and `#FAFAFA` surfaces with an explicit `40px` (`2.5rem` / `space-xl`) gap between independent modular sections.
+- **Container Breakpoints**:
+  - Desktop (`≥ 1024px`): 12 columns, `1.5rem` gutters, `2.5rem` outer canvas padding.
+  - Tablet (`768px – 1023px`): 8 columns, `1.25rem` gutters, `2rem` outer padding.
+  - Mobile (`< 768px`): 4 columns, `1rem` gutters, `1rem` outer canvas padding. Content stacks into full-width vertical cards.
+
+## Elevation & Depth
+
+Visual hierarchy uses a two-tiered elevation model with tinted ambient shadows to create genuine physical separation from the light gray (`#F5F5F5`) viewport base.
+
+### Primary Section & Floating Card Elevation
+- **Floating Containers (24px radius)**:
+  - Base shadow: `0 20px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.03)`
+  - Edge Ring: Subtle `1px` outer ring using `rgba(229, 231, 235, 0.8)` (`ring-1 ring-neutral-200/80`) to ensure contrast against white canvas variations.
+  
+### Secondary & Interactive Internal Cards
+- **Sub-cards & Case Metric Tiles (12px radius)**:
+  - Rest State: `0 4px 6px -1px rgba(15, 23, 42, 0.04), 0 2px 4px -2px rgba(15, 23, 42, 0.02)` with a 1px crisp neutral border (`#E5E7EB`).
+  - Hover Interaction: Translates `-2px` on the Y-axis with an elevated shadow: `0 12px 20px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04)`. Transition timing is locked to `200ms cubic-bezier(0.16, 1, 0.3, 1)`.
+
+### Primary Button Elevation
+- Blue-tinted glow: `0 4px 14px 0 rgba(37, 99, 235, 0.35)` expanding to `0 6px 20px 0 rgba(37, 99, 235, 0.45)` upon hover.
+
+## Shapes
+
+The design system enforces a deliberate radius hierarchy:
+
+- **Macro Containers / Floating Section Blocks**: Explicitly set to `24px` (`rounded-3xl`) to project a soft, welcoming, and polished frame around major portfolio segments.
+- **Internal Content Cards & Metric Blocks**: Set to `12px` (`rounded-xl`), providing a sharp, structured boundary suited for tabular metrics, graphs, and case summary highlights.
+- **Interactive Controls (Buttons, Inputs, Selectors)**: Fixed at `8px` (`rounded-lg`) for a disciplined, clean corporate feel that fits standard thumb and cursor targets.
+- **Status Badges, Metric Pills, and Tags**: Fully rounded pill shapes (`9999px` / `rounded-full`) to differentiate metadata from actionable rectangular controls.
+
+## Components
+
+### Buttons
+- **Primary Action**: Solid `#2563EB` fill, white `#FFFFFF` text, `8px` border radius, blue-tinted shadow (`rgba(37, 99, 235, 0.35)`). Padding: `12px 24px` for default, `10px 18px` for compact. Hover transitions to `#1D4ED8`; active state triggers `#1E40AF`.
+- **Secondary / Outlined Action**: Transparent fill with a `1px` border in `#E5E7EB` (neutral-200), `#171717` label, and `8px` radius. Hover state adds `#F9FAFB` background fill and subtle `#D1D5DB` border tint.
+
+### Floating Cards (Outer Containers)
+- Surface: `#FFFFFF`.
+- Corner Radius: `24px`.
+- Padding: `32px` to `48px` on desktop; `20px` to `24px` on mobile.
+- Outline: `1px` ring in `#E5E7EB/80`.
+- Shadow: Soft, deep ambient shadow separating it from the `#F5F5F5` global background.
+
+### Internal Cards (Metric & Case Study Tiles)
+- Surface: `#FFFFFF` or `#FAFAFA`.
+- Corner Radius: `12px`.
+- Border: `1px` solid `#E5E7EB`.
+- Interactive Behavior: Lift effect (`translateY(-2px)`) with heightened shadow on mouse over.
+- Padding: `20px` to `24px`.
+
+### Metric Chips & Status Badges
+- Shape: Full pill (`rounded-full`).
+- Positive Metrics: Soft green background `#DCFCE7`, rich green text `#15803D`, small positive indicator icon, font size `12px` or `14px`, weight `600`.
+- Category Tags: `#F3F4F6` background, `#374151` text, subtle `1px` neutral border.
+
+### Input Fields & Contact Controls
+- Surface: `#FFFFFF` with `1px` solid `#D1D5DB` border, `8px` radius, `12px 16px` padding.
+- Text: `#171717` with placeholder styled in `#9CA3AF`.
+- Focus State: Border color transitions to `#2563EB` with an ambient `3px` focus ring in `rgba(37, 99, 235, 0.15)`.
+
+### Icons
+- Clean, 2px stroke-width Lucide vector glyphs.
+- Sizing standard: `20px` inside buttons and inline lists, `24px` for section headings, `32px` to `40px` inside light-tinted circular badges (`48px` diameter) for service features.
+- Color: Always aligned to `#2563EB` for navigational cues, `#16A34A` for positive metric trends, and `#525252` for general descriptive metadata.
+
+### Dark Footer
+- Full bleed surface set to `#0F172A` with `#111827` secondary containers.
+- Typography: Inverted with headings in `#F8FAFC`, descriptive text in `#94A3B8`, and borders rendered in `rgba(255, 255, 255, 0.08)`.
