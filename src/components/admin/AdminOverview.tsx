@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
-import { seedDatabaseFromSampleData } from '../../lib/portfolioService';
+import { seedDatabaseFromSampleData } from '../../lib/admin-service';
 
 interface AdminOverviewProps {
   onNavigateTab: (tab: string) => void;

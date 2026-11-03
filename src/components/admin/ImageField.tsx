@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { uploadImage, listDriveImages, driveImageUrl, DriveFileInfo } from '../../lib/backend';
+import { uploadImage, listDriveImages, DriveFileInfo } from '../../lib/admin-service';
+import { driveImageUrl } from '../../lib/drive-image';
 import { usePortfolioData } from '../../context/PortfolioContext';
 
 export interface ImageFieldProps {

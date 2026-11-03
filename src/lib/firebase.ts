@@ -1,3 +1,5 @@
+'use client';
+
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
@@ -10,7 +12,9 @@ export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getA
 // Authentication
 export const auth = getAuth(app);
 // Ensure persistence across refreshes
-setPersistence(auth, browserLocalPersistence).catch(() => {});
+if (typeof window !== 'undefined') {
+  setPersistence(auth, browserLocalPersistence).catch(() => {});
+}
 
 // Google Auth Provider
 export const googleProvider = new GoogleAuthProvider();

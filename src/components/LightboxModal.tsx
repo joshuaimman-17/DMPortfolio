@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useEffect } from 'react';
-import { driveImageUrl } from '../lib/backend';
+import { driveImageUrl } from '@/lib/drive-image';
 
 export interface LightboxItem {
   id: string;

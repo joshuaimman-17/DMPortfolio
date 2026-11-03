@@ -4,6 +4,7 @@ import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
 import { uploadMediaFile } from '../../lib/portfolioService';
 import { WorkDetail, ShowcaseItem } from '../../data/portfolioData';
+import { triggerRevalidation } from '../../lib/admin-service';
 import { ImageField } from './ImageField';
 
 export const AdminWorks: React.FC = () => {
@@ -208,6 +209,7 @@ export const AdminWorks: React.FC = () => {
       setEditingItem(null);
       await loadAllWorks();
       await refreshData();
+      await triggerRevalidation(['works']);
     } catch (err: any) {
       showToast(err.message || 'Failed to save case study', 'error');
     }
@@ -220,6 +222,7 @@ export const AdminWorks: React.FC = () => {
       setDeleteConfirmSlug(null);
       await loadAllWorks();
       await refreshData();
+      await triggerRevalidation(['works']);
     } catch (err: any) {
       showToast(err.message || 'Failed to delete case study', 'error');
     }
@@ -246,6 +249,7 @@ export const AdminWorks: React.FC = () => {
       ]);
       await loadAllWorks();
       await refreshData();
+      await triggerRevalidation(['works']);
     } catch (err: any) {
       showToast(err.message || 'Error updating order', 'error');
     }

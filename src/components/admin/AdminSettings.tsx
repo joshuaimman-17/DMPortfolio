@@ -3,6 +3,7 @@ import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
 import { SiteSettings } from '../../lib/portfolioService';
+import { triggerRevalidation } from '../../lib/admin-service';
 
 export const AdminSettings: React.FC = () => {
   const { settings, refreshData, showToast } = usePortfolioData();
@@ -26,6 +27,7 @@ export const AdminSettings: React.FC = () => {
       ]);
       showToast('Site settings updated across public portfolio!', 'success');
       await refreshData();
+      await triggerRevalidation(['settings']);
     } catch (err: any) {
       showToast(err.message || 'Failed to update settings', 'error');
     } finally {

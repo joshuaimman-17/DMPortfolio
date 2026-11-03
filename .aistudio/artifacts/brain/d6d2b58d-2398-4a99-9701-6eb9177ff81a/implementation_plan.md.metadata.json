@@ -1,0 +1,6 @@
+{
+  "summary": "Comprehensive architectural blueprint to port the Alex Rivera Growth Marketing Portfolio from React 19 + Vite into a Next.js 16 App Router application in-place at project root, featuring Server Components by default, unstable_cache data caching with revalidation tags, firebase-admin server initialization, secured server proxy API routes, next/image remote patterns, next/font typography, SEO metadata, and client-side administrative CMS.",
+  "updatedAt": "2026-11-03T11:44:14.122371091Z",
+  "requestFeedback": true,
+  "userFacing": true
+}

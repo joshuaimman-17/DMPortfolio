@@ -1,23 +1,22 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { PORTFOLIO_DATA } from '../data/portfolioData';
 
 export type NavRoute = 'home' | 'about' | 'services' | 'works' | 'blog' | 'contact';
 
 interface NavbarProps {
-  currentPath: string; // e.g. '/', '/services', '/services/seo', '/works', etc.
-  onNavigateRoute: (route: string, targetSectionId?: string) => void;
   onOpenAudit: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({
-  currentPath,
-  onNavigateRoute,
-  onOpenAudit,
-}) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('home');
+  const pathname = usePathname();
 
-  const isHomePage = currentPath === '/' || currentPath === '' || currentPath === '#/';
+  const isHomePage = pathname === '/' || pathname === '';
 
   // Scroll spy on Home page
   useEffect(() => {
@@ -26,7 +25,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     const sections = ['home', 'about', 'services', 'works', 'process', 'blog', 'contact'];
 
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 120; // 120px offset for sticky navbar
+      const scrollPosition = window.scrollY + 140; // 140px offset for sticky navbar
 
       for (let i = sections.length - 1; i >= 0; i--) {
         const id = sections[i];
@@ -34,7 +33,6 @@ export const Navbar: React.FC<NavbarProps> = ({
         if (el) {
           const top = el.offsetTop;
           if (scrollPosition >= top) {
-            // map process to works or keep active
             if (id === 'process') {
               setActiveSection('services');
             } else {
@@ -52,48 +50,38 @@ export const Navbar: React.FC<NavbarProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isHomePage]);
 
-  // Determine which nav link should appear active
+  // Determine active nav item
   const getIsActive = (navId: NavRoute) => {
     if (isHomePage) {
-      if (navId === 'home') return activeSection === 'home';
-      if (navId === 'about') return activeSection === 'about';
-      if (navId === 'services') return activeSection === 'services';
-      if (navId === 'works') return activeSection === 'works';
-      if (navId === 'blog') return activeSection === 'blog';
-      if (navId === 'contact') return activeSection === 'contact';
-      return false;
+      return activeSection === navId;
     } else {
-      if (navId === 'services') return currentPath.startsWith('/services');
-      if (navId === 'works') return currentPath.startsWith('/works');
-      if (navId === 'blog') return currentPath.startsWith('/blog');
+      if (navId === 'services') return pathname.startsWith('/services');
+      if (navId === 'works') return pathname.startsWith('/works');
+      if (navId === 'blog') return pathname.startsWith('/blog');
       return false;
     }
   };
 
-  const handleNavClick = (navId: NavRoute) => {
-    setMobileMenuOpen(false);
-
+  const getHref = (navId: NavRoute) => {
     if (isHomePage) {
-      // On Home, smooth scroll to the section
-      const targetId = navId === 'home' ? 'home' : navId;
-      const el = document.getElementById(targetId);
+      return `#${navId}`;
+    }
+    if (navId === 'home') return '/';
+    if (navId === 'about') return '/#about';
+    if (navId === 'contact') return '/#contact';
+    if (navId === 'services') return '/services';
+    if (navId === 'works') return '/works';
+    if (navId === 'blog') return '/blog';
+    return '/';
+  };
+
+  const handleLinkClick = (navId: NavRoute, e?: React.MouseEvent) => {
+    setMobileMenuOpen(false);
+    if (isHomePage) {
+      e?.preventDefault();
+      const el = document.getElementById(navId);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
-      }
-    } else {
-      // On Hub or Detail page
-      if (navId === 'home') {
-        onNavigateRoute('/');
-      } else if (navId === 'about') {
-        onNavigateRoute('/', 'about');
-      } else if (navId === 'contact') {
-        onNavigateRoute('/', 'contact');
-      } else if (navId === 'services') {
-        onNavigateRoute('/services');
-      } else if (navId === 'works') {
-        onNavigateRoute('/works');
-      } else if (navId === 'blog') {
-        onNavigateRoute('/blog');
       }
     }
   };
@@ -103,8 +91,14 @@ export const Navbar: React.FC<NavbarProps> = ({
       <header className="fixed top-0 left-0 right-0 w-full z-50 bg-[#fbf9f8]/95 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-neutral-200/70">
         <div className="h-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
           {/* Brand Left */}
-          <button
-            onClick={() => handleNavClick('home')}
+          <Link
+            href="/"
+            onClick={(e) => {
+              if (isHomePage) {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
             className="flex items-center gap-2.5 text-left focus:outline-none group cursor-pointer"
           >
             <img
@@ -115,7 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="font-bold text-base sm:text-lg text-on-surface whitespace-nowrap">
               {PORTFOLIO_DATA.profile.title}
             </span>
-          </button>
+          </Link>
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-1 lg:gap-2">
@@ -128,10 +122,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               { id: 'contact' as NavRoute, label: 'Contact' },
             ].map((item) => {
               const active = getIsActive(item.id);
+              const href = getHref(item.id);
               return (
-                <button
+                <Link
                   key={item.id}
-                  onClick={() => handleNavClick(item.id)}
+                  href={href}
+                  onClick={(e) => handleLinkClick(item.id, e)}
                   aria-current={active ? 'page' : undefined}
                   className={`px-3 py-1.5 transition-all text-xs lg:text-sm font-semibold rounded-lg cursor-pointer ${
                     active
@@ -140,7 +136,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   }`}
                 >
                   {item.label}
-                </button>
+                </Link>
               );
             })}
           </nav>
@@ -190,10 +186,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               { id: 'contact' as NavRoute, label: 'Contact & Advisory', icon: 'mail' },
             ].map((item) => {
               const active = getIsActive(item.id);
+              const href = getHref(item.id);
               return (
-                <button
+                <Link
                   key={item.id}
-                  onClick={() => handleNavClick(item.id)}
+                  href={href}
+                  onClick={(e) => handleLinkClick(item.id, e)}
                   className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-base font-bold transition-all text-left cursor-pointer ${
                     active
                       ? 'bg-primary text-white shadow-md'
@@ -205,7 +203,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <span>{item.label}</span>
                   </span>
                   <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-                </button>
+                </Link>
               );
             })}
           </div>

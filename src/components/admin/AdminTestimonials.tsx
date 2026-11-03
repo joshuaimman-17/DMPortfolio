@@ -3,6 +3,7 @@ import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore'
 import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
 import { uploadMediaFile } from '../../lib/portfolioService';
+import { triggerRevalidation } from '../../lib/admin-service';
 import { ImageField } from './ImageField';
 
 export const AdminTestimonials: React.FC = () => {
@@ -143,6 +144,7 @@ export const AdminTestimonials: React.FC = () => {
       setEditingItem(null);
       await loadAllTestimonials();
       await refreshData();
+      await triggerRevalidation(['testimonials']);
     } catch (err: any) {
       showToast(err.message || 'Failed to save testimonial', 'error');
     }
@@ -155,6 +157,7 @@ export const AdminTestimonials: React.FC = () => {
       setDeleteConfirmId(null);
       await loadAllTestimonials();
       await refreshData();
+      await triggerRevalidation(['testimonials']);
     } catch (err: any) {
       showToast(err.message || 'Failed to delete item', 'error');
     }
@@ -181,6 +184,7 @@ export const AdminTestimonials: React.FC = () => {
       ]);
       await loadAllTestimonials();
       await refreshData();
+      await triggerRevalidation(['testimonials']);
     } catch (err: any) {
       showToast(err.message || 'Error updating order', 'error');
     }

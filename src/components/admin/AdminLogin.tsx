@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { usePortfolioData } from '../../context/PortfolioContext';
 
 export const AdminLogin: React.FC = () => {
@@ -42,12 +43,12 @@ export const AdminLogin: React.FC = () => {
               <span className="material-symbols-outlined text-[18px]">logout</span>
               <span>Sign out</span>
             </button>
-            <a
-              href="#/"
+            <Link
+              href="/"
               className="w-full py-2.5 px-4 rounded-xl text-neutral-600 hover:text-neutral-900 text-xs font-semibold transition-colors"
             >
               Return to Public Portfolio
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -87,12 +88,12 @@ export const AdminLogin: React.FC = () => {
           <span className="text-white">Sign in with Google</span>
         </button>
 
-        <a
-          href="#/"
+        <Link
+          href="/"
           className="text-xs text-neutral-500 hover:text-neutral-800 transition-colors"
         >
           ← Back to Public Portfolio
-        </a>
+        </Link>
       </div>
     </div>
   );

@@ -4,23 +4,26 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "vite build",
-    "preview": "vite preview",
-    "clean": "rm -rf dist server.js",
+    "dev": "next dev -p 3000 -H 0.0.0.0",
+    "build": "next build",
+    "start": "next start -p 3000 -H 0.0.0.0",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
-    "@tailwindcss/vite": "^4.3.3",
+    "@tailwindcss/postcss": "^4.3.4",
     "@vitejs/plugin-react": "^6.1.1",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
     "firebase": "^13.2.0",
+    "firebase-admin": "^14.5.0",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
+    "next": "^16.4.4",
+    "postcss": "^8.5.32",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
+    "server-only": "^0.0.1",
     "vite": "^8.3.0"
   },
   "devDependencies": {

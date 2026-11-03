@@ -1,34 +1,41 @@
-import React, { useState } from 'react';
-import { driveImageUrl } from '../../lib/backend';
+'use client';
 
-export interface DriveImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+import React, { useState } from 'react';
+import Image from 'next/image';
+import { driveImageUrl } from '@/lib/drive-image';
+
+export interface DriveImageProps {
   src: string;
   alt: string;
   width?: number;
+  height?: number;
   aspectRatioClass?: string;
   frameType?: 'poster' | 'analytics' | 'seo-site' | 'social' | 'ad' | 'work' | 'post' | 'avatar' | string;
   title?: string;
+  className?: string;
   containerClassName?: string;
+  priority?: boolean;
+  unoptimized?: boolean;
 }
 
 export const DriveImage: React.FC<DriveImageProps> = ({
   src,
   alt,
   width = 600,
+  height,
   aspectRatioClass = 'aspect-[16/10]',
   frameType = 'general',
   title,
   className = '',
   containerClassName = '',
-  loading = 'lazy',
-  ...rest
+  priority = false,
+  unoptimized,
 }) => {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
 
   const resolvedSrc = driveImageUrl(src, width);
 
-  // Fallback badge styling based on frameType
   const getFallbackIcon = () => {
     switch (frameType) {
       case 'poster':
@@ -75,21 +82,11 @@ export const DriveImage: React.FC<DriveImageProps> = ({
     }
   };
 
-  return (
-    <div
-      className={`relative overflow-hidden bg-neutral-100 ${aspectRatioClass} ${containerClassName}`}
-    >
-      {/* Loading Skeleton */}
-      {!loaded && !error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-neutral-100 via-neutral-200/70 to-neutral-100 animate-pulse">
-          <span className="material-symbols-outlined text-neutral-300 text-3xl">
-            {getFallbackIcon()}
-          </span>
-        </div>
-      )}
-
-      {/* Styled Gradient Fallback on Error */}
-      {error ? (
+  if (!resolvedSrc || error) {
+    return (
+      <div
+        className={`relative overflow-hidden bg-neutral-100 ${aspectRatioClass} ${containerClassName}`}
+      >
         <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-gradient-to-br from-neutral-800 via-neutral-900 to-slate-950 text-white select-none">
           <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mb-2">
             <span className="material-symbols-outlined text-blue-400 text-2xl">
@@ -103,19 +100,35 @@ export const DriveImage: React.FC<DriveImageProps> = ({
             {title || alt || 'Growth Asset'}
           </span>
         </div>
-      ) : (
-        <img
-          src={resolvedSrc}
-          alt={alt}
-          loading={loading}
-          onLoad={() => setLoaded(true)}
-          onError={() => setError(true)}
-          className={`w-full h-full object-cover transition-opacity duration-300 ${
-            loaded ? 'opacity-100' : 'opacity-0'
-          } ${className}`}
-          {...rest}
-        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`relative overflow-hidden bg-neutral-100 ${aspectRatioClass} ${containerClassName}`}
+    >
+      {!loaded && !error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-neutral-100 via-neutral-200/70 to-neutral-100 animate-pulse z-10">
+          <span className="material-symbols-outlined text-neutral-300 text-3xl">
+            {getFallbackIcon()}
+          </span>
+        </div>
       )}
+
+      <Image
+        src={resolvedSrc}
+        alt={alt || 'Image'}
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        priority={priority}
+        unoptimized={unoptimized}
+        onLoad={() => setLoaded(true)}
+        onError={() => setError(true)}
+        className={`object-cover transition-opacity duration-300 ${
+          loaded ? 'opacity-100' : 'opacity-0'
+        } ${className}`}
+      />
     </div>
   );
 };

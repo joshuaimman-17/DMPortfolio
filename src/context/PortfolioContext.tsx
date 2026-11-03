@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
@@ -8,11 +10,13 @@ import {
   ShowcaseItem,
   BlogPostDetail,
 } from '../data/portfolioData';
+import { SiteSettings, DEFAULT_SETTINGS } from '../types/settings';
 import {
-  SiteSettings,
-  DEFAULT_SETTINGS,
   checkIsAdmin,
   ensureAdminRecord,
+  triggerRevalidation,
+} from '../lib/admin-service';
+import {
   fetchPublishedCollection,
   fetchSiteSettings,
 } from '../lib/portfolioService';
@@ -236,7 +240,26 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 export const usePortfolioData = () => {
   const context = useContext(PortfolioContext);
   if (!context) {
-    throw new Error('usePortfolioData must be used within a PortfolioProvider');
+    return {
+      services: PORTFOLIO_DATA.services,
+      works: PORTFOLIO_DATA.works,
+      showcase: PORTFOLIO_DATA.showcase,
+      blogPosts: PORTFOLIO_DATA.blogPosts,
+      testimonials: PORTFOLIO_DATA.testimonials,
+      settings: DEFAULT_SETTINGS,
+      loading: false,
+      refreshData: async () => {},
+      findService: (slug: string) => PORTFOLIO_DATA.services.find((s) => s.slug === slug),
+      findWork: (slug: string) => PORTFOLIO_DATA.works.find((w) => w.slug === slug),
+      findPost: (slug: string) => PORTFOLIO_DATA.blogPosts.find((p) => p.slug === slug),
+      user: null,
+      isAdmin: false,
+      authLoading: false,
+      loginWithGoogle: async () => false,
+      logout: async () => {},
+      toast: null,
+      showToast: () => {},
+    };
   }
   return context;
 };

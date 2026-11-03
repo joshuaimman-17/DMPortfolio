@@ -3,6 +3,7 @@ import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore'
 import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
 import { ServiceDetail } from '../../data/portfolioData';
+import { triggerRevalidation } from '../../lib/admin-service';
 
 export const AdminServices: React.FC = () => {
   const { services: cachedServices, refreshData, showToast } = usePortfolioData();
@@ -168,6 +169,7 @@ export const AdminServices: React.FC = () => {
       setEditingItem(null);
       await loadAllServices();
       await refreshData();
+      await triggerRevalidation(['services']);
     } catch (err: any) {
       showToast(err.message || 'Failed to save service', 'error');
     }
@@ -180,6 +182,7 @@ export const AdminServices: React.FC = () => {
       setDeleteConfirmSlug(null);
       await loadAllServices();
       await refreshData();
+      await triggerRevalidation(['services']);
     } catch (err: any) {
       showToast(err.message || 'Failed to delete service', 'error');
     }
@@ -206,6 +209,7 @@ export const AdminServices: React.FC = () => {
       ]);
       await loadAllServices();
       await refreshData();
+      await triggerRevalidation(['services']);
     } catch (err: any) {
       showToast(err.message || 'Error updating order', 'error');
     }

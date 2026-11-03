@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState } from 'react';
-import { submitInboundForm } from '../lib/portfolioService';
+import { submitInboundForm } from '@/lib/client-api';
 
 interface AuditBookingModalProps {
   isOpen: boolean;

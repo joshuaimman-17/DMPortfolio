@@ -1,15 +1,22 @@
+'use client';
+
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { PORTFOLIO_DATA } from '../data/portfolioData';
-import { usePortfolioData } from '../context/PortfolioContext';
-import { subscribeNewsletter } from '../lib/portfolioService';
+import { subscribeNewsletter } from '@/lib/client-api';
+import { SiteSettings, DEFAULT_SETTINGS } from '@/types/settings';
 
 interface FooterProps {
-  onOpenAudit: () => void;
-  onNavigateRoute?: (route: string, sectionId?: string) => void;
+  settings?: SiteSettings;
+  onOpenAudit?: () => void;
+  isAdmin?: boolean;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenAudit, onNavigateRoute }) => {
-  const { settings, services, isAdmin } = usePortfolioData();
+export const Footer: React.FC<FooterProps> = ({
+  settings = DEFAULT_SETTINGS,
+  onOpenAudit,
+  isAdmin = false,
+}) => {
   const [email, setEmail] = useState('');
   const [honeypot, setHoneypot] = useState('');
   const [subscribed, setSubscribed] = useState(false);
@@ -35,14 +42,6 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAudit, onNavigateRoute }) 
       setIsSubscribing(false);
       setSubscribed(true);
       setEmail('');
-    }
-  };
-
-  const handleNav = (route: string, sectionId?: string) => {
-    if (onNavigateRoute) {
-      onNavigateRoute(route, sectionId);
-    } else {
-      window.location.hash = route;
     }
   };
 
@@ -103,52 +102,52 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAudit, onNavigateRoute }) 
             </h3>
             <ul className="flex flex-col gap-2 text-xs sm:text-sm">
               <li>
-                <button
-                  onClick={() => handleNav('/')}
-                  className="text-slate-400 hover:text-white transition-colors text-left cursor-pointer"
+                <Link
+                  href="/"
+                  className="text-slate-400 hover:text-white transition-colors text-left"
                 >
                   Home
-                </button>
+                </Link>
               </li>
               <li>
-                <button
-                  onClick={() => handleNav('/', 'about')}
-                  className="text-slate-400 hover:text-white transition-colors text-left cursor-pointer"
+                <Link
+                  href="/#about"
+                  className="text-slate-400 hover:text-white transition-colors text-left"
                 >
                   About Alex
-                </button>
+                </Link>
               </li>
               <li>
-                <button
-                  onClick={() => handleNav('/services')}
-                  className="text-slate-400 hover:text-white transition-colors text-left cursor-pointer"
+                <Link
+                  href="/services"
+                  className="text-slate-400 hover:text-white transition-colors text-left"
                 >
                   Services Hub
-                </button>
+                </Link>
               </li>
               <li>
-                <button
-                  onClick={() => handleNav('/works')}
-                  className="text-slate-400 hover:text-white transition-colors text-left cursor-pointer"
+                <Link
+                  href="/works"
+                  className="text-slate-400 hover:text-white transition-colors text-left"
                 >
                   Works &amp; Case Studies
-                </button>
+                </Link>
               </li>
               <li>
-                <button
-                  onClick={() => handleNav('/blog')}
-                  className="text-slate-400 hover:text-white transition-colors text-left cursor-pointer"
+                <Link
+                  href="/blog"
+                  className="text-slate-400 hover:text-white transition-colors text-left"
                 >
                   Growth Playbooks
-                </button>
+                </Link>
               </li>
               <li>
-                <button
-                  onClick={() => handleNav('/', 'contact')}
-                  className="text-slate-400 hover:text-white transition-colors text-left cursor-pointer"
+                <Link
+                  href="/#contact"
+                  className="text-slate-400 hover:text-white transition-colors text-left"
                 >
                   Contact
-                </button>
+                </Link>
               </li>
             </ul>
           </div>
@@ -161,12 +160,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAudit, onNavigateRoute }) 
             <ul className="flex flex-col gap-2 text-xs sm:text-sm">
               {PORTFOLIO_DATA.services.slice(0, 5).map((srv) => (
                 <li key={srv.slug}>
-                  <a
-                    href={`#/services/${srv.slug}`}
+                  <Link
+                    href={`/services/${srv.slug}`}
                     className="text-slate-400 hover:text-white transition-colors text-left"
                   >
                     {srv.title}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -183,7 +182,6 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAudit, onNavigateRoute }) 
 
             {!subscribed ? (
               <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2 pt-1">
-                {/* Honeypot field for bot protection */}
                 <input
                   type="text"
                   name="website"
@@ -217,47 +215,49 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAudit, onNavigateRoute }) 
               </div>
             )}
 
-            <button
-              onClick={onOpenAudit}
-              className="mt-2 text-xs text-primary-fixed hover:underline font-semibold flex items-center gap-1 cursor-pointer"
-            >
-              <span>Book a Free Growth Diagnostic →</span>
-            </button>
+            {onOpenAudit && (
+              <button
+                onClick={onOpenAudit}
+                className="mt-2 text-xs text-primary-fixed hover:underline font-semibold flex items-center gap-1 cursor-pointer text-left"
+              >
+                <span>Book a Free Growth Diagnostic →</span>
+              </button>
+            )}
           </div>
         </div>
 
         {/* Bottom Legal / Copyright Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>{settings.footer.copyright || `© ${new Date().getFullYear()} Alex Rivera. All rights reserved.`}</p>
+          <p>{settings?.footer?.copyright || `© ${new Date().getFullYear()} Alex Rivera. All rights reserved.`}</p>
           <div className="flex items-center gap-6">
-            <button
-              onClick={() => handleNav('/', 'contact')}
+            <Link
+              href="/#contact"
               className="hover:text-slate-300 transition-colors cursor-pointer"
             >
               Terms of Engagement
-            </button>
-            <button
-              onClick={() => handleNav('/', 'contact')}
+            </Link>
+            <Link
+              href="/#contact"
               className="hover:text-slate-300 transition-colors cursor-pointer"
             >
               Privacy Policy
-            </button>
-            <button
-              onClick={onOpenAudit}
-              className="text-primary hover:underline font-semibold cursor-pointer"
-            >
-              Schedule Strategy Call
-            </button>
-            {isAdmin && (
-              <a
-                href="#/admin"
-                className="text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-semibold border-l border-slate-700 pl-4"
-                title="Open Firebase Admin Dashboard"
+            </Link>
+            {onOpenAudit && (
+              <button
+                onClick={onOpenAudit}
+                className="text-primary hover:underline font-semibold cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
-                <span>Admin Console</span>
-              </a>
+                Schedule Strategy Call
+              </button>
             )}
+            <Link
+              href="/admin"
+              className="text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-semibold border-l border-slate-700 pl-4"
+              title="Open Firebase Admin Dashboard"
+            >
+              <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+              <span>Admin Console</span>
+            </Link>
           </div>
         </div>
       </div>

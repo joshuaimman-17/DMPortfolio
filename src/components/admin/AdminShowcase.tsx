@@ -4,6 +4,7 @@ import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
 import { uploadMediaFile } from '../../lib/portfolioService';
 import { ShowcaseItem } from '../../data/portfolioData';
+import { triggerRevalidation } from '../../lib/admin-service';
 import { ImageField } from './ImageField';
 
 export const AdminShowcase: React.FC = () => {
@@ -163,6 +164,7 @@ export const AdminShowcase: React.FC = () => {
       setEditingItem(null);
       await loadAllShowcase();
       await refreshData();
+      await triggerRevalidation(['showcase']);
     } catch (err: any) {
       showToast(err.message || 'Failed to save deliverable', 'error');
     }
@@ -175,6 +177,7 @@ export const AdminShowcase: React.FC = () => {
       setDeleteConfirmId(null);
       await loadAllShowcase();
       await refreshData();
+      await triggerRevalidation(['showcase']);
     } catch (err: any) {
       showToast(err.message || 'Failed to delete item', 'error');
     }
@@ -201,6 +204,7 @@ export const AdminShowcase: React.FC = () => {
       ]);
       await loadAllShowcase();
       await refreshData();
+      await triggerRevalidation(['showcase']);
     } catch (err: any) {
       showToast(err.message || 'Error updating order', 'error');
     }

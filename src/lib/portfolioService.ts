@@ -24,6 +24,7 @@ import {
 } from '../data/portfolioData';
 
 export const ADMIN_EMAILS = [
+  'joshuaimman8@gmail.com',
   'joshuaimman2004@gmail.com',
   'YOUR_EMAIL@gmail.com',
   'alex@growthmark.io',

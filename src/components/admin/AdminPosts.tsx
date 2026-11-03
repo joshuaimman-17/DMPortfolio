@@ -4,6 +4,7 @@ import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
 import { uploadMediaFile } from '../../lib/portfolioService';
 import { BlogPostDetail } from '../../data/portfolioData';
+import { triggerRevalidation } from '../../lib/admin-service';
 import { ImageField } from './ImageField';
 
 export const AdminPosts: React.FC = () => {
@@ -204,6 +205,7 @@ export const AdminPosts: React.FC = () => {
       setEditingItem(null);
       await loadAllPosts();
       await refreshData();
+      await triggerRevalidation(['posts']);
     } catch (err: any) {
       showToast(err.message || 'Failed to save article', 'error');
     }
@@ -216,6 +218,7 @@ export const AdminPosts: React.FC = () => {
       setDeleteConfirmSlug(null);
       await loadAllPosts();
       await refreshData();
+      await triggerRevalidation(['posts']);
     } catch (err: any) {
       showToast(err.message || 'Failed to delete article', 'error');
     }
@@ -242,6 +245,7 @@ export const AdminPosts: React.FC = () => {
       ]);
       await loadAllPosts();
       await refreshData();
+      await triggerRevalidation(['posts']);
     } catch (err: any) {
       showToast(err.message || 'Error updating order', 'error');
     }
