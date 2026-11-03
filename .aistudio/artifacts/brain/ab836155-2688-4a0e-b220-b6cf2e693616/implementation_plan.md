@@ -1,131 +1,217 @@
-# Alex Rivera | Performance Marketing & SEO Growth Portfolio
+# Restructuring Alex Rivera Portfolio: Single-Page Home, Hub & Detail Pages
 
-A comprehensive, production-grade personal brand and client acquisition web application for senior growth marketer Alex Rivera. Replicates and unifies the five complete design screens (Home, About, Services, Works, Blog/Insights) into a high-performance responsive application featuring instant view switching, a full-screen proof lightbox, interactive category filtering, an interactive ROAS & Growth ROI calculator, and a multi-step growth audit diagnostic booking modal.
+Restructure the application from tab-based switching into a cohesive, high-performance architecture featuring a rich single-page scrolling Home experience (incorporating all 13 sections in order with scroll-spy) complemented by dedicated Hub and Detail pages for Services (`#/services`, `#/services/:slug`), Works (`#/works`, `#/works/:slug`), and Blog (`#/blog`, `#/blog/:slug`), plus a 404 fallback card.
 
 ## User Review & Critical Decisions
 
 > [!IMPORTANT]
-> The following product decisions were confirmed during the interactive interview:
-> - **Navigation Architecture**: Seamless multi-view tab switching across `Home`, `About`, `Services`, `Works`, `Blog`, and `Contact` with instant state preservation and URL hash synchronisation.
-> - **Interactive Capabilities**: Built-in proof lightbox modal for inspecting high-resolution creative posters, verified Google Search Console snapshots, and GA4 telemetry; interactive filter chips for case studies and visual assets; plus a client-facing ROAS & Acquisition ROI Calculator.
-> - **Audit & Consultation Flow**: "Hire Me" and "Book a Free 30-Min Growth Audit" CTAs launch an interactive 3-step diagnostic booking modal (Channel Intake & Goals $\rightarrow$ Metric Baselines & Spend $\rightarrow$ Calendar Scheduling & Confirmation).
+> - **Navigation & Routing Model**:
+>   - `#/`: Home page with 13 continuous sections in order: (1) Hero (`#home`), (2) Metrics bar with animated counters, (3) About (`#about`) containing bio, 4 principles, career timeline, skills, tools, certifications, and passions, (4) Services (`#services`) with 6 cards and link to `#/services`, (5) Works & Showcase (`#works`) with 6 mixed items and link to `#/works`, (6) How I Work (`#process`) with 5 steps, (7) Tools I Use, (8) ROAS & Growth ROI Calculator, (9) Testimonials, (10) Blog (`#blog`) with 3 latest posts and link to `#/blog`, (11) FAQ accordion, (12) Contact (`#contact`) with intake form, direct details, and booking, (13) Dark footer with newsletter.
+>   - Hub pages: `#/services`, `#/works`, `#/blog`.
+>   - Detail pages: `#/services/:slug`, `#/works/:slug`, `#/blog/:slug`.
+>   - 404 page: Floating card for unmatched routes with "Back to Home" and "View My Works" buttons.
+> - **Navbar & Scroll-Spy Rules**:
+>   - Sticky navbar with logo, links (`Home`, `About`, `Services`, `Works`, `Blog`, `Contact`), and "Hire Me" button.
+>   - On Home, links smooth-scroll to sections with an offset (accounting for the sticky header) with active link highlighted via `IntersectionObserver` scroll-spy.
+>   - On Hub/Detail pages, clicking `About` or `Contact` transitions to Home and smoothly scrolls to the target anchor.
+>   - `Services`, `Works`, and `Blog` links remain highlighted on their respective Hub and Detail pages.
+>   - Route transitions scroll to top, and returning to Home from a detail page restores the previous scroll position.
+> - **Feature Preservation**:
+>   - The full-screen proof lightbox, ROAS calculator, 3-step audit booking modal, filter chips, FAQ accordion, and localStorage persistence are preserved and enhanced.
+> - **Responsive Geometry (Mobile 375px Breakpoints)**:
+>   - Mobile (`< 640px`): Full-width cards (no side margins, 0px border radius, 16px vertical gap, subtle light shadow).
+>   - Desktop/Tablet (`≥ 640px`): Floating cards with `rounded-3xl`, tactile drop shadows, and 40px (`2.5rem`) gaps over the `#F5F5F5` canvas.
 
 ---
 
 ## 1. Overview & Core Concept
 
-- **What It Does**: Presents an authoritative, data-backed personal brand portfolio demonstrating tangible marketing ROI through real case studies, Google Search Console logs, Meta/Google ad creatives, and live-ranked client sites. Visitors can inspect deliverables in full resolution, model expected campaign returns using an interactive ROAS calculator, and submit diagnostic audit requests.
-- **Target Audience / Persona**: Growth-stage startup founders (Series A–B), DTC brand executives, CMOs, and venture operators looking to audit, scale, or troubleshoot their customer acquisition engines.
-- **Key Value**: Replaces vague marketing buzzwords with quantitative proof, verifiable SERP trajectories, and transparent unit economics.
+- **What It Does**: Provides a unified personal brand and portfolio platform for Alex Rivera. Prospective clients on the homepage experience a comprehensive, seamless narrative from value proposition through proof, methodology, interactive tools, and direct contact. Users wanting deep strategic breakdowns can click into dedicated Hub and Detail pages for individual services, case studies, and editorial playbooks.
+- **Target Audience / Persona**: Founders, CMOs, and VP of Growth looking for verifiable performance track records and clear ROI demonstration before booking an advisory sprint.
+- **Key Value**: Combines single-page conversion efficiency with multi-page depth and direct URL shareability (`#/works/kinetic-activewear`, `#/services/performance-marketing`, `#/blog/ga4-server-side`).
 
 ---
 
 ## 2. User Experience & Visual Design
 
-### Key User Flows
-1. **Executive Overview (Home View)**: Hero section with dynamic proof badges (+120% Traffic, 4.5x ROAS), 4-metric growth bar, full-funnel capability previews, featured case studies, 5-stage methodology, verified marketing stack chips, client endorsements, and conversion CTA.
-2. **Detailed Capabilities & Process (Services View)**: 6 detailed service cards (Technical SEO, Paid Advertising, Social Strategy, Content Marketing, Email Lifecycle, Analytics & CRO) with expandable deliverables, interactive 4-phase execution roadmap with progress indicators, and an interactive FAQ accordion.
-3. **Deep Proof & Artifact Exploration (Works View)**: Filterable masonry gallery across 8 categories (`All`, `Case Studies`, `Posters`, `Analytics`, `SEO Sites`, `Social Media`, `Ads`, `Email`) with full-screen keyboard-accessible lightbox (`ESC`, arrows), before/after metric strips, and verified SERP ranking highlights.
-4. **Strategic Background (About View)**: Bio with quantitative track record, 4-principle engineering philosophy, 3-milestone career timeline, core marketing proficiency breakdown, daily tool armory, industry certifications, and personal balance sections.
-5. **Interactive Tools (ROAS Calculator & Audit Booking)**:
-   - *ROAS & CAC Growth Calculator*: Interactive sliders for monthly ad budget, current conversion rate, and average order value/deal size, outputting blended ROAS, estimated new revenue, and CAC payback timeline.
-   - *3-Step Growth Audit Modal*: Multi-step intake collecting company URL, primary growth challenge, monthly budget tier, and preferred calendar timeslot with immediate summary confirmation.
-
-### Visual Identity & Theme Tokens
-- **Design Constitution**: Follows the *Corporate Modern with Tactile Elevation* design system from the specification:
-  - **Page Canvas**: `#F5F5F5` / `#FBF9F8` creating physical separation beneath floating island panels.
-  - **Surface Elements**: Crisp pure white `#FFFFFF` floating containers (`rounded-3xl` / 24px) with soft ambient drop shadows and subtle `1px` rings (`ring-1 ring-neutral-200/80`).
-  - **Primary Blue Accent**: `#2563EB` (hover: `#1D4ED8`, active: `#1E40AF`) with glowing blue-tinted button shadows (`0 4px 14px rgba(37,99,235,0.35)`).
-  - **Accent Green**: `#16A34A` / `#DCFCE7` reserved exclusively for validated growth statistics, ROAS indicators, and positive SERP movements.
-  - **Dark Anchor Base**: `#0F172A` / `#111827` grounded dark footer and closing contrast strips.
-- **Typography**: Universal **Inter** font hierarchy with tight negative display tracking (`-0.02em` on Display H1, tabular numerals `tabular-nums` on all financial figures and metrics).
-- **Zero-Pill Restraint**: Static metadata uses clean inline typographic separators (`·` / `/`), reserving pill buttons strictly for interactive filter controls and status badges.
+### Page Layouts & User Flows
+1. **Home (`#/`)**:
+   - Continuous scroll through 13 discrete sections with 40px separation on desktop.
+   - Smooth-scrolling anchors with `-80px` header compensation.
+   - Animated counter effects for the metrics bar numbers (+120%, 4.5x, ₹50L+, 30+).
+   - Integrated "Sites I've Ranked" strip inside the Works section showing domain, target keyword, and rank improvement badges.
+2. **Services Hub (`#/services`)**:
+   - Header with key stats, 6 comprehensive service cards (with 3 deliverables each and "Learn more" buttons linking to `#/services/:slug`), process execution strip, FAQ accordion, and CTA card.
+3. **Service Detail (`#/services/:slug`)**:
+   - Breadcrumb navigation (`Home > Services > [Service Title]`) and "← Back to all services".
+   - Hero with "Get a Quote" / "Book Audit" button.
+   - "What's Included", "Who It's For", 4-stage operational process, 3 related case study cards, transparent pricing approach, and service-specific FAQ.
+4. **Works Hub (`#/works`)**:
+   - Aggregate track record metrics ($42M+ spend, 180M+ impressions).
+   - 8 filter chips (`All`, `Case Studies`, `Posters`, `Analytics`, `SEO Sites`, `Social Media`, `Ads`, `Email`) with mobile horizontal scroll.
+   - Masonry showcase of all 12+ items (posters with lightbox zoom, GSC browser logs, CloudPulse SEO before/after, Meta ads KPI panel, phone reel mockup, GA4 revenue ledger).
+   - "Load more" interaction, Hall of Fame SERP strip, and CTA card.
+5. **Work Detail (`#/works/:slug`)**:
+   - Breadcrumbs (`Home > Works > [Client Name]`) and "← Back to full portfolio".
+   - Header with client name, industry, engagement duration, service tags, and cover image.
+   - 4 quantified result stat cards.
+   - Goal & initial challenge, strategic hypothesis, multi-month execution timeline.
+   - Proof gallery with high-resolution mockups, client quote, key learnings, and previous/next work navigation.
+6. **Blog Hub (`#/blog`)**:
+   - Featured marquee article, keyword search input, category chips, responsive article grid, and newsletter capture card.
+7. **Blog Detail (`#/blog/:slug`)**:
+   - 720px reading container, breadcrumbs, category kicker, author metadata, read time, cover media, rich multi-section prose with pull quotes, sticky desktop Table of Contents, social share buttons, and related articles.
+8. **404 Floating Error Card**:
+   - Clean, branded error screen with "Back to Home" and "View My Works" buttons.
 
 ---
 
 ## 3. Key Product Decisions & Trade-Offs
 
-- **Multi-View State Model**:
-  - *Chosen*: Single-page view router driven by React state synchronized with `window.location.hash`.
-  - *Why*: Eliminates page reload flicker, enables seamless state persistence (e.g. calculator numbers and filter preferences remain intact when navigating), and allows direct links to `#works`, `#services`, or `#about`.
-- **Integrated Assets & Zero External Dependency Failure**:
-  - *Chosen*: Hotlink verified Google CDN image URLs provided in the reference HTML screens (`lh3.googleusercontent.com`), backed with robust styled fallback SVG/gradient containers.
-  - *Why*: Guarantees high-fidelity visual fidelity identical to the approved screens without risk of external CDN outages or broken image frames.
-- **Local Storage for Audit Diagnostic Inquiries**:
-  - *Chosen*: Submissions in the 3-step audit booking modal store diagnostic state in `localStorage` and trigger email pre-fill links.
-  - *Why*: Provides instant client feedback and reviewable submission history without requiring external cloud databases or third-party webhooks.
+- **Hash Router Implementation**:
+  - *Chosen*: Custom lightweight React hash router parsing `window.location.hash` with route regexes (`#/`, `#/services`, `#/services/:slug`, `#/works`, `#/works/:slug`, `#/blog`, `#/blog/:slug`).
+  - *Why*: Full refresh resistance in hermetic web preview environments, zero server rewrite dependencies, instant browser back/forward history support, and preserved client memory.
+- **Scroll Restoration Mechanism**:
+  - *Chosen*: Storing the homepage scroll offset in a ref whenever navigating away from `#/`, and restoring it when navigating back to `#/`. Transitions to hub/detail routes automatically scroll to top (`window.scrollTo({ top: 0 })`).
+  - *Why*: Ensures seamless UX so visitors inspecting a case study return exactly to where they were in the Home feed.
+- **Consolidated Typed Data Store**:
+  - *Chosen*: A single typed data source (`src/data/portfolioData.ts`) defining `services`, `works`, `showcase`, and `posts` with matching slugs, cross-references, and realistic marketing benchmarks.
+  - *Why*: Simplifies maintenance, ensures consistent slug references across Hub and Detail pages, and keeps the build lightweight.
 
 ---
 
 ## 4. Technical Architecture & Data Strategy
 
-### System & Component Diagram
+### System Architecture Diagram
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                              App Container                             │
-│       ┌────────────────────────────────────────────────────────┐       │
-│       │         Top Navigation Bar (1-Row, 3-Zone Contract)    │       │
-│       │  [Brand Wordmark] ── [Nav Links] ── ["Hire Me" CTA]    │       │
-│       └────────────────────────────────────────────────────────┘       │
-│                                   │                                    │
-│                 ┌─────────────────┴─────────────────┐                  │
-│                 ▼                                   ▼                  │
-│     ┌───────────────────────┐           ┌───────────────────────┐      │
-│     │    View Orchestrator  │           │   Global Overlay Hub  │      │
-│     │  (Home/About/Services/│           │ ┌───────────────────┐ │      │
-│     │     Works/Blog/Audit) │           │ │ Proof Lightbox    │ │      │
-│     └───────────────────────┘           │ ├───────────────────┤ │      │
-│                 │                       │ │ 3-Step Audit Modal│ │      │
-│                 ▼                       │ └───────────────────┘ │      │
-│  ┌───────────────────────────────────────────────────────────┐  │      │
-│  │                     Active View Screen                    │  │      │
-│  │  ┌───────────────┐ ┌────────────────┐ ┌────────────────┐  │  │      │
-│  │  │ HomeView      │ │ ServicesView   │ │ WorksView      │  │  │      │
-│  │  │ - Hero Split  │ │ - 6 Solution   │ │ - 8 Filters    │  │  │      │
-│  │  │ - Metric Bar  │ │   Cards        │ │ - Proof Tiles  │  │  │      │
-│  │  │ - ROAS Tool   │ │ - 4-Phase Flow │ │ - SERP Strip   │  │  │      │
-│  │  │ - Case Grid   │ │ - FAQ Accordion│ │ - Testimonial  │  │  │      │
-│  │  └───────────────┘ └────────────────┘ └────────────────┘  │  │      │
-│  │  ┌───────────────┐ ┌────────────────┐ ┌────────────────┐  │  │      │
-│  │  │ AboutView     │ │ BlogView       │ │ ContactView    │  │  │      │
-│  │  │ - Bio & Visual│ │ - Articles     │ │ - Form Intake  │  │  │      │
-│  │  │ - Timeline    │ │ - Read Times   │ │ - Direct Info  │  │  │      │
-│  │  │ - Tech Armory │ │ - Topic Hubs   │ │ - Social Hub   │  │  │      │
-│  │  └───────────────┘ └────────────────┘ └────────────────┘  │  │      │
-│  └───────────────────────────────────────────────────────────┘  │      │
-│                                   │                                    │
-│       ┌───────────────────────────▼────────────────────────────┐      │
-│       │        Dark Footer (#0F172A) & Newsletter Capture      │      │
-│       └────────────────────────────────────────────────────────┘      │
-└────────────────────────────────────────────────────────────────────────┘
+│                              App.tsx                                   │
+│  State: currentRoute, scrollPositionRef, auditModalOpen, lightboxItem  │
+│  Hooks: window.addEventListener('hashchange'), useScrollSpy            │
+└──────────────────────────────────┬─────────────────────────────────────┘
+                                   │
+         ┌─────────────────────────┼─────────────────────────┐
+         ▼                         ▼                         ▼
+┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│    Navbar.tsx    │     │   Active View    │     │    Footer.tsx    │
+│ - Sticky Bar     │     │   Router Match   │     │ - Grounded Slate │
+│ - Scroll Spy     │     └─────────┬────────┘     │ - Global Links   │
+│ - Hash Navigation│               │              │ - Newsletter     │
+└──────────────────┘               │              └──────────────────┘
+                                   │
+  ┌────────────────────────────────┼────────────────────────────────┐
+  ▼                                ▼                                ▼
+┌────────────────────┐   ┌────────────────────┐   ┌─────────────────────┐
+│    Home View (#/)  │   │     Hub Views      │   │    Detail Views     │
+│ 13 Stamped Sections│   │ - #/services       │   │ - #/services/:slug  │
+│ (Hero → Metrics →  │   │ - #/works          │   │ - #/works/:slug     │
+│ About → Services → │   │ - #/blog           │   │ - #/blog/:slug      │
+│ Works → Process →  │   └────────────────────┘   └─────────────────────┘
+│ Tools → ROAS Calc →│                                       │
+│ Testimonials → Blog│                                       ▼
+│ → FAQ → Contact)   │                            ┌─────────────────────┐
+└────────────────────┘                            │    404 Fallback     │
+                                                  │ - "Back to Home"    │
+                                                  │ - "View My Works"   │
+                                                  └─────────────────────┘
 ```
 
-### Component & State Mapping
+### Data Schema Mapping
 
-| Component | Key State & Props | Event Handlers & User Interactions |
-| :--- | :--- | :--- |
-| `App` / `Navbar` | `currentView: TabId`, `isAuditModalOpen: boolean` | `onNavigate(view)`, `onOpenAudit()`, hash listener sync |
-| `WorksView` | `activeFilter: string`, `selectedImageIndex: number` | Category chip filtering, click-to-preview lightbox trigger |
-| `LightboxModal` | `isOpen: boolean`, `currentIndex: number` | Previous/Next navigation, `Escape` key close, keyboard arrows |
-| `ServicesView` | `expandedFaqId: string \| null` | Accordion collapse/expand micro-interaction |
-| `RoasCalculator` | `budget: number`, `cvr: number`, `aov: number` | Real-time mathematical recalculation of ROAS, ARR and CAC |
-| `AuditBookingModal`| `step: 1\|2\|3`, `formData: AuditFormData`, `isSubmitted: boolean` | Diagnostic form field updates, step validation, `localStorage` storage |
+```typescript
+export interface ServiceDetail {
+  slug: string;
+  title: string;
+  icon: string;
+  summary: string;
+  deliverables: string[];
+  whoItsFor: string[];
+  process: { phase: string; title: string; desc: string }[];
+  faqs: { q: string; a: string }[];
+  relatedWorkSlugs: string[];
+}
+
+export interface WorkDetail {
+  slug: string;
+  client: string;
+  title: string;
+  industry: string;
+  duration: string;
+  services: string[];
+  result: string;
+  stats: { label: string; value: string; trend?: string }[];
+  goal: string;
+  challenge: string;
+  strategy: string;
+  execution: { step: string; title: string; desc: string }[];
+  proofItemIds: string[];
+  testimonial: { quote: string; author: string; role: string; avatar?: string };
+  learnings: string[];
+}
+
+export interface ShowcaseItem {
+  id: string;
+  type: 'poster' | 'analytics' | 'seo-site' | 'social' | 'ad' | 'email';
+  title: string;
+  client: string;
+  image: string;
+  badge?: string;
+  source?: string;
+  url?: string;
+  before?: string;
+  after?: string;
+  workSlug?: string;
+  metrics?: { label: string; value: string }[];
+}
+
+export interface BlogPostDetail {
+  slug: string;
+  title: string;
+  category: string;
+  excerpt: string;
+  date: string;
+  readTime: string;
+  coverImage: string;
+  author: { name: string; role: string; avatar: string };
+  toc: { id: string; title: string }[];
+  contentBlocks: { heading?: string; paragraphs: string[]; pullQuote?: string }[];
+  relatedSlugs: string[];
+}
+```
 
 ---
 
-## 5. Execution Steps (Upon Approval)
+## 5. Execution Steps
 
-1. **HTML & Metadata Synchronization**: Update `/index.html` with accurate OpenGraph, favicon, title ("Alex Rivera | Growth Marketer - Performance Portfolio"), and `/metadata.json`.
-2. **Design Tokens & Theme Styling**: Configure typography and Tailwind utilities in `/src/index.css` following the design specification.
-3. **Data Assets & Portfolio Content**: Consolidate structured portfolio items, case studies, client rankings, and testimonial records into typed data definitions.
-4. **Interactive Component Architecture**:
-   - `Navbar` & `Footer` with 1-row, 3-zone contract.
-   - `HomeView` with hero split, interactive metric counters, ROAS estimator, and case studies.
-   - `ServicesView` with 6 detailed capability cards, process milestones, and FAQ accordion.
-   - `WorksView` with 8 filter tabs, before/after metric comparisons, and SERP Hall of Fame.
-   - `AboutView` with career timeline, domain proficiencies, and armory grid.
-   - `BlogView` with tactical growth playbooks.
-   - `LightboxModal` with smooth transitions and keyboard navigation.
-   - `AuditBookingModal` with multi-step diagnostic intake.
-5. **Compilation & Verification**: Execute `compile_applet` to ensure pristine TypeScript compilation and zero console errors.
+1. **Data Model Expansion (`src/data/portfolioData.ts`)**:
+   - Seed 6 complete services with full detail metadata.
+   - Seed 6 in-depth works with quantified stats, challenges, strategies, execution timelines, and proof references.
+   - Seed 12 diverse showcase items across all 6 formats (poster, analytics, SEO site, social reel, Meta ad, Klaviyo email flow).
+   - Seed 6 blog articles with structured content blocks and table of contents.
+2. **Router & Scroll-Spy Utility**:
+   - Create custom route matcher supporting `#/`, `#/services`, `#/services/:slug`, `#/works`, `#/works/:slug`, `#/blog`, `#/blog/:slug`, and 404 fallback.
+   - Implement scroll restoration and `document.title` synchronization per route.
+   - Implement intersection-based scroll-spy for Home sections.
+3. **Navbar & Footer Updates**:
+   - Sticky navbar handling section jumping on Home vs routing from hubs/detail pages.
+   - Active route and section highlighting.
+   - Full-screen mobile navigation drawer.
+4. **Single-Page Home View (`src/components/HomeView.tsx`)**:
+   - Assemble all 13 sections in strict order as floating cards (desktop 40px gap, mobile 16px edge-to-edge).
+   - Animated metric counters and interactive ROAS calculator.
+   - "Sites I've Ranked" strip integrated into Works preview.
+5. **Hub Pages Components**:
+   - `ServicesHubView.tsx` (`#/services`).
+   - `WorksHubView.tsx` (`#/works`) with 8 filter chips, masonry grid, and "Load more".
+   - `BlogHubView.tsx` (`#/blog`) with featured article, search, and category chips.
+6. **Detail Pages Components**:
+   - `ServiceDetailView.tsx` (`#/services/:slug`).
+   - `WorkDetailView.tsx` (`#/works/:slug`).
+   - `BlogDetailView.tsx` (`#/blog/:slug`) with sticky desktop TOC and 720px column.
+7. **404 View Component (`src/components/NotFoundView.tsx`)**:
+   - Clean floating card with recovery CTAs.
+8. **App Integration & Verification**:
+   - Mount router inside `src/App.tsx`.
+   - Test acceptance checks: direct URL loading, refresh survival, browser back/forward, mobile responsive styles, lightbox, and calculator persistence.
+   - Run `lint_applet` and `compile_applet`.

@@ -1,0 +1,208 @@
+{
+  "entities": {
+    "Service": {
+      "title": "Service",
+      "description": "Growth consulting practice area",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "slug": { "type": "string" },
+        "icon": { "type": "string" },
+        "summary": { "type": "string" },
+        "tag": { "type": "string" },
+        "deliverables": { "type": "array" },
+        "whoItsFor": { "type": "array" },
+        "process": { "type": "array" },
+        "faqs": { "type": "array" },
+        "pricingApproach": { "type": "string" },
+        "relatedWorkSlugs": { "type": "array" },
+        "status": { "type": "string", "enum": ["draft", "published"] },
+        "order": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["title", "slug", "status", "order"]
+    },
+    "Work": {
+      "title": "Work",
+      "description": "Portfolio case study and client engagement breakdown",
+      "type": "object",
+      "properties": {
+        "client": { "type": "string" },
+        "title": { "type": "string" },
+        "slug": { "type": "string" },
+        "industry": { "type": "string" },
+        "duration": { "type": "string" },
+        "services": { "type": "array" },
+        "result": { "type": "string" },
+        "stats": { "type": "array" },
+        "goal": { "type": "string" },
+        "challenge": { "type": "string" },
+        "strategy": { "type": "string" },
+        "execution": { "type": "array" },
+        "proofItemIds": { "type": "array" },
+        "testimonial": { "type": "object" },
+        "learnings": { "type": "array" },
+        "coverImage": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "published"] },
+        "order": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["client", "title", "slug", "status", "order"]
+    },
+    "Showcase": {
+      "title": "Showcase",
+      "description": "Visual proof artifact, ad creative, or analytics dashboard",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["poster", "analytics", "seo-site", "social", "ad", "email"] },
+        "title": { "type": "string" },
+        "client": { "type": "string" },
+        "image": { "type": "string" },
+        "badge": { "type": "string" },
+        "source": { "type": "string" },
+        "url": { "type": "string" },
+        "before": { "type": "string" },
+        "after": { "type": "string" },
+        "workSlug": { "type": "string" },
+        "metrics": { "type": "array" },
+        "highlight": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "published"] },
+        "order": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["title", "type", "image", "status", "order"]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "Growth article and technical playbook",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "slug": { "type": "string" },
+        "category": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "date": { "type": "string" },
+        "readTime": { "type": "string" },
+        "coverImage": { "type": "string" },
+        "author": { "type": "object" },
+        "toc": { "type": "array" },
+        "contentBlocks": { "type": "array" },
+        "relatedSlugs": { "type": "array" },
+        "status": { "type": "string", "enum": ["draft", "published"] },
+        "order": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["title", "slug", "status", "order"]
+    },
+    "Testimonial": {
+      "title": "Testimonial",
+      "description": "Client endorsement and review",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "company": { "type": "string" },
+        "quote": { "type": "string" },
+        "rating": { "type": "number" },
+        "avatarInitials": { "type": "string" },
+        "avatarBg": { "type": "string" },
+        "avatarColor": { "type": "string" },
+        "avatarImage": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "published"] },
+        "order": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["name", "quote", "status", "order"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Site global content settings (hero, metrics, contact, social)",
+      "type": "object",
+      "properties": {
+        "data": { "type": "object" },
+        "updatedAt": { "type": "string" }
+      }
+    },
+    "Submission": {
+      "title": "Submission",
+      "description": "Inbound growth audit or contact form request",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["audit", "contact"] },
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 150 },
+        "company": { "type": "string", "maxLength": 200 },
+        "message": { "type": "string", "maxLength": 2000 },
+        "status": { "type": "string", "enum": ["New", "Contacted", "Closed"] },
+        "createdAt": { "type": "string" },
+        "sourcePage": { "type": "string" }
+      },
+      "required": ["type", "name", "email"]
+    },
+    "Subscriber": {
+      "title": "Subscriber",
+      "description": "Newsletter email subscriber",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "maxLength": 150 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["email"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Authorized administrator email record",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "role": { "type": "string" },
+        "addedAt": { "type": "string" }
+      },
+      "required": ["email"]
+    }
+  },
+  "firestore": {
+    "/services/{serviceId}": {
+      "schema": "Service",
+      "description": "Services catalog collection"
+    },
+    "/works/{workId}": {
+      "schema": "Work",
+      "description": "Case studies collection"
+    },
+    "/showcase/{showcaseId}": {
+      "schema": "Showcase",
+      "description": "Proof deliverables gallery"
+    },
+    "/posts/{postId}": {
+      "schema": "Post",
+      "description": "Blog and growth playbooks collection"
+    },
+    "/testimonials/{testimonialId}": {
+      "schema": "Testimonial",
+      "description": "Client testimonials collection"
+    },
+    "/settings/{settingsDocId}": {
+      "schema": "Settings",
+      "description": "Global settings documents (hero, metrics, contact, social)"
+    },
+    "/submissions/{submissionId}": {
+      "schema": "Submission",
+      "description": "Inbound audit and contact submissions"
+    },
+    "/subscribers/{subscriberId}": {
+      "schema": "Subscriber",
+      "description": "Newsletter subscribers collection"
+    },
+    "/admins/{adminEmail}": {
+      "schema": "Admin",
+      "description": "List of authorized administrator emails"
+    }
+  }
+}

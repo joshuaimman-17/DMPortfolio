@@ -1,0 +1,105 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Direct super-admin check based on authorized email list
+    function isSuperAdmin() {
+      return isAuthenticated() &&
+        request.auth.token.email != null &&
+        request.auth.token.email in [
+          'joshuaimman2004@gmail.com',
+          'alex@growthmark.io',
+          'YOUR_EMAIL@gmail.com'
+        ];
+    }
+
+    // Comprehensive admin resolution:
+    // Resolves true if either the email is in the authorized admin list
+    // OR if an active document exists in the admins collection.
+    function isAdmin() {
+      return isAuthenticated() &&
+        request.auth.token.email != null &&
+        (isSuperAdmin() ||
+         exists(/databases/$(database)/documents/admins/$(request.auth.token.email)));
+    }
+
+    function isPublished() {
+      return resource.data.status == 'published';
+    }
+
+    // Admins Collection (Admin role registry)
+    match /admins/{adminEmail} {
+      allow read: if isAuthenticated();
+      // Allow writes if caller is an admin or is a super-admin bootstrapping/updating their record
+      allow write: if isAdmin() || (isAuthenticated() && request.auth.token.email == adminEmail && isSuperAdmin());
+    }
+
+    // Settings (Public Read, Admin Write)
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Services (Public Read Published, Admin Full Access)
+    match /services/{serviceId} {
+      allow read: if isPublished() || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Works / Case Studies (Public Read Published, Admin Full Access)
+    match /works/{workId} {
+      allow read: if isPublished() || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Showcase Deliverables (Public Read Published, Admin Full Access)
+    match /showcase/{showcaseId} {
+      allow read: if isPublished() || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Posts / Articles (Public Read Published, Admin Full Access)
+    match /posts/{postId} {
+      allow read: if isPublished() || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Testimonials (Public Read Published, Admin Full Access)
+    match /testimonials/{testimonialId} {
+      allow read: if isPublished() || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Inbound Submissions (Audit & Contact forms)
+    match /submissions/{submissionId} {
+      // Public can only create with basic validation; cannot read/update/delete
+      allow create: if request.resource.data.type in ['audit', 'contact'] &&
+                       request.resource.data.name is string &&
+                       request.resource.data.name.size() > 0 &&
+                       request.resource.data.name.size() <= 100 &&
+                       request.resource.data.email is string &&
+                       request.resource.data.email.size() > 3 &&
+                       request.resource.data.email.size() <= 150;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Newsletter Subscribers
+    match /subscribers/{subscriberId} {
+      // Public can create or update email registration with size bounds
+      allow create, update: if request.resource.data.email is string &&
+                               request.resource.data.email.size() > 3 &&
+                               request.resource.data.email.size() <= 150;
+      allow read, delete: if isAdmin();
+    }
+
+    // Deny all other collections and operations by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
