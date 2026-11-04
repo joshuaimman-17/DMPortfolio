@@ -162,15 +162,15 @@ export default async function HomePage() {
                   </p>
 
                   {/* CTAs */}
-                  <div className="flex flex-wrap items-center gap-4 pt-1">
-                    <AuditButton className="px-6 py-3.5 rounded-xl bg-primary text-white font-bold text-sm shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] hover:bg-blue-700 transition-all inline-flex items-center gap-2 cursor-pointer">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-1 w-full sm:w-auto">
+                    <AuditButton className="w-full sm:w-auto justify-center px-6 py-3.5 rounded-xl bg-primary text-white font-bold text-sm shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] hover:bg-blue-700 transition-all inline-flex items-center gap-2 cursor-pointer">
                       <span>Book a Free Growth Diagnostic</span>
                       <span className="material-symbols-outlined text-[18px]">calendar_today</span>
                     </AuditButton>
 
                     <a
                       href="#works"
-                      className="px-6 py-3.5 rounded-xl bg-surface-container-low text-on-surface font-semibold text-sm hover:bg-neutral-200/80 transition-all inline-flex items-center gap-2 border border-neutral-200"
+                      className="w-full sm:w-auto justify-center px-6 py-3.5 rounded-xl bg-surface-container-low text-on-surface font-semibold text-sm hover:bg-neutral-200/80 transition-all inline-flex items-center gap-2 border border-neutral-200"
                     >
                       <span>Explore Case Studies</span>
                       <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
@@ -212,7 +212,7 @@ export default async function HomePage() {
                   </div>
 
                   {/* Badge 1: Traffic Growth */}
-                  <div className="absolute -bottom-4 -left-4 sm:left-2 bg-surface-container-lowest/95 backdrop-blur-md p-3.5 rounded-xl shadow-lg flex items-center gap-3 border border-neutral-200/70 z-20">
+                  <div className="absolute bottom-2 left-2 sm:-bottom-4 sm:left-2 bg-surface-container-lowest/95 backdrop-blur-md p-2 sm:p-3.5 rounded-xl shadow-lg flex items-center gap-2 sm:gap-3 border border-neutral-200/70 z-20 max-w-[calc(100%-1rem)]">
                     <div className="w-10 h-10 rounded-full bg-secondary-container/40 flex items-center justify-center text-secondary">
                       <span className="material-symbols-outlined text-[22px]">trending_up</span>
                     </div>
@@ -227,7 +227,7 @@ export default async function HomePage() {
                   </div>
 
                   {/* Badge 2: 4.5x ROAS */}
-                  <div className="absolute -top-3 -right-2 bg-surface-container-lowest/95 backdrop-blur-md px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2.5 border border-neutral-200/70 z-20">
+                  <div className="absolute top-2 right-2 sm:-top-3 sm:-right-2 bg-surface-container-lowest/95 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-xl shadow-lg flex items-center gap-2 sm:gap-2.5 border border-neutral-200/70 z-20">
                     <span className="material-symbols-outlined text-primary-container text-[20px]">bolt</span>
                     <div>
                       <div className="text-xs text-on-surface font-bold">
@@ -284,14 +284,14 @@ export default async function HomePage() {
                     Unlike traditional agencies that prioritize billable hours and vanity impressions, my methodology anchors strictly on cashflow-positive metrics: Blended MER, First-Party LTV, and Unshakable Organic Dominance.
                   </p>
 
-                  <div className="grid grid-cols-2 gap-4 pt-2">
-                    <div className="p-4 rounded-xl bg-surface-container-low border border-neutral-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2">
+                    <div className="p-3.5 sm:p-4 rounded-xl bg-surface-container-low border border-neutral-200">
                       <div className="text-xs text-on-surface-variant font-medium">Headquarters</div>
                       <div className="text-sm font-bold text-on-surface mt-0.5">{PORTFOLIO_DATA.profile.location}</div>
                     </div>
-                    <div className="p-4 rounded-xl bg-surface-container-low border border-neutral-200">
+                    <div className="p-3.5 sm:p-4 rounded-xl bg-surface-container-low border border-neutral-200">
                       <div className="text-xs text-on-surface-variant font-medium">Direct Line</div>
-                      <div className="text-sm font-bold text-on-surface mt-0.5">{PORTFOLIO_DATA.profile.email}</div>
+                      <div className="text-sm font-bold text-on-surface mt-0.5 break-all">{PORTFOLIO_DATA.profile.email}</div>
                     </div>
                   </div>
                 </div>
@@ -501,7 +501,7 @@ export default async function HomePage() {
                       </p>
 
                       {/* Stat Strip */}
-                      <div className="grid grid-cols-3 gap-2 mt-5 p-3 rounded-xl bg-surface-container-low border border-neutral-200/70">
+                      <div className="grid grid-cols-3 gap-1 sm:gap-2 mt-4 sm:mt-5 p-2 sm:p-3 rounded-xl bg-surface-container-low border border-neutral-200/70">
                         {(wrk.stats || []).slice(0, 3).map((st, idx) => (
                           <div key={idx} className="text-center">
                             <div className="font-mono font-bold text-xs sm:text-sm text-on-surface">

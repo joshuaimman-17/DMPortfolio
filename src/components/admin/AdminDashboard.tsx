@@ -47,6 +47,22 @@ export const AdminDashboard: React.FC = () => {
       <aside className="w-full lg:w-64 bg-white rounded-3xl p-4 sm:p-5 border border-neutral-200/80 shadow-sm shrink-0 flex flex-col justify-between">
         <div>
           {/* Admin Header */}
+          <div className="lg:hidden flex items-center justify-between pb-3 mb-2 border-b border-neutral-200/80">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-neutral-600 hover:text-primary"
+            >
+              <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+              <span>Back to Public Site</span>
+            </Link>
+            <button
+              onClick={logout}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-700"
+            >
+              <span className="material-symbols-outlined text-[16px]">logout</span>
+              <span>Sign Out</span>
+            </button>
+          </div>
           <div className="flex items-center justify-between pb-4 mb-3 border-b border-neutral-200/80">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center font-bold">

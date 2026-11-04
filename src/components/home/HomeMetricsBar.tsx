@@ -36,53 +36,53 @@ export function HomeMetricsBar() {
   const c4 = useAnimatedCounter(30);
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
-      <div className="bg-surface-container-lowest p-5 rounded-2xl border border-neutral-200/80 shadow-sm flex flex-col justify-between">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
+      <div className="bg-surface-container-lowest p-3.5 sm:p-5 rounded-2xl border border-neutral-200/80 shadow-sm flex flex-col justify-between">
         <div className="flex items-center justify-between text-neutral-400 mb-2">
-          <span className="material-symbols-outlined text-secondary text-[24px]">query_stats</span>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-secondary">Verified Uplift</span>
+          <span className="material-symbols-outlined text-secondary text-[20px] sm:text-[24px]">query_stats</span>
+          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-secondary">Verified Uplift</span>
         </div>
-        <div className="font-mono text-3xl sm:text-4xl font-extrabold text-secondary tracking-tight">
+        <div className="font-mono text-2xl xs:text-3xl sm:text-4xl font-extrabold text-secondary tracking-tight">
           +{c1}%
         </div>
-        <div className="text-xs font-bold text-on-surface mt-1">Organic Traffic</div>
-        <div className="text-[11px] text-on-surface-variant line-clamp-1">Avg. 6-Month Organic Uplift Across Audited Clients</div>
+        <div className="text-[11px] sm:text-xs font-bold text-on-surface mt-1 truncate">Organic Traffic</div>
+        <div className="text-[10px] sm:text-[11px] text-on-surface-variant line-clamp-1 mt-0.5">Avg. 6-Month Organic Uplift Across Audited Clients</div>
       </div>
 
-      <div className="bg-surface-container-lowest p-5 rounded-2xl border border-neutral-200/80 shadow-sm flex flex-col justify-between">
+      <div className="bg-surface-container-lowest p-3.5 sm:p-5 rounded-2xl border border-neutral-200/80 shadow-sm flex flex-col justify-between">
         <div className="flex items-center justify-between text-neutral-400 mb-2">
-          <span className="material-symbols-outlined text-primary-container text-[24px]">percent</span>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Blended</span>
+          <span className="material-symbols-outlined text-primary-container text-[20px] sm:text-[24px]">percent</span>
+          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-primary">Blended</span>
         </div>
-        <div className="font-mono text-3xl sm:text-4xl font-extrabold text-primary-container tracking-tight">
+        <div className="font-mono text-2xl xs:text-3xl sm:text-4xl font-extrabold text-primary-container tracking-tight">
           {c2}x
         </div>
-        <div className="text-xs font-bold text-on-surface mt-1">Blended ROAS</div>
-        <div className="text-[11px] text-on-surface-variant line-clamp-1">Average Return on Ad Spend Across Meta &amp; Google</div>
+        <div className="text-[11px] sm:text-xs font-bold text-on-surface mt-1 truncate">Blended ROAS</div>
+        <div className="text-[10px] sm:text-[11px] text-on-surface-variant line-clamp-1 mt-0.5">Average Return on Ad Spend Across Meta &amp; Google</div>
       </div>
 
-      <div className="bg-surface-container-lowest p-5 rounded-2xl border border-neutral-200/80 shadow-sm flex flex-col justify-between">
+      <div className="bg-surface-container-lowest p-3.5 sm:p-5 rounded-2xl border border-neutral-200/80 shadow-sm flex flex-col justify-between">
         <div className="flex items-center justify-between text-neutral-400 mb-2">
-          <span className="material-symbols-outlined text-on-surface text-[24px]">payments</span>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Capital</span>
+          <span className="material-symbols-outlined text-on-surface text-[20px] sm:text-[24px]">payments</span>
+          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-500">Capital</span>
         </div>
-        <div className="font-mono text-3xl sm:text-4xl font-extrabold text-on-surface tracking-tight">
+        <div className="font-mono text-2xl xs:text-3xl sm:text-4xl font-extrabold text-on-surface tracking-tight">
           ₹{c3}L+
         </div>
-        <div className="text-xs font-bold text-on-surface mt-1">Ad Spend Managed</div>
-        <div className="text-[11px] text-on-surface-variant line-clamp-1">Over Google &amp; Meta Ads Campaigns with Zero Wastage</div>
+        <div className="text-[11px] sm:text-xs font-bold text-on-surface mt-1 truncate">Ad Spend Managed</div>
+        <div className="text-[10px] sm:text-[11px] text-on-surface-variant line-clamp-1 mt-0.5">Over Google &amp; Meta Ads Campaigns with Zero Wastage</div>
       </div>
 
-      <div className="bg-surface-container-lowest p-5 rounded-2xl border border-neutral-200/80 shadow-sm flex flex-col justify-between">
+      <div className="bg-surface-container-lowest p-3.5 sm:p-5 rounded-2xl border border-neutral-200/80 shadow-sm flex flex-col justify-between">
         <div className="flex items-center justify-between text-neutral-400 mb-2">
-          <span className="material-symbols-outlined text-secondary text-[24px]">verified_user</span>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-secondary">Track Record</span>
+          <span className="material-symbols-outlined text-secondary text-[20px] sm:text-[24px]">verified_user</span>
+          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-secondary">Track Record</span>
         </div>
-        <div className="font-mono text-3xl sm:text-4xl font-extrabold text-secondary tracking-tight">
+        <div className="font-mono text-2xl xs:text-3xl sm:text-4xl font-extrabold text-secondary tracking-tight">
           {c4}+
         </div>
-        <div className="text-xs font-bold text-on-surface mt-1">Completed Engagements</div>
-        <div className="text-[11px] text-on-surface-variant line-clamp-1">Enterprise &amp; D2C Brands with Documented Growth Trajectories</div>
+        <div className="text-[11px] sm:text-xs font-bold text-on-surface mt-1 truncate">Engagements Scaled</div>
+        <div className="text-[10px] sm:text-[11px] text-on-surface-variant line-clamp-1 mt-0.5">Enterprise &amp; D2C Brands with Documented Trajectories</div>
       </div>
     </div>
   );

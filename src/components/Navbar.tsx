@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { PORTFOLIO_DATA } from '../data/portfolioData';
-
 import { SiteSettings } from '@/types/settings';
 
 export type NavRoute = 'home' | 'about' | 'services' | 'works' | 'blog' | 'contact';
@@ -20,6 +19,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
   const pathname = usePathname();
 
   const isHomePage = pathname === '/' || pathname === '';
+
+  // Prevent background scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [mobileMenuOpen]);
 
   // Scroll spy on Home page
   useEffect(() => {
@@ -92,7 +102,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 w-full z-50 bg-[#fbf9f8]/95 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-neutral-200/70">
-        <div className="h-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+        <div className="h-16 sm:h-20 max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-4">
           {/* Brand Left */}
           <Link
             href="/"
@@ -102,14 +112,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }
             }}
-            className="flex items-center gap-2.5 text-left focus:outline-none group cursor-pointer"
+            className="flex items-center gap-2 sm:gap-2.5 text-left focus:outline-none group cursor-pointer min-w-0"
           >
             <img
               alt="Alex Rivera Logo"
-              className="h-8 w-auto object-contain transition-transform group-hover:scale-105"
+              className="h-7 sm:h-8 w-auto object-contain transition-transform group-hover:scale-105 shrink-0"
               src={PORTFOLIO_DATA.profile.logo}
             />
-            <span className="font-bold text-base sm:text-lg text-on-surface whitespace-nowrap">
+            <span className="font-bold text-sm sm:text-base md:text-lg text-on-surface truncate max-w-[130px] xs:max-w-[200px] sm:max-w-none">
               {settings?.name || PORTFOLIO_DATA.profile.name || 'Alex Rivera'}
             </span>
           </Link>
@@ -145,10 +155,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
           </nav>
 
           {/* Right Action: Hire Me + Profile Avatar + Hamburger */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={onOpenAudit}
-              className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-primary text-white text-xs sm:text-sm font-bold shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] hover:bg-blue-700 transition-all whitespace-nowrap cursor-pointer"
+              className="inline-flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-primary text-white text-xs sm:text-sm font-bold shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] hover:bg-blue-700 transition-all whitespace-nowrap cursor-pointer"
             >
               Hire Me
             </button>
@@ -165,7 +175,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
               className="md:hidden p-2 rounded-lg text-neutral-700 hover:bg-neutral-200/70 focus:outline-none cursor-pointer"
               aria-label="Toggle Navigation Drawer"
             >
-              <span className="material-symbols-outlined text-[26px]">
+              <span className="material-symbols-outlined text-[24px]">
                 {mobileMenuOpen ? 'close' : 'menu'}
               </span>
             </button>
@@ -175,9 +185,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
 
       {/* Full-Screen Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 top-20 z-40 bg-surface-container-lowest/98 backdrop-blur-2xl flex flex-col justify-between p-6 md:hidden animate-fadeIn">
-          <div className="flex flex-col gap-2 pt-4">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 px-3">
+        <div className="fixed inset-0 top-16 sm:top-20 z-40 bg-surface-container-lowest/98 backdrop-blur-2xl flex flex-col justify-between p-5 sm:p-6 md:hidden animate-fadeIn overflow-y-auto max-h-[calc(100dvh-4rem)] sm:max-h-[calc(100dvh-5rem)]">
+          <div className="flex flex-col gap-1.5 pt-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 px-3 pb-1">
               Menu Navigation
             </span>
             {[
@@ -195,7 +205,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
                   key={item.id}
                   href={href}
                   onClick={(e) => handleLinkClick(item.id, e)}
-                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-base font-bold transition-all text-left cursor-pointer ${
+                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm sm:text-base font-bold transition-all text-left cursor-pointer ${
                     active
                       ? 'bg-primary text-white shadow-md'
                       : 'text-on-surface hover:bg-surface-container-low'
@@ -212,13 +222,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
           </div>
 
           {/* Mobile Drawer Bottom: Hire Me Button */}
-          <div className="pt-6 border-t border-neutral-200/70 space-y-3">
+          <div className="pt-5 mt-4 border-t border-neutral-200/70 space-y-3 pb-6">
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
                 onOpenAudit();
               }}
-              className="w-full py-4 rounded-2xl bg-primary text-white font-bold text-base shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3.5 rounded-2xl bg-primary text-white font-bold text-sm sm:text-base shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] flex items-center justify-center gap-2 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[20px]">calendar_today</span>
               <span>Hire Me / Book Strategy Call</span>

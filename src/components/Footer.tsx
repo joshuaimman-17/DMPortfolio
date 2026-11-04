@@ -229,7 +229,7 @@ export const Footer: React.FC<FooterProps> = ({
         {/* Bottom Legal / Copyright Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>{settings?.footer?.copyright || `© ${new Date().getFullYear()} Alex Rivera. All rights reserved.`}</p>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 sm:gap-6">
             <Link
               href="/#contact"
               className="hover:text-slate-300 transition-colors cursor-pointer"

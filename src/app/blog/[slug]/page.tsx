@@ -157,6 +157,29 @@ export default async function BlogDetailPage({ params }: Props) {
             </div>
           </div>
 
+          {/* Mobile Table of Contents */}
+          {post.toc && post.toc.length > 0 && (
+            <div className="lg:hidden p-4 rounded-2xl bg-surface-container-lowest border border-neutral-200">
+              <details className="group">
+                <summary className="flex items-center justify-between cursor-pointer text-xs font-bold uppercase tracking-wider text-primary">
+                  <span>Table of Contents ({post.toc.length} sections)</span>
+                  <span className="material-symbols-outlined text-[18px] transition-transform group-open:rotate-180">expand_more</span>
+                </summary>
+                <nav className="flex flex-col gap-2 mt-3 pt-3 border-t border-neutral-100">
+                  {post.toc.map((item) => (
+                    <a
+                      key={item.id}
+                      href={'#' + item.id}
+                      className="text-xs text-neutral-600 hover:text-primary transition-colors py-1"
+                    >
+                      {item.title}
+                    </a>
+                  ))}
+                </nav>
+              </details>
+            </div>
+          )}
+
           {/* Cover Image */}
           <div className="rounded-3xl overflow-hidden border border-neutral-200 shadow-xl relative aspect-[16/9]">
             <DriveImage

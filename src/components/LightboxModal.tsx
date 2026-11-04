@@ -76,7 +76,7 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
       <button
         aria-label="Close Preview"
         onClick={onClose}
-        className="absolute top-5 right-5 z-20 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur-sm transition-all focus:outline-none cursor-pointer"
+        className="absolute top-3 right-3 sm:top-5 sm:right-5 z-20 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur-sm transition-all focus:outline-none cursor-pointer"
       >
         <span className="material-symbols-outlined text-[26px]">close</span>
       </button>
@@ -85,7 +85,7 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
       <button
         aria-label="Previous Item"
         onClick={handlePrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur-sm transition-all focus:outline-none cursor-pointer"
+        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur-sm transition-all focus:outline-none cursor-pointer"
       >
         <span className="material-symbols-outlined text-[28px]">chevron_left</span>
       </button>
@@ -93,7 +93,7 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
       <button
         aria-label="Next Item"
         onClick={handleNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur-sm transition-all focus:outline-none cursor-pointer"
+        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur-sm transition-all focus:outline-none cursor-pointer"
       >
         <span className="material-symbols-outlined text-[28px]">chevron_right</span>
       </button>

@@ -112,7 +112,7 @@ export const AuditBookingModal: React.FC<AuditBookingModalProps> = ({ isOpen, on
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-xl bg-surface-container-lowest rounded-3xl p-6 sm:p-8 shadow-2xl border border-neutral-200/90 my-8 text-on-surface"
+        className="relative w-full max-w-xl bg-surface-container-lowest rounded-2xl sm:rounded-3xl p-4 sm:p-6 sm:p-8 shadow-2xl border border-neutral-200/90 my-auto sm:my-8 text-on-surface max-h-[92dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}

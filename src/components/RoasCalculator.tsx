@@ -23,7 +23,7 @@ export const RoasCalculator: React.FC<{ onBookAudit: () => void }> = ({ onBookAu
   };
 
   return (
-    <div className="w-full bg-surface-container-low rounded-2xl p-6 md:p-8 border border-neutral-200/80 shadow-md">
+    <div className="w-full bg-surface-container-low rounded-2xl p-4 sm:p-6 md:p-8 border border-neutral-200/80 shadow-md">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-fixed text-primary font-label-sm text-xs font-semibold uppercase tracking-wider mb-2">
@@ -128,7 +128,7 @@ export const RoasCalculator: React.FC<{ onBookAudit: () => void }> = ({ onBookAu
         </div>
 
         {/* Results Card */}
-        <div className="lg:col-span-5 bg-surface-container-lowest rounded-xl p-6 border border-neutral-200/90 shadow-lg flex flex-col justify-between gap-5">
+        <div className="lg:col-span-5 bg-surface-container-lowest rounded-xl p-4 sm:p-6 border border-neutral-200/90 shadow-lg flex flex-col justify-between gap-5">
           <div className="border-b border-neutral-200 pb-4">
             <span className="text-xs uppercase tracking-wider text-on-surface-variant font-semibold block">
               Projected Outcome
