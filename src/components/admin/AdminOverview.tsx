@@ -74,7 +74,7 @@ export const AdminOverview: React.FC<AdminOverviewProps> = ({ onNavigateTab }) =
           </button>
 
           <a
-            href="#/"
+            href="/"
             className="px-4 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-primary font-semibold text-xs sm:text-sm transition-colors flex items-center gap-1.5"
           >
             <span>View Public Site</span>

@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getPostBySlug, getPosts, getSiteSettings } from '@/lib/data';
+import { getPostBySlug, getPosts, getSiteSettings, getPageMetadata } from '@/lib/data';
 import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { SiteShell } from '@/context/ModalContext';
 import { DriveImage } from '@/components/common/DriveImage';
@@ -13,7 +13,15 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
-export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+export const revalidate = false;
+
+export async function generateStaticParams() {
+  const posts = await getPosts();
+  return posts.map((p) => ({
+    slug: p.slug,
+  }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -21,23 +29,46 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!post) {
     return {
-      title: 'Article Not Found | Alex Rivera',
+      title: 'Article Not Found',
       description: 'The requested growth architecture article could not be located.',
     };
   }
 
-  return {
-    title: `${post.title} | Field Notes | Alex Rivera`,
+  const pageMeta = await getPageMetadata(`route_post_${slug}`, {
+    title: `${post.title} | Field Notes`,
     description: post.excerpt,
+    path: `/blog/${slug}`,
+    image: post.coverImage,
+  });
+
+  return {
+    title: pageMeta.title,
+    description: pageMeta.description,
+    alternates: {
+      canonical: pageMeta.alternates.canonical,
+    },
     openGraph: {
-      title: `${post.title} | Field Notes | Alex Rivera`,
-      description: post.excerpt,
-      images: post.coverImage ? [{ url: post.coverImage }] : [],
+      title: pageMeta.openGraph.title,
+      description: pageMeta.openGraph.description,
+      url: pageMeta.openGraph.url,
+      siteName: pageMeta.openGraph.siteName,
+      locale: pageMeta.openGraph.locale,
+      type: pageMeta.openGraph.type,
+      images: pageMeta.openGraph.images.map((img) => ({
+        url: img.url,
+        width: img.width,
+        height: img.height,
+        alt: img.alt,
+      })),
+    },
+    twitter: {
+      card: pageMeta.twitter.card,
+      title: pageMeta.twitter.title,
+      description: pageMeta.twitter.description,
+      images: pageMeta.twitter.images,
     },
   };
 }
-
-export const revalidate = 300;
 
 export default async function BlogDetailPage({ params }: Props) {
   const { slug } = await params;

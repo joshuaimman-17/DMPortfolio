@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getWorkBySlug, getWorks, getShowcase, getSiteSettings } from '@/lib/data';
+import { getWorkBySlug, getWorks, getShowcase, getSiteSettings, getPageMetadata } from '@/lib/data';
 import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { SiteShell } from '@/context/ModalContext';
 import { AuditButton, LightboxTrigger } from '@/components/common/ActionButtons';
@@ -13,7 +13,15 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
-export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+export const revalidate = false;
+
+export async function generateStaticParams() {
+  const works = await getWorks();
+  return works.map((w) => ({
+    slug: w.slug,
+  }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -21,23 +29,46 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!work) {
     return {
-      title: 'Case Study Not Found | Alex Rivera',
+      title: 'Case Study Not Found',
       description: 'The requested growth marketing case study could not be located.',
     };
   }
 
-  return {
-    title: `${work.title} | Case Study | Alex Rivera`,
+  const pageMeta = await getPageMetadata(`route_work_${slug}`, {
+    title: `${work.title} | Case Study`,
     description: work.challenge || work.goal,
+    path: `/works/${slug}`,
+    image: work.coverImage,
+  });
+
+  return {
+    title: pageMeta.title,
+    description: pageMeta.description,
+    alternates: {
+      canonical: pageMeta.alternates.canonical,
+    },
     openGraph: {
-      title: `${work.title} | Case Study | Alex Rivera`,
-      description: work.challenge || work.goal,
-      images: work.coverImage ? [{ url: work.coverImage }] : [],
+      title: pageMeta.openGraph.title,
+      description: pageMeta.openGraph.description,
+      url: pageMeta.openGraph.url,
+      siteName: pageMeta.openGraph.siteName,
+      locale: pageMeta.openGraph.locale,
+      type: pageMeta.openGraph.type,
+      images: pageMeta.openGraph.images.map((img) => ({
+        url: img.url,
+        width: img.width,
+        height: img.height,
+        alt: img.alt,
+      })),
+    },
+    twitter: {
+      card: pageMeta.twitter.card,
+      title: pageMeta.twitter.title,
+      description: pageMeta.twitter.description,
+      images: pageMeta.twitter.images,
     },
   };
 }
-
-export const revalidate = 300;
 
 export default async function WorkDetailPage({ params }: Props) {
   const { slug } = await params;

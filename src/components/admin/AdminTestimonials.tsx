@@ -144,7 +144,7 @@ export const AdminTestimonials: React.FC = () => {
       setEditingItem(null);
       await loadAllTestimonials();
       await refreshData();
-      await triggerRevalidation(['testimonials']);
+      await triggerRevalidation(['testimonials'], ['/']);
     } catch (err: any) {
       showToast(err.message || 'Failed to save testimonial', 'error');
     }
@@ -157,7 +157,7 @@ export const AdminTestimonials: React.FC = () => {
       setDeleteConfirmId(null);
       await loadAllTestimonials();
       await refreshData();
-      await triggerRevalidation(['testimonials']);
+      await triggerRevalidation(['testimonials'], ['/']);
     } catch (err: any) {
       showToast(err.message || 'Failed to delete item', 'error');
     }
@@ -184,7 +184,7 @@ export const AdminTestimonials: React.FC = () => {
       ]);
       await loadAllTestimonials();
       await refreshData();
-      await triggerRevalidation(['testimonials']);
+      await triggerRevalidation(['testimonials'], ['/']);
     } catch (err: any) {
       showToast(err.message || 'Error updating order', 'error');
     }

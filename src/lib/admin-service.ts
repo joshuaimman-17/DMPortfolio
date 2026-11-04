@@ -28,6 +28,7 @@ export const ADMIN_EMAILS = [
   'joshuaimman8@gmail.com',
   'joshuaimman2004@gmail.com',
   'alex@growthmark.io',
+  'jashper078@gmail.com',
   'YOUR_EMAIL@gmail.com',
 ];
 
@@ -41,8 +42,12 @@ export interface DriveFileInfo {
 
 /**
  * Triggers on-demand Next.js cache revalidation via server API route
+ * Supports both data tags and specific page URL paths
  */
-export async function triggerRevalidation(tags: string[]): Promise<boolean> {
+export async function triggerRevalidation(
+  tags: string[] = [],
+  paths: string[] = []
+): Promise<boolean> {
   try {
     const user = auth.currentUser;
     if (!user) return false;
@@ -52,7 +57,7 @@ export async function triggerRevalidation(tags: string[]): Promise<boolean> {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ idToken, tags }),
+      body: JSON.stringify({ idToken, tags, paths }),
     });
     return res.ok;
   } catch (err) {
@@ -203,15 +208,18 @@ export async function seedDatabaseFromSampleData(
 
     await batch.commit();
 
-    // Revalidate all tags
-    await triggerRevalidation([
-      'services',
-      'works',
-      'showcase',
-      'posts',
-      'testimonials',
-      'settings',
-    ]);
+    // Revalidate all tags and primary public page paths
+    await triggerRevalidation(
+      [
+        'services',
+        'works',
+        'showcase',
+        'posts',
+        'testimonials',
+        'settings',
+      ],
+      ['/', '/services', '/works', '/blog']
+    );
 
     return {
       success: true,

@@ -1,20 +1,50 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getServices, getSiteSettings } from '@/lib/data';
+import { getServices, getSiteSettings, getPageMetadata } from '@/lib/data';
 import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { SiteShell } from '@/context/ModalContext';
 import { AuditButton } from '@/components/common/ActionButtons';
 import { HomeFaqAccordion } from '@/components/home/HomeFaqAccordion';
 
-export const metadata: Metadata = {
-  title: 'Growth Services & Capabilities | Alex Rivera',
-  description:
-    'Full-funnel growth services built for scalable revenue. Technical SEO, high-ROAS paid media across Google and Meta, and conversion rate optimization.',
-};
+export const revalidate = false;
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 300;
+export async function generateMetadata(): Promise<Metadata> {
+  const pageMeta = await getPageMetadata('route_services', {
+    title: 'Growth Services & Capabilities',
+    description:
+      'Full-funnel growth services built for scalable revenue. Technical SEO, high-ROAS paid media across Google and Meta, and conversion rate optimization.',
+    path: '/services',
+  });
+
+  return {
+    title: pageMeta.title,
+    description: pageMeta.description,
+    alternates: {
+      canonical: pageMeta.alternates.canonical,
+    },
+    openGraph: {
+      title: pageMeta.openGraph.title,
+      description: pageMeta.openGraph.description,
+      url: pageMeta.openGraph.url,
+      siteName: pageMeta.openGraph.siteName,
+      locale: pageMeta.openGraph.locale,
+      type: pageMeta.openGraph.type,
+      images: pageMeta.openGraph.images.map((img) => ({
+        url: img.url,
+        width: img.width,
+        height: img.height,
+        alt: img.alt,
+      })),
+    },
+    twitter: {
+      card: pageMeta.twitter.card,
+      title: pageMeta.twitter.title,
+      description: pageMeta.twitter.description,
+      images: pageMeta.twitter.images,
+    },
+  };
+}
 
 export default async function ServicesHubPage() {
   const [services, settings] = await Promise.all([

@@ -1,0 +1,6 @@
+{
+  "summary": "Architectural blueprint to enable an editable brand/person name across all public pages and implement a dedicated SEO & Metadata management tab in the Admin Console. Features custom per-page metadata editing (OpenGraph, Twitter cards, canonical tags, and 1200x630 card image upload), real-time social search card previews, Firestore persistence, and on-demand ISR cache revalidation.",
+  "updatedAt": "2026-11-04T08:58:08.618836515Z",
+  "requestFeedback": true,
+  "userFacing": true
+}

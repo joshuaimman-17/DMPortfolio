@@ -1,18 +1,48 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { getPosts, getSiteSettings } from '@/lib/data';
+import { getPosts, getSiteSettings, getPageMetadata } from '@/lib/data';
 import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { SiteShell } from '@/context/ModalContext';
 import { BlogListClient } from '@/components/blog/BlogListClient';
 
-export const metadata: Metadata = {
-  title: 'Growth Playbooks & Field Notes | Alex Rivera',
-  description:
-    'Field notes on technical SEO, ad script testing frameworks, and server-side conversion tracking by Alex Rivera.',
-};
+export const revalidate = false;
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 300;
+export async function generateMetadata(): Promise<Metadata> {
+  const pageMeta = await getPageMetadata('route_blog', {
+    title: 'Growth Playbooks & Field Notes',
+    description:
+      'Field notes on technical SEO, ad script testing frameworks, and server-side conversion tracking.',
+    path: '/blog',
+  });
+
+  return {
+    title: pageMeta.title,
+    description: pageMeta.description,
+    alternates: {
+      canonical: pageMeta.alternates.canonical,
+    },
+    openGraph: {
+      title: pageMeta.openGraph.title,
+      description: pageMeta.openGraph.description,
+      url: pageMeta.openGraph.url,
+      siteName: pageMeta.openGraph.siteName,
+      locale: pageMeta.openGraph.locale,
+      type: pageMeta.openGraph.type,
+      images: pageMeta.openGraph.images.map((img) => ({
+        url: img.url,
+        width: img.width,
+        height: img.height,
+        alt: img.alt,
+      })),
+    },
+    twitter: {
+      card: pageMeta.twitter.card,
+      title: pageMeta.twitter.title,
+      description: pageMeta.twitter.description,
+      images: pageMeta.twitter.images,
+    },
+  };
+}
 
 export default async function BlogHubPage() {
   const [posts, settings] = await Promise.all([

@@ -8,6 +8,7 @@ import { AdminShowcase } from './AdminShowcase';
 import { AdminPosts } from './AdminPosts';
 import { AdminTestimonials } from './AdminTestimonials';
 import { AdminSettings } from './AdminSettings';
+import { AdminMetadata } from './AdminMetadata';
 import { AdminInbox } from './AdminInbox';
 import { AdminSubscribers } from './AdminSubscribers';
 
@@ -18,6 +19,7 @@ type AdminTab =
   | 'showcase'
   | 'posts'
   | 'testimonials'
+  | 'metadata'
   | 'settings'
   | 'inbox'
   | 'subscribers';
@@ -33,6 +35,7 @@ export const AdminDashboard: React.FC = () => {
     { id: 'showcase', label: 'Showcase Proof', icon: 'photo_library' },
     { id: 'posts', label: 'Blog Posts', icon: 'article' },
     { id: 'testimonials', label: 'Testimonials', icon: 'star' },
+    { id: 'metadata', label: 'SEO & Metadata', icon: 'travel_explore' },
     { id: 'settings', label: 'Site Settings', icon: 'tune' },
     { id: 'inbox', label: 'Inbound Inbox', icon: 'inbox' },
     { id: 'subscribers', label: 'Subscribers', icon: 'mark_email_read' },
@@ -107,6 +110,7 @@ export const AdminDashboard: React.FC = () => {
         {activeTab === 'showcase' && <AdminShowcase />}
         {activeTab === 'posts' && <AdminPosts />}
         {activeTab === 'testimonials' && <AdminTestimonials />}
+        {activeTab === 'metadata' && <AdminMetadata />}
         {activeTab === 'settings' && <AdminSettings />}
         {activeTab === 'inbox' && <AdminInbox />}
         {activeTab === 'subscribers' && <AdminSubscribers />}

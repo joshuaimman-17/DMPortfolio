@@ -164,7 +164,9 @@ export const AdminShowcase: React.FC = () => {
       setEditingItem(null);
       await loadAllShowcase();
       await refreshData();
-      await triggerRevalidation(['showcase']);
+      const affectedPaths = ['/', '/works'];
+      if (formData.workSlug) affectedPaths.push(`/works/${formData.workSlug}`);
+      await triggerRevalidation(['showcase', 'works'], affectedPaths);
     } catch (err: any) {
       showToast(err.message || 'Failed to save deliverable', 'error');
     }
@@ -177,7 +179,7 @@ export const AdminShowcase: React.FC = () => {
       setDeleteConfirmId(null);
       await loadAllShowcase();
       await refreshData();
-      await triggerRevalidation(['showcase']);
+      await triggerRevalidation(['showcase', 'works'], ['/', '/works']);
     } catch (err: any) {
       showToast(err.message || 'Failed to delete item', 'error');
     }
@@ -204,7 +206,7 @@ export const AdminShowcase: React.FC = () => {
       ]);
       await loadAllShowcase();
       await refreshData();
-      await triggerRevalidation(['showcase']);
+      await triggerRevalidation(['showcase', 'works'], ['/', '/works']);
     } catch (err: any) {
       showToast(err.message || 'Error updating order', 'error');
     }

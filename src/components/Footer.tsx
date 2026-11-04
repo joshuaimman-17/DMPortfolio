@@ -58,7 +58,7 @@ export const Footer: React.FC<FooterProps> = ({
                 src={PORTFOLIO_DATA.profile.logo}
               />
               <span className="text-xl text-white font-bold tracking-tight">
-                Alex Rivera
+                {settings?.name || 'Alex Rivera'}
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-400 max-w-sm leading-relaxed">

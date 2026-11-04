@@ -205,7 +205,7 @@ export const AdminPosts: React.FC = () => {
       setEditingItem(null);
       await loadAllPosts();
       await refreshData();
-      await triggerRevalidation(['posts']);
+      await triggerRevalidation(['posts'], ['/', '/blog', `/blog/${formData.slug}`]);
     } catch (err: any) {
       showToast(err.message || 'Failed to save article', 'error');
     }
@@ -218,7 +218,7 @@ export const AdminPosts: React.FC = () => {
       setDeleteConfirmSlug(null);
       await loadAllPosts();
       await refreshData();
-      await triggerRevalidation(['posts']);
+      await triggerRevalidation(['posts'], ['/', '/blog', `/blog/${slug}`]);
     } catch (err: any) {
       showToast(err.message || 'Failed to delete article', 'error');
     }
@@ -245,7 +245,7 @@ export const AdminPosts: React.FC = () => {
       ]);
       await loadAllPosts();
       await refreshData();
-      await triggerRevalidation(['posts']);
+      await triggerRevalidation(['posts'], ['/', '/blog']);
     } catch (err: any) {
       showToast(err.message || 'Error updating order', 'error');
     }

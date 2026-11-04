@@ -67,7 +67,7 @@ export function SiteShell({
 
   return (
     <ModalContext.Provider value={value}>
-      <Navbar onOpenAudit={() => setAuditOpen(true)} />
+      <Navbar onOpenAudit={() => setAuditOpen(true)} settings={settings} />
       <main className="flex-1 pt-20">{children}</main>
       <Footer
         settings={settings}

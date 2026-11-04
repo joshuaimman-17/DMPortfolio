@@ -46,6 +46,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Pages Metadata (Public Read, Admin Write)
+    match /pages_metadata/{pageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Services (Public Read Published, Admin Full Access)
     match /services/{serviceId} {
       allow read: if isPublished() || isAdmin();

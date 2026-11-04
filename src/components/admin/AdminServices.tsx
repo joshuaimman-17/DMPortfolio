@@ -169,7 +169,7 @@ export const AdminServices: React.FC = () => {
       setEditingItem(null);
       await loadAllServices();
       await refreshData();
-      await triggerRevalidation(['services']);
+      await triggerRevalidation(['services'], ['/', '/services', `/services/${formData.slug}`]);
     } catch (err: any) {
       showToast(err.message || 'Failed to save service', 'error');
     }
@@ -182,7 +182,7 @@ export const AdminServices: React.FC = () => {
       setDeleteConfirmSlug(null);
       await loadAllServices();
       await refreshData();
-      await triggerRevalidation(['services']);
+      await triggerRevalidation(['services'], ['/', '/services', `/services/${slug}`]);
     } catch (err: any) {
       showToast(err.message || 'Failed to delete service', 'error');
     }
@@ -209,7 +209,7 @@ export const AdminServices: React.FC = () => {
       ]);
       await loadAllServices();
       await refreshData();
-      await triggerRevalidation(['services']);
+      await triggerRevalidation(['services'], ['/', '/services']);
     } catch (err: any) {
       showToast(err.message || 'Error updating order', 'error');
     }

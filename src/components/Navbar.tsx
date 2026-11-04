@@ -5,13 +5,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { PORTFOLIO_DATA } from '../data/portfolioData';
 
+import { SiteSettings } from '@/types/settings';
+
 export type NavRoute = 'home' | 'about' | 'services' | 'works' | 'blog' | 'contact';
 
 interface NavbarProps {
   onOpenAudit: () => void;
+  settings?: SiteSettings;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('home');
   const pathname = usePathname();
@@ -107,7 +110,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit }) => {
               src={PORTFOLIO_DATA.profile.logo}
             />
             <span className="font-bold text-base sm:text-lg text-on-surface whitespace-nowrap">
-              {PORTFOLIO_DATA.profile.title}
+              {settings?.name || PORTFOLIO_DATA.profile.name || 'Alex Rivera'}
             </span>
           </Link>
 

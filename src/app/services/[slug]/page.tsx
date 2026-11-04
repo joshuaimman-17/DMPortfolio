@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getServiceBySlug, getWorks, getSiteSettings, getServices } from '@/lib/data';
+import { getServiceBySlug, getWorks, getSiteSettings, getServices, getPageMetadata } from '@/lib/data';
 import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { SiteShell } from '@/context/ModalContext';
 import { AuditButton } from '@/components/common/ActionButtons';
@@ -14,7 +14,15 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
-export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+export const revalidate = false;
+
+export async function generateStaticParams() {
+  const services = await getServices();
+  return services.map((s) => ({
+    slug: s.slug,
+  }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -22,22 +30,45 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!service) {
     return {
-      title: 'Service Not Found | Alex Rivera',
+      title: 'Service Not Found',
       description: 'The requested growth marketing service could not be located.',
     };
   }
 
-  return {
-    title: `${service.title} | Growth Practice Area | Alex Rivera`,
+  const pageMeta = await getPageMetadata(`route_service_${slug}`, {
+    title: `${service.title} | Growth Practice Area`,
     description: service.summary,
+    path: `/services/${slug}`,
+  });
+
+  return {
+    title: pageMeta.title,
+    description: pageMeta.description,
+    alternates: {
+      canonical: pageMeta.alternates.canonical,
+    },
     openGraph: {
-      title: `${service.title} | Growth Practice Area | Alex Rivera`,
-      description: service.summary,
+      title: pageMeta.openGraph.title,
+      description: pageMeta.openGraph.description,
+      url: pageMeta.openGraph.url,
+      siteName: pageMeta.openGraph.siteName,
+      locale: pageMeta.openGraph.locale,
+      type: pageMeta.openGraph.type,
+      images: pageMeta.openGraph.images.map((img) => ({
+        url: img.url,
+        width: img.width,
+        height: img.height,
+        alt: img.alt,
+      })),
+    },
+    twitter: {
+      card: pageMeta.twitter.card,
+      title: pageMeta.twitter.title,
+      description: pageMeta.twitter.description,
+      images: pageMeta.twitter.images,
     },
   };
 }
-
-export const revalidate = 300;
 
 export default async function ServiceDetailPage({ params }: Props) {
   const { slug } = await params;

@@ -19,6 +19,7 @@ export const AdminSettings: React.FC = () => {
     setSaving(true);
     try {
       await Promise.all([
+        setDoc(doc(db, 'settings', 'profile'), { name: form.name || 'Alex Rivera', updatedAt: new Date().toISOString() }),
         setDoc(doc(db, 'settings', 'hero'), { data: form.hero, updatedAt: new Date().toISOString() }),
         setDoc(doc(db, 'settings', 'metrics'), { data: form.metrics, updatedAt: new Date().toISOString() }),
         setDoc(doc(db, 'settings', 'contact'), { data: form.contact, updatedAt: new Date().toISOString() }),
@@ -27,7 +28,7 @@ export const AdminSettings: React.FC = () => {
       ]);
       showToast('Site settings updated across public portfolio!', 'success');
       await refreshData();
-      await triggerRevalidation(['settings']);
+      await triggerRevalidation(['settings'], ['/', '/services', '/works', '/blog']);
     } catch (err: any) {
       showToast(err.message || 'Failed to update settings', 'error');
     } finally {
@@ -41,7 +42,7 @@ export const AdminSettings: React.FC = () => {
         <div>
           <h2 className="text-2xl font-bold text-neutral-900 tracking-tight">Site Settings &amp; Global Copy</h2>
           <p className="text-xs sm:text-sm text-neutral-600 mt-0.5">
-            Configure headline, subtext, 4 animated metrics, contact channels, and footer copy.
+            Configure brand name, headline, subtext, 4 animated metrics, contact channels, and footer copy.
           </p>
         </div>
 
@@ -53,6 +54,32 @@ export const AdminSettings: React.FC = () => {
           <span className="material-symbols-outlined text-[18px]">save</span>
           <span>{saving ? 'Saving...' : 'Save All Settings'}</span>
         </button>
+      </div>
+
+      {/* 0. Brand & Personal Identity */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-neutral-200/80 shadow-sm space-y-4">
+        <h3 className="text-base font-bold text-neutral-900 border-b border-neutral-200 pb-3 flex items-center gap-2">
+          <span className="material-symbols-outlined text-primary text-[20px]">badge</span>
+          <span>Brand &amp; Personal Identity</span>
+        </h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs font-bold text-neutral-800 block mb-1">
+              Portfolio Owner / Brand Name *
+            </label>
+            <input
+              type="text"
+              value={form.name || ''}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="e.g. Alex Rivera"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+            <p className="text-[11px] text-neutral-500 mt-1">
+              This name dynamically populates across the navigation bar, hero section, about bio, footer copyright, and OpenGraph site name.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* 1. Hero Section Settings */}

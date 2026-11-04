@@ -26,11 +26,13 @@ import {
 export const ADMIN_EMAILS = [
   'joshuaimman8@gmail.com',
   'joshuaimman2004@gmail.com',
-  'YOUR_EMAIL@gmail.com',
   'alex@growthmark.io',
+  'jashper078@gmail.com',
+  'YOUR_EMAIL@gmail.com',
 ];
 
 export interface SiteSettings {
+  name?: string;
   hero: {
     roleTag: string;
     headline: string;
@@ -67,6 +69,7 @@ export interface SiteSettings {
 }
 
 export const DEFAULT_SETTINGS: SiteSettings = {
+  name: PORTFOLIO_DATA.profile.name || 'Alex Rivera',
   hero: {
     roleTag: PORTFOLIO_DATA.profile.roleTag,
     headline: 'I help brands grow with SEO and performance marketing',

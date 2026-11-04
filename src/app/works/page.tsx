@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getWorks, getShowcase, getSiteSettings } from '@/lib/data';
+import { getWorks, getShowcase, getSiteSettings, getPageMetadata } from '@/lib/data';
 import { PORTFOLIO_DATA, WorkDetail, ShowcaseItem } from '@/data/portfolioData';
 import { SiteShell } from '@/context/ModalContext';
 import { LightboxTrigger, AuditButton } from '@/components/common/ActionButtons';
@@ -12,14 +12,44 @@ type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export const metadata: Metadata = {
-  title: 'Proof of Work & Case Studies | Alex Rivera',
-  description:
-    'Forensic case studies, unedited Google Search Console curves, and high-converting ad creative assets across B2B SaaS and D2C brands.',
-};
+export const revalidate = false;
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 300;
+export async function generateMetadata(): Promise<Metadata> {
+  const pageMeta = await getPageMetadata('route_works', {
+    title: 'Proof of Work & Case Studies',
+    description:
+      'Forensic case studies, unedited Google Search Console curves, and high-converting ad creative assets across B2B SaaS and D2C brands.',
+    path: '/works',
+  });
+
+  return {
+    title: pageMeta.title,
+    description: pageMeta.description,
+    alternates: {
+      canonical: pageMeta.alternates.canonical,
+    },
+    openGraph: {
+      title: pageMeta.openGraph.title,
+      description: pageMeta.openGraph.description,
+      url: pageMeta.openGraph.url,
+      siteName: pageMeta.openGraph.siteName,
+      locale: pageMeta.openGraph.locale,
+      type: pageMeta.openGraph.type,
+      images: pageMeta.openGraph.images.map((img) => ({
+        url: img.url,
+        width: img.width,
+        height: img.height,
+        alt: img.alt,
+      })),
+    },
+    twitter: {
+      card: pageMeta.twitter.card,
+      title: pageMeta.twitter.title,
+      description: pageMeta.twitter.description,
+      images: pageMeta.twitter.images,
+    },
+  };
+}
 
 export default async function WorksHubPage({ searchParams }: Props) {
   const resolvedSearchParams = await searchParams;

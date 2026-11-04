@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import type { Metadata } from 'next';
 import {
   getServices,
   getWorks,
@@ -8,6 +9,7 @@ import {
   getPosts,
   getTestimonials,
   getSiteSettings,
+  getPageMetadata,
 } from '@/lib/data';
 import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { SiteShell } from '@/context/ModalContext';
@@ -21,8 +23,44 @@ import { MotionReveal } from '@/components/common/MotionWrapper';
 import { getPersonJsonLd } from '@/lib/jsonld';
 import { LightboxItem } from '@/components/LightboxModal';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 300;
+export const revalidate = false;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const pageMeta = await getPageMetadata('route_home', {
+    title: 'Alex Rivera | Growth Marketer - Performance Portfolio',
+    description:
+      'Performance marketing portfolio and client acquisition platform for senior digital marketing expert. Featuring full-funnel case studies, verified organic SERP rankings, interactive ROAS calculator, and growth audit booking.',
+    path: '/',
+  });
+
+  return {
+    title: pageMeta.title,
+    description: pageMeta.description,
+    alternates: {
+      canonical: pageMeta.alternates.canonical,
+    },
+    openGraph: {
+      title: pageMeta.openGraph.title,
+      description: pageMeta.openGraph.description,
+      url: pageMeta.openGraph.url,
+      siteName: pageMeta.openGraph.siteName,
+      locale: pageMeta.openGraph.locale,
+      type: pageMeta.openGraph.type,
+      images: pageMeta.openGraph.images.map((img) => ({
+        url: img.url,
+        width: img.width,
+        height: img.height,
+        alt: img.alt,
+      })),
+    },
+    twitter: {
+      card: pageMeta.twitter.card,
+      title: pageMeta.twitter.title,
+      description: pageMeta.twitter.description,
+      images: pageMeta.twitter.images,
+    },
+  };
+}
 
 export default async function HomePage() {
   const [services, works, showcase, posts, testimonials, settings] = await Promise.all([
@@ -189,7 +227,7 @@ export default async function HomePage() {
                   <div className="w-full max-w-sm rounded-3xl overflow-hidden border-2 border-primary/20 shadow-2xl relative aspect-square">
                     <Image
                       src={PORTFOLIO_DATA.profile.avatar}
-                      alt="Alex Rivera - Growth Marketer"
+                      alt={`${settings.name || 'Alex Rivera'} - Growth Marketer`}
                       fill
                       sizes="(max-width: 768px) 100vw, 400px"
                       className="object-cover"
@@ -197,8 +235,8 @@ export default async function HomePage() {
                     />
                   </div>
                   <div className="text-center mt-3">
-                    <span className="text-sm font-bold text-on-surface block">Alex Rivera</span>
-                    <span className="text-xs text-on-surface-variant">Senior Performance Marketer &amp; SEO Architect</span>
+                    <span className="text-sm font-bold text-on-surface block">{settings.name || 'Alex Rivera'}</span>
+                    <span className="text-xs text-on-surface-variant">{settings.hero.roleTag || 'Senior Performance Marketer & SEO Architect'}</span>
                   </div>
                 </div>
               </div>

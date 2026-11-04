@@ -1,6 +1,7 @@
 import { PORTFOLIO_DATA } from '@/data/portfolioData';
 
 export interface SiteSettings {
+  name?: string;
   hero: {
     roleTag: string;
     headline: string;
@@ -36,7 +37,53 @@ export interface SiteSettings {
   };
 }
 
+/** OpenGraph image — `width`/`height` are pixel dimensions of the shared card. */
+export type PageOpenGraphImage = {
+  /** Absolute or site-relative URL. Next composes it against `metadataBase`. */
+  url: string;
+  /** Pixel width. */
+  width: number;
+  /** Pixel height. */
+  height: number;
+  /** Shown to assistive tech and as a link-preview fallback. */
+  alt: string;
+};
+
+/** OpenGraph block — always `type: 'website'` and `locale: 'en_US'` on this site. */
+export type PageOpenGraph = {
+  title: string;
+  description: string;
+  /** Absolute URL — `siteUrl` + the route path. */
+  url: string;
+  /** From `SiteConfig.name`, so every card carries the org name. */
+  siteName: string;
+  locale: 'en_US';
+  type: 'website';
+  /** Always the single shared `/opengraph-image` card. */
+  images: PageOpenGraphImage[];
+};
+
+/** Twitter/X card block — `summary_large_image` with the same shared card. */
+export type PageTwitter = {
+  card: 'summary_large_image';
+  title: string;
+  description: string;
+  /** Twitter accepts bare URL strings; this site passes the one shared card. */
+  images: string[];
+};
+
+/** Complete metadata object returned by `pageMetadata()`. */
+export type PageMetadata = {
+  title: string;
+  description: string;
+  /** Canonical is the route *path* (Next resolves it against `metadataBase`). */
+  alternates: { canonical: string };
+  openGraph: PageOpenGraph;
+  twitter: PageTwitter;
+};
+
 export const DEFAULT_SETTINGS: SiteSettings = {
+  name: PORTFOLIO_DATA.profile.name || 'Alex Rivera',
   hero: {
     roleTag: PORTFOLIO_DATA.profile.roleTag,
     headline: 'I help brands grow with SEO and performance marketing',
