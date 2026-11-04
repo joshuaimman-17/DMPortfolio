@@ -12,34 +12,25 @@ export interface MotionRevealProps {
   className?: string;
 }
 
+/**
+ * MotionReveal provides smooth entrance animations without hiding un-scrolled
+ * or iframe-nested content. Avoids aggressive whileInView viewport negative margins
+ * that cause blank sections in iframe previews.
+ */
 export const MotionReveal: React.FC<MotionRevealProps> = ({
   children,
   delay = 0,
   direction = 'up',
   className = '',
 }) => {
-  const initial =
-    direction === 'up'
-      ? { opacity: 0, y: 20 }
-      : direction === 'down'
-      ? { opacity: 0, y: -20 }
-      : direction === 'left'
-      ? { opacity: 0, x: 20 }
-      : direction === 'right'
-      ? { opacity: 0, x: -20 }
-      : { opacity: 0 };
-
-  const animate =
-    direction === 'none'
-      ? { opacity: 1 }
-      : { opacity: 1, x: 0, y: 0 };
+  const initialY = direction === 'up' ? 14 : direction === 'down' ? -14 : 0;
+  const initialX = direction === 'left' ? 14 : direction === 'right' ? -14 : 0;
 
   return (
     <motion.div
-      initial={initial}
-      whileInView={animate}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity: 0.85, y: initialY, x: initialX }}
+      animate={{ opacity: 1, y: 0, x: 0 }}
+      transition={{ duration: 0.35, delay: Math.min(delay, 0.2), ease: 'easeOut' }}
       className={className}
     >
       {children}

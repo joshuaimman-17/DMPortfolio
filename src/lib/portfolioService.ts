@@ -40,6 +40,9 @@ export interface SiteSettings {
     badge1: string;
     badge2: string;
     badge3: string;
+    avatar?: string;
+    image?: string;
+    driveFileId?: string;
   };
   metrics: {
     metric1: { value: string; label: string; desc: string };
@@ -123,6 +126,9 @@ export interface SubmissionItem {
   sourcePage?: string;
   status: 'New' | 'Contacted' | 'Closed';
   notified?: boolean;
+  sheetsSaved?: boolean;
+  adminNotified?: boolean;
+  userConfirmed?: boolean;
   createdAt: any;
 }
 
@@ -130,6 +136,9 @@ export interface SubscriberItem {
   id: string;
   email: string;
   notified?: boolean;
+  sheetsSaved?: boolean;
+  adminNotified?: boolean;
+  userConfirmed?: boolean;
   createdAt: any;
 }
 

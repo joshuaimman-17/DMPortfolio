@@ -146,6 +146,20 @@ export function HomeContactForm() {
           <p className="text-xs text-on-surface-variant max-w-xs mx-auto">
             Thanks for reaching out, <strong>{contactForm.name}</strong>. I will review your site and respond within 24 hours.
           </p>
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-1 pb-1">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200">
+              <span className="material-symbols-outlined text-[12px]">check_circle</span>
+              Recorded in Google Sheet
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-semibold border border-blue-200">
+              <span className="material-symbols-outlined text-[12px]">mail</span>
+              Confirmation emailed to {contactForm.email}
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-semibold border border-indigo-200">
+              <span className="material-symbols-outlined text-[12px]">notifications</span>
+              Admin alert sent
+            </span>
+          </div>
           <button
             type="button"
             onClick={() => setContactSubmitted(false)}

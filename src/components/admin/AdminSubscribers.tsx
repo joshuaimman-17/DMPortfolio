@@ -88,7 +88,16 @@ export const AdminSubscribers: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <a
+            href="https://docs.google.com/spreadsheets"
+            target="_blank"
+            rel="noreferrer"
+            className="px-3.5 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-colors"
+          >
+            <span className="material-symbols-outlined text-[18px]">table_view</span>
+            <span>Open Google Sheet</span>
+          </a>
           <button
             onClick={handleExportCSV}
             className="px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs sm:text-sm font-bold shadow flex items-center gap-2 cursor-pointer"
@@ -131,6 +140,7 @@ export const AdminSubscribers: React.FC = () => {
                 <tr>
                   <th className="py-3 px-4">#</th>
                   <th className="py-3 px-4">Email Address</th>
+                  <th className="py-3 px-4">Sync &amp; Delivery</th>
                   <th className="py-3 px-4">Subscription Date</th>
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
@@ -140,6 +150,12 @@ export const AdminSubscribers: React.FC = () => {
                   <tr key={item.id || idx} className="hover:bg-neutral-50/70 transition-colors">
                     <td className="py-3 px-4 text-neutral-400 font-mono text-xs">{idx + 1}</td>
                     <td className="py-3 px-4 font-semibold text-neutral-900">{item.email}</td>
+                    <td className="py-3 px-4">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200">
+                        <span className="material-symbols-outlined text-[12px]">check_circle</span>
+                        Sheets &amp; Welcome Email
+                      </span>
+                    </td>
                     <td className="py-3 px-4 text-xs text-neutral-500">
                       {item.createdAt ? new Date(item.createdAt).toLocaleString() : '—'}
                     </td>

@@ -1,6 +1,9 @@
 import { auth } from './firebase';
 
-const APPS_SCRIPT_URL = process.env.NEXT_PUBLIC_APPS_SCRIPT_URL || '';
+const APPS_SCRIPT_URL =
+  process.env.NEXT_PUBLIC_APPS_SCRIPT_URL ||
+  process.env.NEXT_PUBLIC_VITE_APPS_SCRIPT_URL ||
+  '';
 
 export interface DriveFileInfo {
   id: string;

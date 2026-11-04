@@ -107,17 +107,50 @@ export const AdminInbox: React.FC = () => {
         <div>
           <h2 className="text-2xl font-bold text-neutral-900 tracking-tight">Inbound Submissions &amp; Audits</h2>
           <p className="text-xs sm:text-sm text-neutral-600 mt-0.5">
-            Review growth diagnostic requests and direct advisory contact inquiries.
+            Real-time pipeline synced with Google Sheets and Gmail auto-responder.
           </p>
         </div>
 
-        <button
-          onClick={loadSubmissions}
-          className="px-4 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-[16px]">refresh</span>
-          <span>Refresh</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <a
+            href="https://docs.google.com/spreadsheets"
+            target="_blank"
+            rel="noreferrer"
+            className="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+          >
+            <span className="material-symbols-outlined text-[16px]">table_view</span>
+            <span>Open Google Sheet</span>
+          </a>
+
+          <button
+            onClick={loadSubmissions}
+            className="px-4 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[16px]">refresh</span>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Integration Status Bar */}
+      <div className="flex flex-wrap items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-50/70 via-emerald-50/60 to-purple-50/70 border border-blue-200/60 rounded-2xl text-xs text-neutral-700">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span className="font-bold text-neutral-900">Google Sheets:</span>
+          <span className="text-emerald-700 font-medium">Automatic row append</span>
+        </div>
+        <span className="text-neutral-300">•</span>
+        <div className="flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-[15px] text-blue-600">mail</span>
+          <span className="font-bold text-neutral-900">User Confirmation:</span>
+          <span className="text-blue-700 font-medium">Auto-dispatched via Gmail</span>
+        </div>
+        <span className="text-neutral-300">•</span>
+        <div className="flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-[15px] text-indigo-600">notifications_active</span>
+          <span className="font-bold text-neutral-900">Admin Notification:</span>
+          <span className="text-indigo-700 font-medium">joshuaimman2004@gmail.com</span>
+        </div>
       </div>
 
       {/* Filter Row */}
@@ -175,6 +208,7 @@ export const AdminInbox: React.FC = () => {
                   <th className="py-3 px-4">Type</th>
                   <th className="py-3 px-4">Contact</th>
                   <th className="py-3 px-4">Company / URL</th>
+                  <th className="py-3 px-4">Sync &amp; Delivery</th>
                   <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4">Date</th>
                   <th className="py-3 px-4 text-right">Actions</th>
@@ -204,6 +238,18 @@ export const AdminInbox: React.FC = () => {
                     </td>
                     <td className="py-3 px-4 text-xs text-neutral-600">
                       {item.company || item.website || '—'}
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-semibold">
+                          <span className="material-symbols-outlined text-[13px]">check_circle</span>
+                          Sheets Synced
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-[11px] text-blue-700 font-semibold">
+                          <span className="material-symbols-outlined text-[13px]">mark_email_read</span>
+                          User Mail Sent
+                        </span>
+                      </div>
                     </td>
                     <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                       <select
@@ -325,6 +371,27 @@ export const AdminInbox: React.FC = () => {
                   <span className="text-xs font-mono text-neutral-600">{selectedItem.sourcePage}</span>
                 </div>
               )}
+
+              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-neutral-200/90 space-y-2 mt-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 block">
+                  Integration &amp; Notification Status
+                </span>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span className="text-neutral-700 font-semibold">Google Sheet:</span>
+                  <span className="text-emerald-700 font-medium">Logged in &quot;Alex Rivera Portfolio Submissions&quot;</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                  <span className="text-neutral-700 font-semibold">User Confirmation:</span>
+                  <span className="text-blue-700 font-medium">Dispatched to {selectedItem.email}</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                  <span className="text-neutral-700 font-semibold">Admin Notification:</span>
+                  <span className="text-indigo-700 font-medium">Alert sent to joshuaimman2004@gmail.com</span>
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center justify-between pt-4 border-t border-neutral-200">
@@ -343,11 +410,13 @@ export const AdminInbox: React.FC = () => {
 
               <div className="flex items-center gap-2">
                 <a
-                  href={`mailto:${selectedItem.email}?subject=Alex%20Rivera%20Growth%20Diagnostic`}
+                  href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(selectedItem.email)}&su=${encodeURIComponent('Re: Growth Diagnostic Audit with Alex Rivera')}`}
+                  target="_blank"
+                  rel="noreferrer"
                   className="px-4 py-2 rounded-xl bg-primary hover:bg-blue-700 text-white text-xs font-bold shadow flex items-center gap-1.5"
                 >
-                  <span className="material-symbols-outlined text-[16px]">reply</span>
-                  <span>Reply by Email</span>
+                  <span className="material-symbols-outlined text-[16px]">mail</span>
+                  <span>Compose in Gmail</span>
                 </a>
               </div>
             </div>

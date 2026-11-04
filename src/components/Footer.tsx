@@ -242,6 +242,15 @@ export const Footer: React.FC<FooterProps> = ({
             >
               Privacy Policy
             </Link>
+            <a
+              href="/llms.txt"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-slate-300 transition-colors font-mono text-[11px] text-slate-400"
+              title="LLM & AI discoverability file (llms.txt standard)"
+            >
+              llms.txt
+            </a>
             {onOpenAudit && (
               <button
                 onClick={onOpenAudit}

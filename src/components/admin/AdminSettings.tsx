@@ -4,6 +4,8 @@ import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
 import { SiteSettings } from '../../lib/portfolioService';
 import { triggerRevalidation } from '../../lib/admin-service';
+import { ImageField } from './ImageField';
+import { PORTFOLIO_DATA } from '../../data/portfolioData';
 
 export const AdminSettings: React.FC = () => {
   const { settings, refreshData, showToast } = usePortfolioData();
@@ -137,6 +139,39 @@ export const AdminSettings: React.FC = () => {
               value={form.hero.badge2}
               onChange={(e) => setForm({ ...form, hero: { ...form.hero, badge2: e.target.value } })}
               className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-bold text-neutral-800 block mb-1">Floating Badge 3 (Partner Status)</label>
+            <input
+              type="text"
+              value={form.hero.badge3 || ''}
+              onChange={(e) => setForm({ ...form, hero: { ...form.hero, badge3: e.target.value } })}
+              placeholder="e.g. Meta & Google Partner"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-sm"
+            />
+          </div>
+
+          <div className="sm:col-span-2 pt-2 border-t border-neutral-100">
+            <ImageField
+              label="Hero Section Portrait / Cover Image"
+              category="testimonials"
+              value={form.hero.avatar || form.hero.image || PORTFOLIO_DATA.profile.avatar}
+              driveFileId={form.hero.driveFileId}
+              aspectRatioClass="aspect-square max-w-[280px]"
+              helperText="Alex Rivera portrait image displayed in the hero visual block with floating metric badges."
+              onChange={({ image, driveFileId }) =>
+                setForm({
+                  ...form,
+                  hero: {
+                    ...form.hero,
+                    avatar: image,
+                    image,
+                    driveFileId,
+                  },
+                })
+              }
             />
           </div>
         </div>

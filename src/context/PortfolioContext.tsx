@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
-import { auth, googleProvider } from '../lib/firebase';
+import { User, onAuthStateChanged, signInWithPopup, signOut, GoogleAuthProvider } from 'firebase/auth';
+import { auth, googleProvider, setCachedAccessToken } from '../lib/firebase';
 import {
   PORTFOLIO_DATA,
   ServiceDetail,
@@ -91,16 +91,25 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
       } else {
         setIsAdmin(false);
+        setCachedAccessToken(null);
       }
       setAuthLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      setCachedAccessToken(null);
+      unsubscribe();
+    };
   }, []);
 
   const loginWithGoogle = async (): Promise<boolean> => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      if (credential?.accessToken) {
+        setCachedAccessToken(credential.accessToken);
+      }
+
       if (result.user?.email) {
         const adminStatus = await checkIsAdmin(result.user.email);
         setIsAdmin(adminStatus);
@@ -125,6 +134,7 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const logout = async () => {
     try {
       await signOut(auth);
+      setCachedAccessToken(null);
       setUser(null);
       setIsAdmin(false);
       showToast('Signed out successfully.', 'info');

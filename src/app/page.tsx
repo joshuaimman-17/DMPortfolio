@@ -118,6 +118,11 @@ export default async function HomePage() {
 
   const jsonLd = getPersonJsonLd();
 
+  const heroAvatar =
+    settings.hero.avatar ||
+    settings.hero.image ||
+    PORTFOLIO_DATA.profile.avatar;
+
   return (
     <SiteShell settings={settings} defaultLightboxItems={lightboxItems}>
       {/* Schema.org JSON-LD */}
@@ -132,51 +137,120 @@ export default async function HomePage() {
            ========================================================================= */}
         <section id="home" className="scroll-mt-28">
           <MotionReveal direction="up">
-            <div className="relative overflow-hidden rounded-3xl bg-surface-container-lowest border border-neutral-200/90 shadow-xl p-6 sm:p-10 md:p-16">
-              <div className="max-w-3xl flex flex-col gap-5">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-fixed/50 text-primary text-xs font-semibold uppercase tracking-wider w-fit">
-                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                  {settings.hero.roleTag || PORTFOLIO_DATA.profile.roleTag}
+            <div className="relative overflow-hidden rounded-3xl bg-surface-container-lowest border border-neutral-200/90 shadow-xl p-6 sm:p-10 md:p-12 lg:p-14">
+              {/* Subtle background ambient blurs */}
+              <div className="absolute -right-24 -top-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-secondary/5 rounded-full blur-3xl pointer-events-none"></div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center relative z-10">
+                {/* Left Content Column */}
+                <div className="lg:col-span-7 flex flex-col items-start gap-6">
+                  {/* Eyebrow Tag */}
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary-fixed/50 text-primary text-xs font-semibold uppercase tracking-wider w-fit">
+                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                    <span>{settings.hero.roleTag || PORTFOLIO_DATA.profile.roleTag}</span>
+                  </div>
+
+                  {/* Headline */}
+                  <h1 className="font-headline-xl text-3xl sm:text-5xl lg:text-[54px] font-extrabold text-on-surface tracking-tight leading-[1.12]">
+                    {settings.hero.headline}
+                  </h1>
+
+                  {/* Subtext */}
+                  <p className="font-body-lg text-base sm:text-lg text-on-surface-variant max-w-2xl leading-relaxed">
+                    {settings.hero.subtext || PORTFOLIO_DATA.profile.subtext}
+                  </p>
+
+                  {/* CTAs */}
+                  <div className="flex flex-wrap items-center gap-4 pt-1">
+                    <AuditButton className="px-6 py-3.5 rounded-xl bg-primary text-white font-bold text-sm shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] hover:bg-blue-700 transition-all inline-flex items-center gap-2 cursor-pointer">
+                      <span>Book a Free Growth Diagnostic</span>
+                      <span className="material-symbols-outlined text-[18px]">calendar_today</span>
+                    </AuditButton>
+
+                    <a
+                      href="#works"
+                      className="px-6 py-3.5 rounded-xl bg-surface-container-low text-on-surface font-semibold text-sm hover:bg-neutral-200/80 transition-all inline-flex items-center gap-2 border border-neutral-200"
+                    >
+                      <span>Explore Case Studies</span>
+                      <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
+                    </a>
+                  </div>
+
+                  {/* Trust Rating & Social Proof */}
+                  <div className="flex flex-wrap items-center gap-3 pt-2 text-on-surface-variant text-xs font-semibold">
+                    <div className="flex items-center text-amber-500">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          className="material-symbols-outlined text-[18px]"
+                          style={{ fontVariationSettings: "'FILL' 1" }}
+                        >
+                          star
+                        </span>
+                      ))}
+                    </div>
+                    <span className="w-1 h-1 rounded-full bg-neutral-300"></span>
+                    <span>Trusted by 30+ Growth-Stage Startups &amp; Enterprise Brands</span>
+                  </div>
                 </div>
 
-                <h1 className="font-headline-xl text-3xl sm:text-5xl lg:text-6xl font-extrabold text-on-surface tracking-tight text-balance leading-[1.15]">
-                  {settings.hero.headline}
-                </h1>
+                {/* Right Visual Column with Alex Rivera Portrait & Floating Metrics */}
+                <div className="lg:col-span-5 relative flex items-center justify-center pt-4 lg:pt-0">
+                  <div className="relative w-full max-w-[420px] aspect-square rounded-2xl overflow-hidden shadow-2xl bg-surface-container-low ring-1 ring-neutral-200/80 group">
+                    <DriveImage
+                      src={heroAvatar}
+                      alt={`${settings.name || PORTFOLIO_DATA.profile.name} - Senior Growth Marketer`}
+                      frameType="avatar"
+                      aspectRatioClass="aspect-square"
+                      width={800}
+                      priority
+                      containerClassName="w-full h-full"
+                      className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none rounded-2xl"></div>
+                  </div>
 
-                <p className="font-body-lg text-base sm:text-lg text-on-surface-variant max-w-2xl leading-relaxed">
-                  {settings.hero.subtext || PORTFOLIO_DATA.profile.subtext}
-                </p>
+                  {/* Badge 1: Traffic Growth */}
+                  <div className="absolute -bottom-4 -left-4 sm:left-2 bg-surface-container-lowest/95 backdrop-blur-md p-3.5 rounded-xl shadow-lg flex items-center gap-3 border border-neutral-200/70 z-20">
+                    <div className="w-10 h-10 rounded-full bg-secondary-container/40 flex items-center justify-center text-secondary">
+                      <span className="material-symbols-outlined text-[22px]">trending_up</span>
+                    </div>
+                    <div>
+                      <div className="font-headline-md text-base text-secondary font-bold font-mono">
+                        {settings.hero.badge1?.split(' ')[0] || '+120%'}
+                      </div>
+                      <div className="text-[11px] text-on-surface-variant font-medium">
+                        {settings.hero.badge1?.split(' ').slice(1).join(' ') || 'Organic Traffic Growth'}
+                      </div>
+                    </div>
+                  </div>
 
-                {/* CTAs */}
-                <div className="flex flex-wrap items-center gap-4 pt-2">
-                  <AuditButton className="px-6 py-3.5 rounded-xl bg-primary text-white font-bold text-sm shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] hover:bg-blue-700 transition-all inline-flex items-center gap-2 cursor-pointer">
-                    <span>Book a Free Growth Diagnostic</span>
-                    <span className="material-symbols-outlined text-[18px]">calendar_today</span>
-                  </AuditButton>
+                  {/* Badge 2: 4.5x ROAS */}
+                  <div className="absolute -top-3 -right-2 bg-surface-container-lowest/95 backdrop-blur-md px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2.5 border border-neutral-200/70 z-20">
+                    <span className="material-symbols-outlined text-primary-container text-[20px]">bolt</span>
+                    <div>
+                      <div className="text-xs text-on-surface font-bold">
+                        {settings.hero.badge2?.split(' ').slice(0, 3).join(' ') || '4.5x Average ROAS'}
+                      </div>
+                      <div className="text-[10px] text-on-surface-variant">
+                        {settings.hero.badge2?.split(' ').slice(3).join(' ') || 'Blended Acquisition'}
+                      </div>
+                    </div>
+                  </div>
 
-                  <a
-                    href="#works"
-                    className="px-6 py-3.5 rounded-xl bg-surface-container-low text-on-surface font-semibold text-sm hover:bg-neutral-200/80 transition-all inline-flex items-center gap-2 border border-neutral-200"
-                  >
-                    <span>Explore Case Studies</span>
-                    <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
-                  </a>
-                </div>
-
-                {/* Badges */}
-                <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-neutral-200/60 mt-2 text-xs text-on-surface-variant font-medium">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container/30 text-secondary font-semibold">
-                    <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                    {settings.hero.badge1 || '+120% Organic Traffic Growth'}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-fixed/40 text-primary font-semibold">
-                    <span className="material-symbols-outlined text-[16px]">verified</span>
-                    {settings.hero.badge2 || '4.5x Average ROAS Blended Acquisition'}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-200/70 text-neutral-800 font-semibold">
-                    <span className="material-symbols-outlined text-[16px]">military_tech</span>
-                    {settings.hero.badge3 || 'Meta & Google Partner'}
-                  </span>
+                  {/* Badge 3: Verified Partner */}
+                  <div className="hidden sm:flex absolute top-1/2 -right-6 bg-surface-container-lowest/95 backdrop-blur-md px-3.5 py-2 rounded-xl shadow-lg items-center gap-2 border border-neutral-200/70 z-20">
+                    <span
+                      className="material-symbols-outlined text-primary text-[18px]"
+                      style={{ fontVariationSettings: "'FILL' 1" }}
+                    >
+                      verified
+                    </span>
+                    <span className="text-xs text-on-surface font-semibold">
+                      {settings.hero.badge3 || 'Meta & Google Partner'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

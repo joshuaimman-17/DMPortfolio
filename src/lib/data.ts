@@ -3,6 +3,8 @@ import { unstable_cache } from 'next/cache';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import {
   getFirestore,
+  initializeFirestore,
+  setLogLevel,
   doc,
   getDoc,
   collection,
@@ -22,11 +24,48 @@ import {
 import { SiteSettings, DEFAULT_SETTINGS, PageMetadata } from '@/types/settings';
 export { type SiteSettings, DEFAULT_SETTINGS, type PageMetadata };
 
+// Suppress benign gRPC idle stream disconnection notices on the server
+try {
+  setLogLevel('silent');
+} catch {
+  // Ignore
+}
+
+let cachedServerFirestore: Firestore | null = null;
+
 function getServerFirestore(): Firestore {
+  if (cachedServerFirestore) {
+    return cachedServerFirestore;
+  }
+
   const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-  return firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== '(default)'
-    ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
-    : getFirestore(app);
+  const config = firebaseConfig as any;
+  const customDbId =
+    config.firestoreDatabaseId && config.firestoreDatabaseId !== '(default)'
+      ? config.firestoreDatabaseId
+      : undefined;
+
+  try {
+    cachedServerFirestore = customDbId
+      ? initializeFirestore(
+          app,
+          {
+            experimentalAutoDetectLongPolling: true,
+            ignoreUndefinedProperties: true,
+          },
+          customDbId
+        )
+      : initializeFirestore(app, {
+          experimentalAutoDetectLongPolling: true,
+          ignoreUndefinedProperties: true,
+        });
+  } catch {
+    cachedServerFirestore = customDbId
+      ? getFirestore(app, customDbId)
+      : getFirestore(app);
+  }
+
+  return cachedServerFirestore;
 }
 
 /**
@@ -54,6 +93,16 @@ function serializeFirestoreData(obj: any): any {
 /**
  * Internal server query for published items in Firestore with fallback
  */
+function extractSetting<T extends Record<string, any>>(docSnap: any, defaultVal: T): T {
+  if (!docSnap || !docSnap.exists()) return defaultVal;
+  const d = docSnap.data();
+  const payload = d?.data && typeof d.data === 'object' ? d.data : d;
+  return { ...defaultVal, ...payload };
+}
+
+/**
+ * Internal server query for published items in Firestore with fallback
+ */
 async function fetchPublishedCollectionServer<T>(
   collectionName: string,
   fallbackData: T[]
@@ -74,7 +123,16 @@ async function fetchPublishedCollectionServer<T>(
     });
 
     items.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
-    return items;
+
+    // Deep merge with fallback data to ensure no critical properties are missing or undefined
+    const enriched = items.map((item: any) => {
+      const fallback = (fallbackData as any[]).find(
+        (f) => (item.slug && f.slug === item.slug) || (item.id && f.id === item.id)
+      );
+      return fallback ? { ...fallback, ...item } : item;
+    });
+
+    return enriched.length > 0 ? (enriched as T[]) : fallbackData;
   } catch (error) {
     return fallbackData;
   }
@@ -98,17 +156,17 @@ async function fetchSiteSettingsServer(): Promise<SiteSettings> {
       ]);
 
     const profileData = profileDoc?.exists() ? profileDoc.data() : null;
-    const heroData = heroDoc?.exists() ? heroDoc.data()?.data : null;
+    const heroData = heroDoc?.exists() ? (heroDoc.data()?.data || heroDoc.data()) : null;
     const name = profileData?.name || heroData?.name || DEFAULT_SETTINGS.name || 'Alex Rivera';
 
     return {
       name,
-      hero: heroDoc?.exists() ? (heroDoc.data()?.data || DEFAULT_SETTINGS.hero) : DEFAULT_SETTINGS.hero,
-      metrics: metricsDoc?.exists() ? (metricsDoc.data()?.data || DEFAULT_SETTINGS.metrics) : DEFAULT_SETTINGS.metrics,
-      contact: contactDoc?.exists() ? (contactDoc.data()?.data || DEFAULT_SETTINGS.contact) : DEFAULT_SETTINGS.contact,
-      social: socialDoc?.exists() ? (socialDoc.data()?.data || DEFAULT_SETTINGS.social) : DEFAULT_SETTINGS.social,
-      footer: footerDoc?.exists() ? (footerDoc.data()?.data || DEFAULT_SETTINGS.footer) : DEFAULT_SETTINGS.footer,
-      integrations: integrationsDoc?.exists() ? (integrationsDoc.data()?.data || DEFAULT_SETTINGS.integrations) : DEFAULT_SETTINGS.integrations,
+      hero: extractSetting(heroDoc, DEFAULT_SETTINGS.hero),
+      metrics: extractSetting(metricsDoc, DEFAULT_SETTINGS.metrics),
+      contact: extractSetting(contactDoc, DEFAULT_SETTINGS.contact),
+      social: extractSetting(socialDoc, DEFAULT_SETTINGS.social),
+      footer: extractSetting(footerDoc, DEFAULT_SETTINGS.footer),
+      integrations: extractSetting(integrationsDoc, DEFAULT_SETTINGS.integrations || { googleSheetUrl: '', driveFolderUrl: '' }),
     };
   } catch (error) {
     return DEFAULT_SETTINGS;

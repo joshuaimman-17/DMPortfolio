@@ -66,7 +66,7 @@ function getAdminApp(): App {
 
 export function getAdminFirestore(): Firestore {
   const app = getAdminApp();
-  const dbId = firebaseConfig.firestoreDatabaseId;
+  const dbId = (firebaseConfig as any).firestoreDatabaseId;
   return dbId && dbId !== '(default)' ? getFirestore(app, dbId) : getFirestore(app);
 }
 

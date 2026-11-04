@@ -31,7 +31,6 @@ export const DriveImage: React.FC<DriveImageProps> = ({
   priority = false,
   unoptimized,
 }) => {
-  const [loaded, setLoaded] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
 
   const resolvedSrc = driveImageUrl(src, width);
@@ -82,13 +81,14 @@ export const DriveImage: React.FC<DriveImageProps> = ({
     }
   };
 
+  // Render high-fidelity branded card fallback if no image or on image error
   if (!resolvedSrc || error) {
     return (
       <div
-        className={`relative overflow-hidden bg-neutral-100 ${aspectRatioClass} ${containerClassName}`}
+        className={`relative overflow-hidden bg-neutral-900 ${aspectRatioClass} ${containerClassName}`}
       >
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-gradient-to-br from-neutral-800 via-neutral-900 to-slate-950 text-white select-none">
-          <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mb-2">
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-gradient-to-br from-slate-900 via-neutral-900 to-blue-950 text-white select-none">
+          <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mb-2 shadow-inner">
             <span className="material-symbols-outlined text-blue-400 text-2xl">
               {getFallbackIcon()}
             </span>
@@ -96,38 +96,34 @@ export const DriveImage: React.FC<DriveImageProps> = ({
           <span className="text-[11px] font-bold uppercase tracking-wider text-blue-400">
             {getFallbackLabel()}
           </span>
-          <span className="text-xs text-neutral-300 font-semibold line-clamp-1 max-w-[90%] mt-1">
-            {title || alt || 'Growth Asset'}
+          <span className="text-xs text-neutral-200 font-semibold line-clamp-1 max-w-[90%] mt-1">
+            {title || alt || 'Verified Performance Asset'}
           </span>
         </div>
       </div>
     );
   }
 
+  // Auto-detect if image is external Google Drive / Google usercontent / unsplash
+  const isExternalGoogle =
+    resolvedSrc.includes('googleusercontent.com') ||
+    resolvedSrc.includes('drive.google.com') ||
+    resolvedSrc.includes('unsplash.com');
+
   return (
     <div
       className={`relative overflow-hidden bg-neutral-100 ${aspectRatioClass} ${containerClassName}`}
     >
-      {!loaded && !error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-r from-neutral-100 via-neutral-200/70 to-neutral-100 animate-pulse z-10">
-          <span className="material-symbols-outlined text-neutral-300 text-3xl">
-            {getFallbackIcon()}
-          </span>
-        </div>
-      )}
-
       <Image
         src={resolvedSrc}
         alt={alt || 'Image'}
         fill
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         priority={priority}
-        unoptimized={unoptimized}
-        onLoad={() => setLoaded(true)}
+        unoptimized={unoptimized ?? isExternalGoogle}
+        referrerPolicy="no-referrer"
         onError={() => setError(true)}
-        className={`object-cover transition-opacity duration-300 ${
-          loaded ? 'opacity-100' : 'opacity-0'
-        } ${className}`}
+        className={`object-cover transition-opacity duration-300 ${className}`}
       />
     </div>
   );

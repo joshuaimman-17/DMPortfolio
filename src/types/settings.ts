@@ -9,6 +9,9 @@ export interface SiteSettings {
     badge1: string;
     badge2: string;
     badge3: string;
+    avatar?: string;
+    image?: string;
+    driveFileId?: string;
   };
   metrics: {
     metric1: { value: string; label: string; desc: string };
@@ -91,6 +94,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     badge1: '+120% Organic Traffic Growth',
     badge2: '4.5x Average ROAS Blended Acquisition',
     badge3: 'Meta & Google Partner',
+    avatar: PORTFOLIO_DATA.profile.avatar,
   },
   metrics: {
     metric1: { value: '+120%', label: 'Organic Traffic', desc: 'Avg. 6-Month Organic Uplift Across Audited Clients' },

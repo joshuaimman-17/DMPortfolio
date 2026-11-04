@@ -1,5 +1,16 @@
 'use client';
 
+import { getAccessToken } from './firebase';
+
+export interface FormSubmitResponse {
+  success: boolean;
+  sheetsSaved?: boolean;
+  adminNotified?: boolean;
+  userConfirmed?: boolean;
+  notified?: boolean;
+  error?: string;
+}
+
 export async function submitInboundForm(data: {
   type: 'audit' | 'contact';
   name: string;
@@ -16,11 +27,18 @@ export async function submitInboundForm(data: {
   currentMetrics?: string;
   sourcePage?: string;
   honeypot?: string;
-}): Promise<{ success: boolean; notified?: boolean; error?: string }> {
+  spreadsheetId?: string;
+}): Promise<FormSubmitResponse> {
   try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const token = await getAccessToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const res = await fetch('/api/forms', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         type: data.type,
         name: data.name,
@@ -35,6 +53,7 @@ export async function submitInboundForm(data: {
         service: data.service || '',
         currentMetrics: data.currentMetrics || '',
         sourcePage: data.sourcePage || (typeof window !== 'undefined' ? window.location.pathname : '/'),
+        spreadsheetId: data.spreadsheetId,
       }),
     });
     return await res.json();
@@ -45,16 +64,24 @@ export async function submitInboundForm(data: {
 
 export async function subscribeNewsletter(
   email: string,
-  honeypot = ''
-): Promise<{ success: boolean; notified?: boolean; error?: string }> {
+  honeypot = '',
+  spreadsheetId?: string
+): Promise<FormSubmitResponse> {
   try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const token = await getAccessToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const res = await fetch('/api/forms', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         type: 'newsletter',
         email,
         website: honeypot,
+        spreadsheetId,
       }),
     });
     return await res.json();

@@ -399,9 +399,23 @@ export const AuditBookingModal: React.FC<AuditBookingModalProps> = ({ isOpen, on
               Growth Audit Scheduled!
             </h3>
             <p className="font-body-base text-sm text-on-surface-variant mt-2 max-w-md mx-auto">
-              Thank you, <strong className="text-on-surface">{data.name}</strong>. A calendar invitation and preliminary intake checklist have been prepared for{' '}
-              <strong className="text-on-surface">{data.email}</strong>.
+              Thank you, <strong className="text-on-surface">{data.name}</strong>. Your session request has been saved and confirmed.
             </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200">
+                <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                Saved to Google Sheets
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-semibold border border-blue-200">
+                <span className="material-symbols-outlined text-[14px]">mark_email_read</span>
+                Confirmation sent to {data.email}
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-semibold border border-indigo-200">
+                <span className="material-symbols-outlined text-[14px]">notifications_active</span>
+                Admin notified
+              </span>
+            </div>
 
             <div className="mt-6 p-4 rounded-2xl bg-surface-container-low border border-neutral-200 text-left text-xs space-y-2 max-w-md mx-auto">
               <div className="flex justify-between">

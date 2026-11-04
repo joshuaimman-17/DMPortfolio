@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminFirestore } from '@/lib/firebase-admin';
+import { sendGmail, appendSpreadsheetRow } from '@/lib/workspace';
 
 export async function POST(req: NextRequest) {
   try {
+    const authHeader = req.headers.get('Authorization') || '';
+    const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '';
+
     const body = await req.json();
     const {
       type,
@@ -19,11 +23,12 @@ export async function POST(req: NextRequest) {
       service,
       currentMetrics,
       sourcePage,
+      spreadsheetId,
     } = body || {};
 
     // 1. Silent bot honeypot rejection
     if (website && typeof website === 'string' && website.trim().length > 0) {
-      return NextResponse.json({ success: true, notified: false });
+      return NextResponse.json({ success: true, notified: false, sheetsSaved: false });
     }
 
     // 2. Validate email
@@ -44,9 +49,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 4. Forward to Google Apps Script if APPS_SCRIPT_URL is configured
-    let notified = false;
-    const appsScriptUrl = process.env.APPS_SCRIPT_URL;
+    let sheetsSaved = false;
+    let adminNotified = false;
+    let userConfirmed = false;
+
+    // 4. Forward to Google Apps Script (handles Google Sheets + Gmail confirmation & notification)
+    const appsScriptUrl =
+      process.env.APPS_SCRIPT_URL ||
+      process.env.NEXT_PUBLIC_APPS_SCRIPT_URL ||
+      process.env.VITE_APPS_SCRIPT_URL ||
+      process.env.NEXT_PUBLIC_VITE_APPS_SCRIPT_URL;
+
     if (appsScriptUrl) {
       try {
         const scriptPayload = {
@@ -57,6 +70,7 @@ export async function POST(req: NextRequest) {
           data: {
             name: cleanName || cleanEmail.split('@')[0],
             email: cleanEmail,
+            company: company || '',
             companyUrl: companyUrl || website || company || '',
             challenge: challenge || '',
             budget: budget || '',
@@ -80,16 +94,76 @@ export async function POST(req: NextRequest) {
         if (scriptRes.ok) {
           const resData = await scriptRes.json().catch(() => null);
           if (resData && resData.ok !== false) {
-            notified = true;
+            sheetsSaved = resData.sheetsSaved !== false;
+            adminNotified = resData.adminNotified !== false;
+            userConfirmed = resData.userConfirmed !== false;
           }
         }
       } catch (scriptErr) {
-        console.warn('[api/forms] Google Apps Script forward failed:', scriptErr);
-        notified = false;
+        console.warn('[api/forms] Google Apps Script sync warning:', scriptErr);
       }
     }
 
-    // 5. Persist to Firestore
+    // 5. Direct Workspace Fallback: if bearerToken and spreadsheetId provided and not saved yet
+    if (bearerToken && spreadsheetId && !sheetsSaved) {
+      try {
+        const row = [
+          new Date().toISOString(),
+          cleanName,
+          cleanEmail,
+          companyUrl || company || '',
+          challenge || service || '',
+          budget || '',
+          preferredSlot || slot || '',
+          message || '',
+          sourcePage || '/',
+        ];
+        const targetSheet = type === 'audit' ? 'Growth Audits!A:I' : type === 'newsletter' ? 'Subscribers!A:C' : 'Contact Inquiries!A:I';
+        const sheetsRes = await appendSpreadsheetRow(bearerToken, spreadsheetId, targetSheet, row);
+        if (sheetsRes.success) {
+          sheetsSaved = true;
+        }
+      } catch (sheetsErr) {
+        console.warn('[api/forms] Direct Sheets append warning:', sheetsErr);
+      }
+    }
+
+    // 6. Direct Gmail Fallback: if bearerToken provided and user not confirmed yet
+    if (bearerToken && !userConfirmed) {
+      try {
+        const userSubject =
+          type === 'audit'
+            ? 'Confirmed: Your Growth Audit with Alex Rivera'
+            : type === 'newsletter'
+            ? 'Welcome to Growth Dispatch — Alex Rivera'
+            : 'Message Received — Alex Rivera Growth Advisory';
+
+        const userHtml = `
+          <div style="font-family: sans-serif; max-width: 600px; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px;">
+            <h2 style="color: #2563eb;">Submission Confirmed</h2>
+            <p>Hi ${cleanName || 'there'},</p>
+            <p>Thank you for submitting your details. Your request has been recorded into our Google Sheets pipeline and Alex has been notified.</p>
+            <p>We will review your diagnostic notes and reply within 24 hours.</p>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
+            <p style="font-size: 12px; color: #64748b;">Alex Rivera &bull; Performance Marketing &amp; SEO Growth Portfolio</p>
+          </div>
+        `;
+
+        const gmailRes = await sendGmail(bearerToken, {
+          to: cleanEmail,
+          subject: userSubject,
+          htmlBody: userHtml,
+        });
+
+        if (gmailRes.success) {
+          userConfirmed = true;
+        }
+      } catch (gmailErr) {
+        console.warn('[api/forms] Direct Gmail send warning:', gmailErr);
+      }
+    }
+
+    // 7. Persist to Firestore
     try {
       const firestore = getAdminFirestore();
       const now = new Date().toISOString();
@@ -99,7 +173,10 @@ export async function POST(req: NextRequest) {
         await firestore.collection('subscribers').doc(subscriberId).set(
           {
             email: cleanEmail,
-            notified,
+            sheetsSaved,
+            adminNotified,
+            userConfirmed,
+            notified: adminNotified || userConfirmed,
             createdAt: now,
           },
           { merge: true }
@@ -120,14 +197,16 @@ export async function POST(req: NextRequest) {
           currentMetrics: (currentMetrics || '').trim().slice(0, 500),
           sourcePage: sourcePage || '/',
           status: 'New',
-          notified,
+          sheetsSaved,
+          adminNotified,
+          userConfirmed,
+          notified: adminNotified || userConfirmed,
           createdAt: now,
         });
       }
     } catch (dbErr) {
       console.warn('[api/forms] Firestore write error:', dbErr);
-      // If Apps Script succeeded, still return success to visitor
-      if (!notified) {
+      if (!sheetsSaved && !adminNotified) {
         return NextResponse.json(
           { success: false, error: 'Failed to record submission. Please reach out directly.' },
           { status: 500 }
@@ -135,7 +214,13 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true, notified });
+    return NextResponse.json({
+      success: true,
+      sheetsSaved,
+      adminNotified,
+      userConfirmed,
+      notified: adminNotified || userConfirmed,
+    });
   } catch (err: any) {
     console.error('[api/forms] Request error:', err);
     return NextResponse.json(
