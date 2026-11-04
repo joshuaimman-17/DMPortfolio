@@ -1,7 +1,10 @@
 node_modules/
+.next/
+.turbo/
 build/
 dist/
 coverage/
+*.tsbuildinfo
 .DS_Store
 *.log
 .env*
