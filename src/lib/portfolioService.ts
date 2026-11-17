@@ -1,3 +1,4 @@
+import { mergeHome, type HomeContent } from '../types/home-content';
 import {
   collection,
   doc,
@@ -16,12 +17,11 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from './firebase';
 import { submitForm } from './backend';
 import {
-  PORTFOLIO_DATA,
   ServiceDetail,
   WorkDetail,
   ShowcaseItem,
   BlogPostDetail,
-} from '../data/portfolioData';
+} from '@/types/content';
 
 export const ADMIN_EMAILS = [
   'joshuaimman8@gmail.com',
@@ -33,6 +33,7 @@ export const ADMIN_EMAILS = [
 
 export interface SiteSettings {
   name?: string;
+  home?: HomeContent;
   hero: {
     roleTag: string;
     headline: string;
@@ -72,11 +73,11 @@ export interface SiteSettings {
 }
 
 export const DEFAULT_SETTINGS: SiteSettings = {
-  name: PORTFOLIO_DATA.profile.name || 'Alex Rivera',
+  name: '',
   hero: {
-    roleTag: PORTFOLIO_DATA.profile.roleTag,
+    roleTag: '',
     headline: 'I help brands grow with SEO and performance marketing',
-    subtext: PORTFOLIO_DATA.profile.subtext,
+    subtext: '',
     badge1: '+120% Organic Traffic Growth',
     badge2: '4.5x Average ROAS Blended Acquisition',
     badge3: 'Meta & Google Partner',
@@ -88,9 +89,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     metric4: { value: '30+', label: 'Completed Engagements', desc: 'Enterprise & D2C Brands with Documented Growth Trajectories' },
   },
   contact: {
-    email: PORTFOLIO_DATA.profile.email,
-    phone: PORTFOLIO_DATA.profile.phone,
-    location: PORTFOLIO_DATA.profile.location,
+    email: '',
+    phone: '',
+    location: '',
     whatsapp: '+1 (555) 234-8900',
   },
   social: {
@@ -175,109 +176,6 @@ export async function ensureAdminRecord(email?: string | null): Promise<void> {
   }
 }
 
-// Seed database from local sample data (safe to run twice using IDs as doc IDs)
-export async function seedDatabaseFromSampleData(adminUserEmail?: string): Promise<{ success: boolean; message: string }> {
-  try {
-    const batch = writeBatch(db);
-
-    // 1. Seed Admins
-    const emailsToSeed = [...ADMIN_EMAILS];
-    if (adminUserEmail && !emailsToSeed.includes(adminUserEmail)) {
-      emailsToSeed.push(adminUserEmail);
-    }
-    for (const em of emailsToSeed) {
-      const adminRef = doc(db, 'admins', em.toLowerCase());
-      batch.set(adminRef, {
-        email: em.toLowerCase(),
-        role: 'admin',
-        addedAt: new Date().toISOString(),
-      });
-    }
-
-    // 2. Seed Settings
-    const settingsDocs: Record<string, any> = {
-      hero: DEFAULT_SETTINGS.hero,
-      metrics: DEFAULT_SETTINGS.metrics,
-      contact: DEFAULT_SETTINGS.contact,
-      social: DEFAULT_SETTINGS.social,
-      footer: DEFAULT_SETTINGS.footer,
-      integrations: DEFAULT_SETTINGS.integrations,
-    };
-    for (const [key, data] of Object.entries(settingsDocs)) {
-      const sRef = doc(db, 'settings', key);
-      batch.set(sRef, { data, updatedAt: new Date().toISOString() });
-    }
-
-    // 3. Seed Services (slug as id)
-    PORTFOLIO_DATA.services.forEach((srv, index) => {
-      const sRef = doc(db, 'services', srv.slug);
-      batch.set(sRef, {
-        ...srv,
-        status: 'published',
-        order: index + 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    });
-
-    // 4. Seed Works (slug as id)
-    PORTFOLIO_DATA.works.forEach((wrk, index) => {
-      const wRef = doc(db, 'works', wrk.slug);
-      batch.set(wRef, {
-        ...wrk,
-        status: 'published',
-        order: index + 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    });
-
-    // 5. Seed Showcase (id as id)
-    PORTFOLIO_DATA.showcase.forEach((sc, index) => {
-      const scRef = doc(db, 'showcase', sc.id);
-      batch.set(scRef, {
-        ...sc,
-        status: 'published',
-        order: index + 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    });
-
-    // 6. Seed Blog Posts (slug as id)
-    PORTFOLIO_DATA.blogPosts.forEach((post, index) => {
-      const pRef = doc(db, 'posts', post.slug);
-      batch.set(pRef, {
-        ...post,
-        status: 'published',
-        order: index + 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    });
-
-    // 7. Seed Testimonials (order/name as id)
-    PORTFOLIO_DATA.testimonials.forEach((t, index) => {
-      const tId = `testimonial-${index + 1}`;
-      const tRef = doc(db, 'testimonials', tId);
-      batch.set(tRef, {
-        ...t,
-        id: tId,
-        status: 'published',
-        order: index + 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    });
-
-    await batch.commit();
-    return { success: true, message: 'Database successfully seeded with all sample services, works, showcase items, posts, testimonials, settings, and admin records!' };
-  } catch (error: any) {
-    return { success: false, message: error?.message || 'Failed to seed database' };
-  }
-}
-
-// Fetch published items with fallback
 export async function fetchPublishedCollection<T>(collectionName: string, fallbackData: T[]): Promise<T[]> {
   try {
     const q = query(collection(db, collectionName), where('status', '==', 'published'), orderBy('order', 'asc'));
@@ -299,21 +197,25 @@ export async function fetchPublishedCollection<T>(collectionName: string, fallba
 // Fetch all settings with fallback
 export async function fetchSiteSettings(): Promise<SiteSettings> {
   try {
-    const [heroDoc, metricsDoc, contactDoc, socialDoc, footerDoc, integrationsDoc] = await Promise.all([
+    const [heroDoc, metricsDoc, contactDoc, socialDoc, footerDoc, integrationsDoc, profileDoc, homeDoc] = await Promise.all([
       getDoc(doc(db, 'settings', 'hero')),
       getDoc(doc(db, 'settings', 'metrics')),
       getDoc(doc(db, 'settings', 'contact')),
       getDoc(doc(db, 'settings', 'social')),
       getDoc(doc(db, 'settings', 'footer')),
       getDoc(doc(db, 'settings', 'integrations')),
+      getDoc(doc(db, 'settings', 'profile')),
+      getDoc(doc(db, 'settings', 'home')),
     ]);
 
     return {
+      name: profileDoc.exists() ? (profileDoc.data().name || DEFAULT_SETTINGS.name) : DEFAULT_SETTINGS.name,
       hero: heroDoc.exists() ? (heroDoc.data().data || DEFAULT_SETTINGS.hero) : DEFAULT_SETTINGS.hero,
       metrics: metricsDoc.exists() ? (metricsDoc.data().data || DEFAULT_SETTINGS.metrics) : DEFAULT_SETTINGS.metrics,
       contact: contactDoc.exists() ? (contactDoc.data().data || DEFAULT_SETTINGS.contact) : DEFAULT_SETTINGS.contact,
       social: socialDoc.exists() ? (socialDoc.data().data || DEFAULT_SETTINGS.social) : DEFAULT_SETTINGS.social,
       footer: footerDoc.exists() ? (footerDoc.data().data || DEFAULT_SETTINGS.footer) : DEFAULT_SETTINGS.footer,
+      home: mergeHome(homeDoc.exists() ? (homeDoc.data().data || {}) : {}),
       integrations: integrationsDoc.exists() ? (integrationsDoc.data().data || DEFAULT_SETTINGS.integrations) : DEFAULT_SETTINGS.integrations,
     };
   } catch {

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
-import { ServiceDetail } from '../../data/portfolioData';
+import { ServiceDetail } from '@/types/content';
 import { triggerRevalidation } from '../../lib/admin-service';
+import { ItemSeo } from './ItemSeo';
 
 export const AdminServices: React.FC = () => {
   const { services: cachedServices, refreshData, showToast } = usePortfolioData();
@@ -555,6 +556,8 @@ export const AdminServices: React.FC = () => {
               ))}
             </div>
           </div>
+
+          <ItemSeo kind="service" slug={editingItem?.slug} isNew={isNew} />
 
           {/* Status & Action Buttons */}
           <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-neutral-200">

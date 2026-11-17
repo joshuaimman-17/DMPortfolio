@@ -20,8 +20,8 @@ function AdminContent() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-100/70 flex flex-col">
-      <header className="bg-white border-b border-neutral-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-40">
+    <div className="h-screen overflow-hidden bg-neutral-100/70 flex flex-col">
+      <header className="bg-white border-b border-neutral-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between shrink-0 z-40">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">
             AR
@@ -44,7 +44,7 @@ function AdminContent() {
         </Link>
       </header>
 
-      <main className="p-4 sm:p-6 lg:p-8 flex-1 max-w-7xl mx-auto w-full">
+      <main className="p-4 sm:p-6 lg:p-8 flex-1 min-h-0 overflow-hidden max-w-7xl mx-auto w-full">
         {isAdmin ? <AdminDashboard /> : <AdminLogin />}
       </main>
     </div>

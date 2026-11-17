@@ -1,9 +1,11 @@
 import type { MetadataRoute } from 'next';
-import { PORTFOLIO_DATA } from '@/data/portfolioData';
+import { getServices, getWorks, getPosts } from '@/lib/data';
+import { getSiteUrl } from '@/lib/site-url';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://alexriveragrowth.com';
+  const baseUrl = getSiteUrl();
   const now = new Date();
+  const [services, works, posts] = await Promise.all([getServices(), getWorks(), getPosts()]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -32,21 +34,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const serviceRoutes: MetadataRoute.Sitemap = PORTFOLIO_DATA.services.map((s) => ({
+  const serviceRoutes: MetadataRoute.Sitemap = services.map((s) => ({
     url: `${baseUrl}/services/${s.slug}`,
     lastModified: now,
     changeFrequency: 'monthly',
     priority: 0.85,
   }));
 
-  const workRoutes: MetadataRoute.Sitemap = PORTFOLIO_DATA.works.map((w) => ({
+  const workRoutes: MetadataRoute.Sitemap = works.map((w) => ({
     url: `${baseUrl}/works/${w.slug}`,
     lastModified: now,
     changeFrequency: 'monthly',
     priority: 0.85,
   }));
 
-  const blogRoutes: MetadataRoute.Sitemap = PORTFOLIO_DATA.blogPosts.map((b) => ({
+  const blogRoutes: MetadataRoute.Sitemap = posts.map((b) => ({
     url: `${baseUrl}/blog/${b.slug}`,
     lastModified: now,
     changeFrequency: 'weekly',

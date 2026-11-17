@@ -2,8 +2,10 @@
 
 import React, { useState } from 'react';
 import { submitInboundForm } from '@/lib/client-api';
+import { DEFAULT_HOME, type HomeContent } from '@/types/home-content';
 
-export function HomeContactForm() {
+export function HomeContactForm({ content }: { content?: HomeContent['inquiryForm'] }) {
+  const t = content || DEFAULT_HOME.inquiryForm;
   const [contactForm, setContactForm] = useState({ name: '', email: '', company: '', message: '' });
   const [honeypot, setHoneypot] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,10 +50,10 @@ export function HomeContactForm() {
   return (
     <div className="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 border border-neutral-200 shadow-sm">
       <h3 className="font-headline-md text-xl font-bold text-on-surface mb-2">
-        Direct Project Inquiry
+        {t.title}
       </h3>
       <p className="text-xs text-on-surface-variant mb-6">
-        Fill out this brief intake and Alex will reply within 24 hours with diagnostic notes.
+        {t.intro}
       </p>
 
       {contactError && (
@@ -76,12 +78,12 @@ export function HomeContactForm() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-on-surface mb-1">
-                Your Name *
+                {t.nameLabel}
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g. Maya Patel"
+                placeholder={t.namePlaceholder}
                 value={contactForm.name}
                 onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-lg border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-primary text-xs"
@@ -89,12 +91,12 @@ export function HomeContactForm() {
             </div>
             <div>
               <label className="block text-xs font-semibold text-on-surface mb-1">
-                Work Email *
+                {t.emailLabel}
               </label>
               <input
                 type="email"
                 required
-                placeholder="name@company.com"
+                placeholder={t.emailPlaceholder}
                 value={contactForm.email}
                 onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-lg border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-primary text-xs"
@@ -104,11 +106,11 @@ export function HomeContactForm() {
 
           <div>
             <label className="block text-xs font-semibold text-on-surface mb-1">
-              Company / Website URL
+              {t.companyLabel}
             </label>
             <input
               type="text"
-              placeholder="https://yourbrand.com"
+              placeholder={t.companyPlaceholder}
               value={contactForm.company}
               onChange={(e) => setContactForm({ ...contactForm, company: e.target.value })}
               className="w-full px-3.5 py-2.5 rounded-lg border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-primary text-xs"
@@ -117,11 +119,11 @@ export function HomeContactForm() {
 
           <div>
             <label className="block text-xs font-semibold text-on-surface mb-1">
-              Message or Specific Growth Objective
+              {t.messageLabel}
             </label>
             <textarea
               rows={4}
-              placeholder="Tell me about your current acquisition channels, challenges, or targets..."
+              placeholder={t.messagePlaceholder}
               value={contactForm.message}
               onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
               className="w-full px-3.5 py-2.5 rounded-lg border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-primary text-xs"
@@ -133,7 +135,7 @@ export function HomeContactForm() {
             disabled={isSubmitting}
             className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-white text-xs font-bold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 cursor-pointer"
           >
-            <span>{isSubmitting ? 'Sending Message...' : 'Send Inquiry to Alex'}</span>
+            <span>{isSubmitting ? t.sending : t.submit}</span>
             <span className="material-symbols-outlined text-[16px]">send</span>
           </button>
         </form>
@@ -142,9 +144,14 @@ export function HomeContactForm() {
           <div className="w-12 h-12 rounded-full bg-secondary-container text-secondary mx-auto flex items-center justify-center">
             <span className="material-symbols-outlined text-[24px]">check</span>
           </div>
-          <h4 className="font-bold text-on-surface text-base">Inquiry Dispatched!</h4>
+          <h4 className="font-bold text-on-surface text-base">{t.successTitle}</h4>
           <p className="text-xs text-on-surface-variant max-w-xs mx-auto">
-            Thanks for reaching out, <strong>{contactForm.name}</strong>. I will review your site and respond within 24 hours.
+            {t.successText.split('{name}').map((part, i, arr) => (
+              <React.Fragment key={i}>
+                {part}
+                {i < arr.length - 1 && <strong>{contactForm.name}</strong>}
+              </React.Fragment>
+            ))}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2 pt-1 pb-1">
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200">
@@ -165,7 +172,7 @@ export function HomeContactForm() {
             onClick={() => setContactSubmitted(false)}
             className="text-xs text-primary font-semibold hover:underline mt-2 inline-block cursor-pointer"
           >
-            Send another inquiry
+            {t.another}
           </button>
         </div>
       )}

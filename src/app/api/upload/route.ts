@@ -1,116 +1,109 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminAuth } from '@/lib/firebase-admin';
+import { randomUUID } from 'crypto';
+import { verifyAdminIdToken } from '@/lib/admin-auth';
+import { getAdminBucket } from '@/lib/firebase-admin';
 
-function getAuthorizedAdminEmails(): string[] {
-  const envAdmins = process.env.ADMIN_EMAILS
-    ? process.env.ADMIN_EMAILS.split(',').map((e) => e.trim().toLowerCase()).filter(Boolean)
-    : [];
-  const defaults = [
-    'joshuaimman8@gmail.com',
-    'joshuaimman2004@gmail.com',
-    'alex@growthmark.io',
-  ];
-  return Array.from(new Set([...envAdmins, ...defaults]));
+export const runtime = 'nodejs';
+
+const ALLOWED_MIME: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+};
+const MAX_BYTES = 4 * 1024 * 1024; // images are compressed client-side; hard cap server-side
+const ROOT = 'images';
+
+function cleanSegment(input: unknown, fallback: string): string {
+  const s = String(input ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+  return s || fallback;
 }
 
+function downloadUrl(bucket: string, path: string, token: string) {
+  return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(path)}?alt=media&token=${token}`;
+}
+
+/**
+ * Admin-only image API backed by Firebase Storage (service account).
+ * actions: upload | list | delete
+ */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { idToken, action, category, filename, mimeType, base64 } = body || {};
+    const { idToken, action = 'upload', category, filename, mimeType, base64, path } = body || {};
 
-    if (!idToken || typeof idToken !== 'string') {
-      return NextResponse.json(
-        { error: 'Authentication required. Missing Firebase ID token.' },
-        { status: 401 }
-      );
+    const check = await verifyAdminIdToken(idToken);
+    if ('error' in check) {
+      return NextResponse.json({ error: check.error }, { status: check.status });
     }
 
-    // 1. Verify token with Firebase Admin
-    const auth = getAdminAuth();
-    let decoded;
-    try {
-      decoded = await auth.verifyIdToken(idToken);
-    } catch (authErr: any) {
-      return NextResponse.json(
-        { error: 'Invalid or expired Firebase ID token.', details: authErr?.message },
-        { status: 401 }
-      );
+    const bucket = getAdminBucket();
+
+    // ---------- LIST ----------
+    if (action === 'list' || action === 'listFiles') {
+      const prefix = `${ROOT}/${cleanSegment(category, 'general')}/`;
+      const [files] = await bucket.getFiles({ prefix, maxResults: 200 });
+      const out = files
+        .filter((f) => !f.name.endsWith('/'))
+        .map((f) => {
+          const token = String(f.metadata?.metadata?.firebaseStorageDownloadTokens || '').split(',')[0];
+          return {
+            id: f.name,
+            name: f.name.split('/').pop() || f.name,
+            url: token ? downloadUrl(bucket.name, f.name, token) : '',
+            updated: f.metadata?.updated || '',
+          };
+        })
+        .filter((f) => f.url)
+        .sort((a, b) => String(b.updated).localeCompare(String(a.updated)));
+      return NextResponse.json({ files: out });
     }
 
-    // 2. Validate email verification and admin email list
-    const email = (decoded.email || '').toLowerCase().trim();
-    if (!decoded.email_verified) {
-      return NextResponse.json(
-        { error: 'Administrator email must be verified.' },
-        { status: 403 }
-      );
+    // ---------- DELETE ----------
+    if (action === 'delete') {
+      if (typeof path !== 'string' || !path.startsWith(`${ROOT}/`) || path.includes('..')) {
+        return NextResponse.json({ error: 'Invalid file path.' }, { status: 400 });
+      }
+      await bucket.file(path).delete({ ignoreNotFound: true });
+      return NextResponse.json({ ok: true, deleted: path });
     }
 
-    const adminEmails = getAuthorizedAdminEmails();
-    if (!adminEmails.includes(email)) {
-      return NextResponse.json(
-        { error: 'Access denied. Account is not registered as an administrator.' },
-        { status: 403 }
-      );
+    // ---------- UPLOAD ----------
+    const ext = ALLOWED_MIME[String(mimeType)];
+    if (!ext) {
+      return NextResponse.json({ error: 'Only JPG, PNG or WebP images are allowed.' }, { status: 400 });
+    }
+    if (typeof base64 !== 'string' || !base64) {
+      return NextResponse.json({ error: 'No image data received.' }, { status: 400 });
+    }
+    const buffer = Buffer.from(base64, 'base64');
+    if (buffer.length === 0 || buffer.length > MAX_BYTES) {
+      return NextResponse.json({ error: 'Image is empty or larger than 4 MB after compression.' }, { status: 413 });
     }
 
-    // 3. Forward to Apps Script
-    const appsScriptUrl = process.env.APPS_SCRIPT_URL;
-    if (!appsScriptUrl) {
-      return NextResponse.json(
-        { error: 'Google Apps Script URL is not configured on the server.' },
-        { status: 500 }
-      );
-    }
+    const baseName = cleanSegment(String(filename || 'image').replace(/\.[^/.]+$/, ''), 'image');
+    const filePath = `${ROOT}/${cleanSegment(category, 'general')}/${Date.now()}-${baseName}.${ext}`;
+    const token = randomUUID();
 
-    const scriptSecret = process.env.APPS_SCRIPT_SECRET || '';
-    const scriptPayload = {
-      action: action || 'upload',
-      category: category || 'general',
-      filename,
-      mimeType,
-      base64,
-      secret: scriptSecret,
-      userEmail: email,
-    };
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 20000);
-
-    const res = await fetch(appsScriptUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8',
+    await bucket.file(filePath).save(buffer, {
+      resumable: false,
+      contentType: mimeType,
+      metadata: {
+        cacheControl: 'public, max-age=31536000, immutable',
+        metadata: { firebaseStorageDownloadTokens: token, uploadedBy: check.email },
       },
-      body: JSON.stringify(scriptPayload),
-      signal: controller.signal,
     });
-    clearTimeout(timeoutId);
 
-    if (!res.ok) {
-      return NextResponse.json(
-        { error: `Apps Script returned HTTP ${res.status}: ${res.statusText}` },
-        { status: res.status }
-      );
-    }
-
-    const text = await res.text();
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      return NextResponse.json(
-        { error: 'Invalid JSON returned from Google Apps Script' },
-        { status: 502 }
-      );
-    }
-
-    return NextResponse.json(data);
+    return NextResponse.json({
+      id: filePath,
+      name: filePath.split('/').pop(),
+      url: downloadUrl(bucket.name, filePath, token),
+    });
   } catch (err: any) {
     console.error('[api/upload] Error:', err);
-    return NextResponse.json(
-      { error: err?.message || 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: err?.message || 'Internal server error' }, { status: 500 });
   }
 }

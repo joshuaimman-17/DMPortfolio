@@ -8,6 +8,8 @@ export interface EmailPayload {
   subject: string;
   htmlBody: string;
   fromName?: string;
+  fromEmail?: string;
+  replyTo?: string;
 }
 
 /**
@@ -17,14 +19,21 @@ export function createRfc2822Message({
   to,
   subject,
   htmlBody,
-  fromName = 'Alex Rivera | Growth Advisory',
+  fromName,
+  fromEmail,
+  replyTo,
 }: EmailPayload): string {
+  // Strip CR/LF from every header value (prevents header injection from form input)
+  const h = (v: string) => String(v || '').replace(/[\r\n]+/g, ' ').trim();
+  const encodeWord = (v: string) => `=?utf-8?B?${Buffer.from(v).toString('base64')}?=`;
   const plainText = htmlBody.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   const boundary = `__boundary_${Date.now()}__`;
 
   const messageParts = [
-    `To: ${to}`,
-    `Subject: =?utf-8?B?${Buffer.from(subject).toString('base64')}?=`,
+    ...(fromEmail ? [`From: ${fromName ? `${encodeWord(h(fromName))} ` : ''}<${h(fromEmail)}>`] : []),
+    `To: ${h(to)}`,
+    ...(replyTo ? [`Reply-To: ${h(replyTo)}`] : []),
+    `Subject: ${encodeWord(h(subject))}`,
     `MIME-Version: 1.0`,
     `Content-Type: multipart/alternative; boundary="${boundary}"`,
     '',

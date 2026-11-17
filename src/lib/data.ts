@@ -13,15 +13,15 @@ import {
   where,
   type Firestore,
 } from 'firebase/firestore';
-import firebaseConfig from '../../firebase-applet-config.json';
+import firebaseConfig from './firebase-config';
 import {
-  PORTFOLIO_DATA,
   ServiceDetail,
   WorkDetail,
   ShowcaseItem,
   BlogPostDetail,
-} from '@/data/portfolioData';
+} from '@/types/content';
 import { SiteSettings, DEFAULT_SETTINGS, PageMetadata } from '@/types/settings';
+import { mergeHome } from '@/types/home-content';
 export { type SiteSettings, DEFAULT_SETTINGS, type PageMetadata };
 
 // Suppress benign gRPC idle stream disconnection notices on the server
@@ -113,7 +113,7 @@ async function fetchPublishedCollectionServer<T>(
     const snapshot = await getDocs(q);
 
     if (snapshot.empty) {
-      return fallbackData;
+      return [];
     }
 
     const items: T[] = [];
@@ -124,17 +124,10 @@ async function fetchPublishedCollectionServer<T>(
 
     items.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
 
-    // Deep merge with fallback data to ensure no critical properties are missing or undefined
-    const enriched = items.map((item: any) => {
-      const fallback = (fallbackData as any[]).find(
-        (f) => (item.slug && f.slug === item.slug) || (item.id && f.id === item.id)
-      );
-      return fallback ? { ...fallback, ...item } : item;
-    });
-
-    return enriched.length > 0 ? (enriched as T[]) : fallbackData;
+    // Firebase is the single source of truth: no static merge (it would leak static images).
+    return items;
   } catch (error) {
-    return fallbackData;
+    return [];
   }
 }
 
@@ -144,7 +137,7 @@ async function fetchPublishedCollectionServer<T>(
 async function fetchSiteSettingsServer(): Promise<SiteSettings> {
   try {
     const firestore = getServerFirestore();
-    const [heroDoc, metricsDoc, contactDoc, socialDoc, footerDoc, integrationsDoc, profileDoc] =
+    const [heroDoc, metricsDoc, contactDoc, socialDoc, footerDoc, integrationsDoc, profileDoc, homeDoc] =
       await Promise.all([
         getDoc(doc(firestore, 'settings', 'hero')).catch(() => null),
         getDoc(doc(firestore, 'settings', 'metrics')).catch(() => null),
@@ -153,6 +146,7 @@ async function fetchSiteSettingsServer(): Promise<SiteSettings> {
         getDoc(doc(firestore, 'settings', 'footer')).catch(() => null),
         getDoc(doc(firestore, 'settings', 'integrations')).catch(() => null),
         getDoc(doc(firestore, 'settings', 'profile')).catch(() => null),
+        getDoc(doc(firestore, 'settings', 'home')).catch(() => null),
       ]);
 
     const profileData = profileDoc?.exists() ? profileDoc.data() : null;
@@ -166,6 +160,7 @@ async function fetchSiteSettingsServer(): Promise<SiteSettings> {
       contact: extractSetting(contactDoc, DEFAULT_SETTINGS.contact),
       social: extractSetting(socialDoc, DEFAULT_SETTINGS.social),
       footer: extractSetting(footerDoc, DEFAULT_SETTINGS.footer),
+      home: mergeHome(extractSetting<any>(homeDoc, {})),
       integrations: extractSetting(integrationsDoc, DEFAULT_SETTINGS.integrations || { googleSheetUrl: '', driveFolderUrl: '' }),
     };
   } catch (error) {
@@ -175,31 +170,31 @@ async function fetchSiteSettingsServer(): Promise<SiteSettings> {
 
 // Cached accessors with discrete tags and on-demand revalidation only
 export const getServices = unstable_cache(
-  async () => fetchPublishedCollectionServer<ServiceDetail>('services', PORTFOLIO_DATA.services),
+  async () => fetchPublishedCollectionServer<ServiceDetail>('services', []),
   ['services-list'],
   { tags: ['services'], revalidate: false }
 );
 
 export const getWorks = unstable_cache(
-  async () => fetchPublishedCollectionServer<WorkDetail>('works', PORTFOLIO_DATA.works),
+  async () => fetchPublishedCollectionServer<WorkDetail>('works', []),
   ['works-list'],
   { tags: ['works'], revalidate: false }
 );
 
 export const getShowcase = unstable_cache(
-  async () => fetchPublishedCollectionServer<ShowcaseItem>('showcase', PORTFOLIO_DATA.showcase),
+  async () => fetchPublishedCollectionServer<ShowcaseItem>('showcase', []),
   ['showcase-list'],
   { tags: ['showcase'], revalidate: false }
 );
 
 export const getPosts = unstable_cache(
-  async () => fetchPublishedCollectionServer<BlogPostDetail>('posts', PORTFOLIO_DATA.blogPosts),
+  async () => fetchPublishedCollectionServer<BlogPostDetail>('posts', []),
   ['posts-list'],
   { tags: ['posts'], revalidate: false }
 );
 
 export const getTestimonials = unstable_cache(
-  async () => fetchPublishedCollectionServer<any>('testimonials', PORTFOLIO_DATA.testimonials),
+  async () => fetchPublishedCollectionServer<any>('testimonials', []),
   ['testimonials-list'],
   { tags: ['testimonials'], revalidate: false }
 );
@@ -245,7 +240,7 @@ export async function getPageMetadata(
   const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://alexriveragrowth.com';
   const cleanPath = fallback.path.startsWith('/') ? fallback.path : `/${fallback.path}`;
   const fullUrl = `${siteUrl.replace(/\/$/, '')}${cleanPath}`;
-  const defaultImage = fallback.image || 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=630&fit=crop';
+  const defaultImage = fallback.image || settings.hero.avatar || settings.hero.image || '';
 
   const defaultMeta: PageMetadata = {
     title: `${fallback.title} | ${siteName}`,
@@ -260,20 +255,15 @@ export async function getPageMetadata(
       siteName: siteName,
       locale: 'en_US',
       type: 'website',
-      images: [
-        {
-          url: defaultImage,
-          width: 1200,
-          height: 630,
-          alt: fallback.title,
-        },
-      ],
+      images: defaultImage
+        ? [{ url: defaultImage, width: 1200, height: 630, alt: fallback.title }]
+        : [],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${fallback.title} | ${siteName}`,
       description: fallback.description,
-      images: [defaultImage],
+      images: defaultImage ? [defaultImage] : [],
     },
   };
 

@@ -2,7 +2,6 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getServices, getSiteSettings, getPageMetadata } from '@/lib/data';
-import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { SiteShell } from '@/context/ModalContext';
 import { AuditButton } from '@/components/common/ActionButtons';
 import { HomeFaqAccordion } from '@/components/home/HomeFaqAccordion';
@@ -52,7 +51,7 @@ export default async function ServicesHubPage() {
     getSiteSettings(),
   ]);
 
-  const displayServices = services.length > 0 ? services : PORTFOLIO_DATA.services;
+  const displayServices = services;
 
   const hubFaqs = [
     {

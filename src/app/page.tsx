@@ -11,7 +11,7 @@ import {
   getSiteSettings,
   getPageMetadata,
 } from '@/lib/data';
-import { PORTFOLIO_DATA } from '@/data/portfolioData';
+import { DEFAULT_HOME } from '@/types/home-content';
 import { SiteShell } from '@/context/ModalContext';
 import { AuditButton, LightboxTrigger } from '@/components/common/ActionButtons';
 import { DriveImage } from '@/components/common/DriveImage';
@@ -72,11 +72,13 @@ export default async function HomePage() {
     getSiteSettings(),
   ]);
 
-  const activeShowcase = showcase.length > 0 ? showcase : PORTFOLIO_DATA.showcase;
-  const activeServices = services.length > 0 ? services : PORTFOLIO_DATA.services;
-  const activeWorks = works.length > 0 ? works : PORTFOLIO_DATA.works;
-  const activePosts = posts.length > 0 ? posts : PORTFOLIO_DATA.blogPosts;
-  const activeTestimonials = testimonials.length > 0 ? testimonials : PORTFOLIO_DATA.testimonials;
+  const home = settings.home || DEFAULT_HOME;
+
+  const activeShowcase = showcase;
+  const activeServices = services;
+  const activeWorks = works;
+  const activePosts = posts;
+  const activeTestimonials = testimonials;
 
   const lightboxItems: LightboxItem[] = activeShowcase.map((s) => ({
     id: s.id,
@@ -89,39 +91,11 @@ export default async function HomePage() {
     caption: s.title,
   }));
 
-  const homeFaqs = [
-    {
-      q: 'How are client engagements structured?',
-      a: 'Engagements typically operate on a flexible monthly advisory retainer with clear milestone deliverables, or sprint-based standalone diagnostics (such as a 14-day technical SEO crawl or an ad account audit). We never require long-term lock-ins.',
-    },
-    {
-      q: 'Do you execute hands-on or advise internal teams?',
-      a: 'Both. For early-to-mid stage startups, I handle full hands-on campaign architecture, pixel setups, and landing page CRO. For larger enterprise teams, I provide strategic playbooks, creative briefs, and weekly executive coaching.',
-    },
-    {
-      q: 'What is your typical onboarding timeline?',
-      a: 'Initial diagnostic audits and telemetry access take 48-72 hours. First optimization sprints and initial test campaigns launch within 7 to 10 business days.',
-    },
-    {
-      q: 'How do you measure success and attribution?',
-      a: 'We build server-side GTM tracking with GA4 and custom Looker Studio dashboards, measuring blended MER (Marketing Efficiency Ratio), CAC payback period, and net incremental revenue rather than channel vanity metrics.',
-    },
-    {
-      q: 'What spend level makes the most sense for an engagement?',
-      a: 'Clients usually invest between ₹3L/month to ₹30L+/month ($4k to $40k+/month) in paid acquisition or have at least 50k+ monthly organic visitors seeking algorithmic monetization and technical CRO.',
-    },
-    {
-      q: 'Do you work with venture-backed SaaS or D2C eCommerce?',
-      a: 'Both. I specialize in high-ticket B2B SaaS acquisition funnels as well as high-velocity D2C eCommerce brands where creative iteration speed and retention economics dictate profitability.',
-    },
-  ];
+  const homeFaqs = home.faq.items || [];
 
-  const jsonLd = getPersonJsonLd();
+  const jsonLd = getPersonJsonLd(settings, activeServices);
 
-  const heroAvatar =
-    settings.hero.avatar ||
-    settings.hero.image ||
-    PORTFOLIO_DATA.profile.avatar;
+  const heroAvatar = settings.hero.avatar || settings.hero.image || '';
 
   return (
     <SiteShell settings={settings} defaultLightboxItems={lightboxItems}>
@@ -148,7 +122,7 @@ export default async function HomePage() {
                   {/* Eyebrow Tag */}
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary-fixed/50 text-primary text-xs font-semibold uppercase tracking-wider w-fit">
                     <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                    <span>{settings.hero.roleTag || PORTFOLIO_DATA.profile.roleTag}</span>
+                    <span>{settings.hero.roleTag}</span>
                   </div>
 
                   {/* Headline */}
@@ -158,13 +132,13 @@ export default async function HomePage() {
 
                   {/* Subtext */}
                   <p className="font-body-lg text-base sm:text-lg text-on-surface-variant max-w-2xl leading-relaxed">
-                    {settings.hero.subtext || PORTFOLIO_DATA.profile.subtext}
+                    {settings.hero.subtext}
                   </p>
 
                   {/* CTAs */}
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-1 w-full sm:w-auto">
                     <AuditButton className="w-full sm:w-auto justify-center px-6 py-3.5 rounded-xl bg-primary text-white font-bold text-sm shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] hover:bg-blue-700 transition-all inline-flex items-center gap-2 cursor-pointer">
-                      <span>Book a Free Growth Diagnostic</span>
+                      <span>{home.hero.ctaPrimary}</span>
                       <span className="material-symbols-outlined text-[18px]">calendar_today</span>
                     </AuditButton>
 
@@ -172,7 +146,7 @@ export default async function HomePage() {
                       href="#works"
                       className="w-full sm:w-auto justify-center px-6 py-3.5 rounded-xl bg-surface-container-low text-on-surface font-semibold text-sm hover:bg-neutral-200/80 transition-all inline-flex items-center gap-2 border border-neutral-200"
                     >
-                      <span>Explore Case Studies</span>
+                      <span>{home.hero.ctaSecondary}</span>
                       <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
                     </a>
                   </div>
@@ -191,7 +165,7 @@ export default async function HomePage() {
                       ))}
                     </div>
                     <span className="w-1 h-1 rounded-full bg-neutral-300"></span>
-                    <span>Trusted by 30+ Growth-Stage Startups &amp; Enterprise Brands</span>
+                    <span>{home.hero.trustText}</span>
                   </div>
                 </div>
 
@@ -200,7 +174,7 @@ export default async function HomePage() {
                   <div className="relative w-full max-w-[420px] aspect-square rounded-2xl overflow-hidden shadow-2xl bg-surface-container-low ring-1 ring-neutral-200/80 group">
                     <DriveImage
                       src={heroAvatar}
-                      alt={`${settings.name || PORTFOLIO_DATA.profile.name} - Senior Growth Marketer`}
+                      alt={`${settings.name || ''} - ${home.hero.avatarAlt}`}
                       frameType="avatar"
                       aspectRatioClass="aspect-square"
                       width={800}
@@ -258,7 +232,10 @@ export default async function HomePage() {
 
           {/* Metrics Strip */}
           <div className="mt-8">
-            <HomeMetricsBar />
+            <HomeMetricsBar
+              metrics={[settings.metrics.metric1, settings.metrics.metric2, settings.metrics.metric3, settings.metrics.metric4]}
+              decor={home.metricsBar.items}
+            />
           </div>
         </section>
 
@@ -272,26 +249,26 @@ export default async function HomePage() {
                 {/* Left Text */}
                 <div className="lg:col-span-7 flex flex-col gap-4">
                   <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                    About The Marketer
+                    {home.about.eyebrow}
                   </span>
                   <h2 className="font-headline-xl text-2xl sm:text-4xl font-bold text-on-surface tracking-tight">
-                    Engineer’s Mindset. Marketer’s Growth Instincts.
+                    {home.about.heading}
                   </h2>
                   <p className="text-sm sm:text-base text-on-surface-variant leading-relaxed">
-                    With over 8 years navigating high-stakes customer acquisition, I merge data engineering rigor with relentless creative testing. Having managed over ₹50L+ in advertising capital across Google, Meta, and LinkedIn, I eliminate guesswork by diagnosing hidden funnel friction.
+                    {home.about.paragraph1}
                   </p>
                   <p className="text-sm sm:text-base text-on-surface-variant leading-relaxed">
-                    Unlike traditional agencies that prioritize billable hours and vanity impressions, my methodology anchors strictly on cashflow-positive metrics: Blended MER, First-Party LTV, and Unshakable Organic Dominance.
+                    {home.about.paragraph2}
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2">
                     <div className="p-3.5 sm:p-4 rounded-xl bg-surface-container-low border border-neutral-200">
-                      <div className="text-xs text-on-surface-variant font-medium">Headquarters</div>
-                      <div className="text-sm font-bold text-on-surface mt-0.5">{PORTFOLIO_DATA.profile.location}</div>
+                      <div className="text-xs text-on-surface-variant font-medium">{home.labels.headquarters}</div>
+                      <div className="text-sm font-bold text-on-surface mt-0.5">{settings.contact.location}</div>
                     </div>
                     <div className="p-3.5 sm:p-4 rounded-xl bg-surface-container-low border border-neutral-200">
-                      <div className="text-xs text-on-surface-variant font-medium">Direct Line</div>
-                      <div className="text-sm font-bold text-on-surface mt-0.5 break-all">{PORTFOLIO_DATA.profile.email}</div>
+                      <div className="text-xs text-on-surface-variant font-medium">{home.labels.directLine}</div>
+                      <div className="text-sm font-bold text-on-surface mt-0.5 break-all">{settings.contact.email}</div>
                     </div>
                   </div>
                 </div>
@@ -299,18 +276,20 @@ export default async function HomePage() {
                 {/* Right Profile Photo */}
                 <div className="lg:col-span-5 flex flex-col items-center">
                   <div className="w-full max-w-sm rounded-3xl overflow-hidden border-2 border-primary/20 shadow-2xl relative aspect-square">
-                    <Image
-                      src={PORTFOLIO_DATA.profile.avatar}
-                      alt={`${settings.name || 'Alex Rivera'} - Growth Marketer`}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 400px"
-                      className="object-cover"
-                      priority
-                    />
+                    {heroAvatar && (
+                      <Image
+                        src={heroAvatar}
+                        alt={`${settings.name || ''} - ${home.hero.avatarAlt}`}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 400px"
+                        className="object-cover"
+                        priority
+                      />
+                    )}
                   </div>
                   <div className="text-center mt-3">
                     <span className="text-sm font-bold text-on-surface block">{settings.name || 'Alex Rivera'}</span>
-                    <span className="text-xs text-on-surface-variant">{settings.hero.roleTag || 'Senior Performance Marketer & SEO Architect'}</span>
+                    <span className="text-xs text-on-surface-variant">{settings.hero.roleTag || home.hero.roleFallback}</span>
                   </div>
                 </div>
               </div>
@@ -320,17 +299,17 @@ export default async function HomePage() {
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
                   <div>
                     <span className="text-xs font-bold uppercase tracking-wider text-secondary">
-                      Arsenal &amp; Infrastructure
+                      {home.about.toolsEyebrow}
                     </span>
                     <h3 className="font-headline-md text-xl font-bold text-on-surface mt-1">
-                      Measurement &amp; Attribution Stack
+                      {home.about.toolsHeading}
                     </h3>
                   </div>
-                  <span className="text-xs text-on-surface-variant">Daily production deployment</span>
+                  <span className="text-xs text-on-surface-variant">{home.about.toolsNote}</span>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                  {PORTFOLIO_DATA.tools.map((t) => (
+                  {(home.about.tools || []).map((t) => (
                     <div
                       key={t.name}
                       className="p-3.5 rounded-xl bg-surface-container-low border border-neutral-200/70 hover:border-primary/40 transition-all flex flex-col justify-between"
@@ -358,13 +337,13 @@ export default async function HomePage() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                  Capabilities &amp; Retainers
+                  {home.services.eyebrow}
                 </span>
                 <h2 className="font-headline-xl text-3xl sm:text-4xl font-bold text-on-surface tracking-tight mt-1">
-                  Full-Funnel Growth Practice Areas
+                  {home.services.heading}
                 </h2>
                 <p className="text-sm text-on-surface-variant max-w-xl mt-1">
-                  Systematic growth protocols engineered for high-growth venture-backed SaaS and modern D2C eCommerce brands.
+                  {home.services.subtext}
                 </p>
               </div>
 
@@ -372,7 +351,7 @@ export default async function HomePage() {
                 href="/services"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-blue-700 transition-colors whitespace-nowrap"
               >
-                <span>View All 6 Growth Capabilities</span>
+                <span>{home.services.viewAllLabel}</span>
                 <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
               </Link>
             </div>
@@ -403,7 +382,7 @@ export default async function HomePage() {
 
                     <div className="mt-4 pt-4 border-t border-neutral-100 space-y-2">
                       <div className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
-                        Core Deliverables
+                        {home.labels.coreDeliverables}
                       </div>
                       {(srv.deliverables || []).slice(0, 3).map((d, i) => (
                         <div key={i} className="flex items-start gap-2 text-xs text-on-surface">
@@ -421,11 +400,11 @@ export default async function HomePage() {
                       href={`/services/${srv.slug}`}
                       className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
                     >
-                      <span>Explore Practice Area</span>
+                      <span>{home.labels.exploreService}</span>
                       <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                     </Link>
                     <AuditButton className="text-xs font-semibold text-neutral-500 hover:text-neutral-900 cursor-pointer">
-                      Inquire
+                      {home.labels.inquire}
                     </AuditButton>
                   </div>
                 </div>
@@ -442,13 +421,13 @@ export default async function HomePage() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-secondary">
-                  Documented Proof
+                  {home.works.eyebrow}
                 </span>
                 <h2 className="font-headline-xl text-3xl sm:text-4xl font-bold text-on-surface tracking-tight mt-1">
-                  Selected Growth Case Studies
+                  {home.works.heading}
                 </h2>
                 <p className="text-sm text-on-surface-variant max-w-xl mt-1">
-                  Real numbers, verified Search Console curves, and margin-protected ad scale across B2B SaaS and D2C brands.
+                  {home.works.subtext}
                 </p>
               </div>
 
@@ -456,7 +435,7 @@ export default async function HomePage() {
                 href="/works"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-secondary hover:underline whitespace-nowrap"
               >
-                <span>Browse Full Case Study Hub &amp; Deliverables</span>
+                <span>{home.works.browseLabel}</span>
                 <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
               </Link>
             </div>
@@ -521,11 +500,11 @@ export default async function HomePage() {
                       href={`/works/${wrk.slug}`}
                       className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1"
                     >
-                      <span>Read Deep Teardown</span>
+                      <span>{home.labels.readTeardown}</span>
                       <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                     </Link>
                     <AuditButton className="text-xs font-semibold text-neutral-500 hover:text-neutral-900 cursor-pointer">
-                      Request Similar Audit
+                      {home.labels.requestAudit}
                     </AuditButton>
                   </div>
                 </div>
@@ -537,10 +516,10 @@ export default async function HomePage() {
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
                 <div>
                   <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                    Visual Deliverable Archive
+                    {home.works.archiveEyebrow}
                   </span>
                   <h3 className="font-headline-md text-xl font-bold text-on-surface mt-1">
-                    Verified SERP Rank Previews &amp; Ad Creative Assets
+                    {home.works.archiveHeading}
                   </h3>
                 </div>
                 <span className="text-xs text-on-surface-variant">Click any thumbnail for full-resolution inspection</span>
@@ -584,47 +563,18 @@ export default async function HomePage() {
             <div className="rounded-3xl bg-surface-container-lowest border border-neutral-200/90 shadow-xl p-6 sm:p-10 md:p-14">
               <div className="max-w-2xl mb-10">
                 <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                  Execution Methodology
+                  {home.process.eyebrow}
                 </span>
                 <h2 className="font-headline-xl text-2xl sm:text-4xl font-bold text-on-surface tracking-tight mt-1">
-                  The 4-Step ICE Growth Protocol
+                  {home.process.heading}
                 </h2>
                 <p className="text-sm sm:text-base text-on-surface-variant mt-2 leading-relaxed">
-                  How every engagement operates from day zero. Eliminating subjective opinions in favor of structured experimentation.
+                  {home.process.subtext}
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                  {
-                    step: '01',
-                    title: 'Deep Audit & Hygiene',
-                    timeframe: 'Days 1-7',
-                    icon: 'verified',
-                    desc: 'Auditing pixel triggers, server-side data logs, crawl index coverage, and ad spend inefficiencies.',
-                  },
-                  {
-                    step: '02',
-                    title: 'Growth Hypothesis',
-                    timeframe: 'Days 8-14',
-                    icon: 'tune',
-                    desc: 'Constructing an ICE-prioritized experimentation backlog and multi-touch channel acquisition matrix.',
-                  },
-                  {
-                    step: '03',
-                    title: 'Rapid Sprint Execution',
-                    timeframe: 'Days 15-45',
-                    icon: 'bolt',
-                    desc: 'Launching high-velocity creative hook tests, schema rollouts, and landing page progressive conversion sprints.',
-                  },
-                  {
-                    step: '04',
-                    title: 'Scale & Moat Building',
-                    timeframe: 'Day 45+',
-                    icon: 'rocket_launch',
-                    desc: 'Scaling profitable ad spend, programmatic search authority, and first-party retention automation.',
-                  },
-                ].map((p) => (
+                {(home.process.steps || []).map((p) => (
                   <div
                     key={p.step}
                     className="p-6 rounded-2xl bg-surface-container-low border border-neutral-200/80 flex flex-col justify-between"
@@ -658,7 +608,7 @@ export default async function HomePage() {
            ========================================================================= */}
         <section id="calculator" className="scroll-mt-28">
           <MotionReveal direction="up">
-            <HomeRoasWrapper />
+            <HomeRoasWrapper content={home.roas} />
           </MotionReveal>
         </section>
 
@@ -669,10 +619,10 @@ export default async function HomePage() {
           <MotionReveal direction="up">
             <div className="text-center max-w-2xl mx-auto mb-10">
               <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                Executive Endorsements
+                {home.testimonials.eyebrow}
               </span>
               <h2 className="font-headline-xl text-2xl sm:text-4xl font-bold text-on-surface tracking-tight mt-1">
-                Trusted by Founders &amp; Marketing Leaders
+                {home.testimonials.heading}
               </h2>
             </div>
 
@@ -720,13 +670,13 @@ export default async function HomePage() {
             <div className="rounded-3xl bg-surface-container-lowest border border-neutral-200/90 shadow-xl p-6 sm:p-10 md:p-14">
               <div className="max-w-2xl mb-8">
                 <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                  Common Inquiries
+                  {home.faq.eyebrow}
                 </span>
                 <h2 className="font-headline-xl text-2xl sm:text-3xl font-bold text-on-surface tracking-tight mt-1">
-                  Frequently Asked Questions
+                  {home.faq.heading}
                 </h2>
                 <p className="text-xs sm:text-sm text-on-surface-variant mt-1">
-                  Everything you need to know about working models, timelines, attribution, and pricing.
+                  {home.faq.subtext}
                 </p>
               </div>
 
@@ -743,13 +693,13 @@ export default async function HomePage() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                  Field Notes &amp; Playbooks
+                  {home.blog.eyebrow}
                 </span>
                 <h2 className="font-headline-xl text-3xl sm:text-4xl font-bold text-on-surface tracking-tight mt-1">
-                  Growth Architecture Articles
+                  {home.blog.heading}
                 </h2>
                 <p className="text-sm text-on-surface-variant max-w-xl mt-1">
-                  Uncensored playbooks on technical SEO, ad script testing frameworks, and server-side conversion tracking.
+                  {home.blog.subtext}
                 </p>
               </div>
 
@@ -757,7 +707,7 @@ export default async function HomePage() {
                 href="/blog"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-blue-700 transition-colors whitespace-nowrap"
               >
-                <span>Browse All Articles</span>
+                <span>{home.blog.browseLabel}</span>
                 <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
               </Link>
             </div>
@@ -804,7 +754,7 @@ export default async function HomePage() {
                       href={`/blog/${post.slug}`}
                       className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1"
                     >
-                      <span>Read Playbook</span>
+                      <span>{home.labels.readPlaybook}</span>
                       <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                     </Link>
                   </div>
@@ -824,13 +774,13 @@ export default async function HomePage() {
               <div className="lg:col-span-5 flex flex-col gap-6">
                 <div>
                   <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                    Start a Conversation
+                    {home.contact.eyebrow}
                   </span>
                   <h2 className="font-headline-xl text-3xl sm:text-4xl font-bold text-on-surface tracking-tight mt-1">
-                    Let’s Engineer Your Next Growth Inflection
+                    {home.contact.heading}
                   </h2>
                   <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">
-                    Whether you need a dedicated 14-day technical crawl, an ad account restructure, or an ongoing CMO growth advisory, reach out directly.
+                    {home.contact.subtext}
                   </p>
                 </div>
 
@@ -840,7 +790,7 @@ export default async function HomePage() {
                       <span className="material-symbols-outlined text-[20px]">mail</span>
                     </div>
                     <div>
-                      <div className="text-[11px] text-on-surface-variant font-medium">Direct Email</div>
+                      <div className="text-[11px] text-on-surface-variant font-medium">{home.labels.directEmail}</div>
                       <a href={`mailto:${settings.contact.email}`} className="text-xs font-bold text-on-surface hover:text-primary">
                         {settings.contact.email}
                       </a>
@@ -852,7 +802,7 @@ export default async function HomePage() {
                       <span className="material-symbols-outlined text-[20px]">chat</span>
                     </div>
                     <div>
-                      <div className="text-[11px] text-on-surface-variant font-medium">WhatsApp / Mobile</div>
+                      <div className="text-[11px] text-on-surface-variant font-medium">{home.labels.whatsapp}</div>
                       <div className="text-xs font-bold text-on-surface">
                         {settings.contact.whatsapp || settings.contact.phone}
                       </div>
@@ -864,19 +814,19 @@ export default async function HomePage() {
                       <span className="material-symbols-outlined text-[20px]">location_on</span>
                     </div>
                     <div>
-                      <div className="text-[11px] text-on-surface-variant font-medium">Base Locations</div>
+                      <div className="text-[11px] text-on-surface-variant font-medium">{home.labels.baseLocation}</div>
                       <div className="text-xs font-bold text-on-surface">{settings.contact.location}</div>
                     </div>
                   </div>
                 </div>
 
                 <div className="p-5 rounded-2xl bg-primary text-white shadow-lg space-y-3">
-                  <div className="font-bold text-sm">Need a 30-Minute Priority Audit?</div>
+                  <div className="font-bold text-sm">{home.contact.priorityTitle}</div>
                   <p className="text-xs text-blue-100 leading-relaxed">
-                    Skip the email thread and schedule directly on my calendar with custom intake questions.
+                    {home.contact.priorityText}
                   </p>
                   <AuditButton className="px-4 py-2.5 rounded-xl bg-white text-primary text-xs font-bold hover:bg-neutral-100 transition-colors inline-flex items-center gap-1.5 cursor-pointer">
-                    <span>Schedule 30-Min Diagnostic</span>
+                    <span>{home.contact.priorityButton}</span>
                     <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                   </AuditButton>
                 </div>
@@ -884,7 +834,7 @@ export default async function HomePage() {
 
               {/* Right Column: Contact Form */}
               <div className="lg:col-span-7">
-                <HomeContactForm />
+                <HomeContactForm content={home.inquiryForm} />
               </div>
             </div>
           </MotionReveal>

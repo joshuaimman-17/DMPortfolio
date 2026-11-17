@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getWorkBySlug, getWorks, getShowcase, getSiteSettings, getPageMetadata } from '@/lib/data';
-import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { SiteShell } from '@/context/ModalContext';
 import { AuditButton, LightboxTrigger } from '@/components/common/ActionButtons';
 import { DriveImage } from '@/components/common/DriveImage';
@@ -83,8 +82,8 @@ export default async function WorkDetailPage({ params }: Props) {
     notFound();
   }
 
-  const worksList = allWorks.length > 0 ? allWorks : PORTFOLIO_DATA.works;
-  const showcaseList = showcase.length > 0 ? showcase : PORTFOLIO_DATA.showcase;
+  const worksList = allWorks;
+  const showcaseList = showcase;
 
   const currentIndex = worksList.findIndex((w) => w.slug === slug);
   const prevWork =

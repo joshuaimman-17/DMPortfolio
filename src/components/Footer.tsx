@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { PORTFOLIO_DATA } from '../data/portfolioData';
 import { subscribeNewsletter } from '@/lib/client-api';
 import { SiteSettings, DEFAULT_SETTINGS } from '@/types/settings';
 
@@ -52,13 +51,15 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Col 1: Bio & Branding */}
           <div className="lg:col-span-4 flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <img
-                alt="Alex Rivera Logo"
-                className="h-8 w-auto object-contain brightness-0 invert"
-                src={PORTFOLIO_DATA.profile.logo}
-              />
+              {settings?.hero?.logo && (
+                <img
+                  alt={`${settings?.name || ''} Logo`}
+                  className="h-8 w-auto object-contain brightness-0 invert"
+                  src={settings.hero.logo}
+                />
+              )}
               <span className="text-xl text-white font-bold tracking-tight">
-                {settings?.name || 'Alex Rivera'}
+                {settings?.name || ''}
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-400 max-w-sm leading-relaxed">
@@ -158,16 +159,14 @@ export const Footer: React.FC<FooterProps> = ({
               Practice Areas
             </h3>
             <ul className="flex flex-col gap-2 text-xs sm:text-sm">
-              {PORTFOLIO_DATA.services.slice(0, 5).map((srv) => (
-                <li key={srv.slug}>
-                  <Link
-                    href={`/services/${srv.slug}`}
-                    className="text-slate-400 hover:text-white transition-colors text-left"
-                  >
-                    {srv.title}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link
+                  href="/services"
+                  className="text-slate-400 hover:text-white transition-colors text-left"
+                >
+                  All Services
+                </Link>
+              </li>
             </ul>
           </div>
 

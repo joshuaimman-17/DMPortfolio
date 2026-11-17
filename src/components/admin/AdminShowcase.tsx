@@ -3,7 +3,7 @@ import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore'
 import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
 import { uploadMediaFile } from '../../lib/portfolioService';
-import { ShowcaseItem } from '../../data/portfolioData';
+import { ShowcaseItem } from '@/types/content';
 import { triggerRevalidation } from '../../lib/admin-service';
 import { ImageField } from './ImageField';
 

@@ -1,73 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidateTag, revalidatePath } from 'next/cache';
-import { getAdminAuth, getAdminFirestore } from '@/lib/firebase-admin';
-
-function getAuthorizedAdminEmails(): string[] {
-  const envAdmins = process.env.ADMIN_EMAILS
-    ? process.env.ADMIN_EMAILS.split(',').map((e) => e.trim().toLowerCase()).filter(Boolean)
-    : [];
-  const defaults = [
-    'joshuaimman8@gmail.com',
-    'joshuaimman2004@gmail.com',
-    'alex@growthmark.io',
-    'jashper078@gmail.com',
-  ];
-  return Array.from(new Set([...envAdmins, ...defaults]));
-}
-
-async function verifyIsAdmin(email: string): Promise<boolean> {
-  const adminEmails = getAuthorizedAdminEmails();
-  if (adminEmails.includes(email)) {
-    return true;
-  }
-  try {
-    const firestore = getAdminFirestore();
-    const adminDoc = await firestore.collection('admins').doc(email).get();
-    return adminDoc.exists;
-  } catch (err) {
-    console.warn('[api/revalidate] Error checking Firestore admin doc:', err);
-    return false;
-  }
-}
+import { verifyAdminIdToken } from '@/lib/admin-auth';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { idToken, tag, tags, path, paths } = body || {};
 
-    if (!idToken || typeof idToken !== 'string') {
-      return NextResponse.json(
-        { error: 'Authentication required. Missing Firebase ID token.' },
-        { status: 401 }
-      );
-    }
-
-    // 1. Verify Firebase token
-    const auth = getAdminAuth();
-    let decoded;
-    try {
-      decoded = await auth.verifyIdToken(idToken);
-    } catch {
-      return NextResponse.json(
-        { error: 'Invalid or expired Firebase ID token.' },
-        { status: 401 }
-      );
-    }
-
-    const email = (decoded.email || '').toLowerCase().trim();
-    if (!decoded.email_verified) {
-      return NextResponse.json(
-        { error: 'Administrator email must be verified.' },
-        { status: 403 }
-      );
-    }
-
-    const isAdmin = await verifyIsAdmin(email);
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: 'Access denied. Account is not registered as an administrator.' },
-        { status: 403 }
-      );
+    const check = await verifyAdminIdToken(idToken);
+    if ('error' in check) {
+      return NextResponse.json({ error: check.error }, { status: check.status });
     }
 
     // 2. Collect tags and paths to revalidate
@@ -105,6 +47,16 @@ export async function POST(req: NextRequest) {
 
     for (const p of pathsToRevalidate) {
       revalidatePath(p);
+    }
+
+    // Generated files that mirror site content must rebuild on every admin save
+    for (const p of ['/llms.txt', '/llms-full.txt', '/sitemap.xml', '/robots.txt']) {
+      revalidatePath(p);
+    }
+
+    // Settings / metadata affect the shared shell (navbar, footer, <head>) on every page
+    if (tagsToRevalidate.includes('settings') || tagsToRevalidate.includes('metadata')) {
+      revalidatePath('/', 'layout');
     }
 
     return NextResponse.json({

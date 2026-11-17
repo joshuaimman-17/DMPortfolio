@@ -11,12 +11,8 @@ service cloud.firestore {
     function isSuperAdmin() {
       return isAuthenticated() &&
         request.auth.token.email != null &&
-        request.auth.token.email in [
-          'joshuaimman8@gmail.com',
-          'joshuaimman2004@gmail.com',
-          'alex@growthmark.io',
-          'YOUR_EMAIL@gmail.com'
-        ];
+        request.auth.token.email_verified == true &&
+        request.auth.token.email == 'premmohan0147@gmail.com';
     }
 
     // Comprehensive admin resolution:
@@ -25,8 +21,7 @@ service cloud.firestore {
     function isAdmin() {
       return isAuthenticated() &&
         request.auth.token.email != null &&
-        (isSuperAdmin() ||
-         exists(/databases/$(database)/documents/admins/$(request.auth.token.email)));
+        isSuperAdmin();
     }
 
     function isPublished() {
@@ -35,7 +30,7 @@ service cloud.firestore {
 
     // Admins Collection (Admin role registry)
     match /admins/{adminEmail} {
-      allow read: if isAuthenticated();
+      allow read: if isAdmin() || (isAuthenticated() && request.auth.token.email == adminEmail);
       // Allow writes if caller is an admin or is a super-admin bootstrapping/updating their record
       allow write: if isAdmin() || (isAuthenticated() && request.auth.token.email == adminEmail && isSuperAdmin());
     }
@@ -80,6 +75,11 @@ service cloud.firestore {
     match /testimonials/{testimonialId} {
       allow read: if isPublished() || isAdmin();
       allow write: if isAdmin();
+    }
+
+    // Email templates (admin-only; the server reads them with the Admin SDK)
+    match /email_templates/{docId} {
+      allow read, write: if isAdmin();
     }
 
     // Inbound Submissions (Audit & Contact forms)

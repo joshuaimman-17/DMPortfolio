@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { PORTFOLIO_DATA } from '../data/portfolioData';
 import { SiteSettings } from '@/types/settings';
 
 export type NavRoute = 'home' | 'about' | 'services' | 'works' | 'blog' | 'contact';
@@ -114,13 +113,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
             }}
             className="flex items-center gap-2 sm:gap-2.5 text-left focus:outline-none group cursor-pointer min-w-0"
           >
-            <img
-              alt="Alex Rivera Logo"
-              className="h-7 sm:h-8 w-auto object-contain transition-transform group-hover:scale-105 shrink-0"
-              src={PORTFOLIO_DATA.profile.logo}
-            />
+            {settings?.hero?.logo && (
+              <img
+                alt={`${settings?.name || ''} Logo`}
+                className="h-7 sm:h-8 w-auto object-contain transition-transform group-hover:scale-105 shrink-0"
+                src={settings.hero.logo}
+              />
+            )}
             <span className="font-bold text-sm sm:text-base md:text-lg text-on-surface truncate max-w-[130px] xs:max-w-[200px] sm:max-w-none">
-              {settings?.name || PORTFOLIO_DATA.profile.name || 'Alex Rivera'}
+              {settings?.name || ''}
             </span>
           </Link>
 
@@ -163,11 +164,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
               Hire Me
             </button>
 
-            <img
-              alt="Alex Rivera"
-              className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20 hidden sm:inline-block"
-              src={PORTFOLIO_DATA.profile.avatar}
-            />
+            {settings?.hero?.avatar && (
+              <img
+                alt={settings?.name || ''}
+                className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20 hidden sm:inline-block"
+                src={settings.hero.avatar}
+              />
+            )}
 
             {/* Mobile Hamburger Button */}
             <button

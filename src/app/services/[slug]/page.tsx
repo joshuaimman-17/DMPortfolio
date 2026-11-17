@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getServiceBySlug, getWorks, getSiteSettings, getServices, getPageMetadata } from '@/lib/data';
-import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { SiteShell } from '@/context/ModalContext';
 import { AuditButton } from '@/components/common/ActionButtons';
 import { DriveImage } from '@/components/common/DriveImage';
@@ -82,11 +81,11 @@ export default async function ServiceDetailPage({ params }: Props) {
     notFound();
   }
 
-  const relatedWorks = (allWorks.length > 0 ? allWorks : PORTFOLIO_DATA.works).filter(
+  const relatedWorks = allWorks.filter(
     (w) => (service.relatedWorkSlugs || []).includes(w.slug)
   );
 
-  const jsonLd = getServiceJsonLd(service);
+  const jsonLd = getServiceJsonLd(service, settings);
 
   return (
     <SiteShell settings={settings}>

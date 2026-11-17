@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getWorks, getShowcase, getSiteSettings, getPageMetadata } from '@/lib/data';
-import { PORTFOLIO_DATA, WorkDetail, ShowcaseItem } from '@/data/portfolioData';
+import { WorkDetail, ShowcaseItem } from '@/types/content';
 import { SiteShell } from '@/context/ModalContext';
 import { LightboxTrigger, AuditButton } from '@/components/common/ActionButtons';
 import { DriveImage } from '@/components/common/DriveImage';
@@ -62,8 +62,8 @@ export default async function WorksHubPage({ searchParams }: Props) {
     getSiteSettings(),
   ]);
 
-  const displayWorks = works.length > 0 ? works : PORTFOLIO_DATA.works;
-  const displayShowcase = showcase.length > 0 ? showcase : PORTFOLIO_DATA.showcase;
+  const displayWorks = works;
+  const displayShowcase = showcase;
 
   const lightboxItems: LightboxItem[] = displayShowcase.map((s) => ({
     id: s.id,

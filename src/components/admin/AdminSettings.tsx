@@ -5,65 +5,21 @@ import { usePortfolioData } from '../../context/PortfolioContext';
 import { SiteSettings } from '../../lib/portfolioService';
 import { triggerRevalidation } from '../../lib/admin-service';
 import { ImageField } from './ImageField';
-import { PORTFOLIO_DATA } from '../../data/portfolioData';
+import { Collapsible } from './Collapsible';
+import { mergeHome } from '../../types/home-content';
 
-export const AdminSettings: React.FC = () => {
-  const { settings, refreshData, showToast } = usePortfolioData();
-  const [form, setForm] = useState<SiteSettings>(settings);
-  const [saving, setSaving] = useState<boolean>(false);
-
-  useEffect(() => {
-    setForm(settings);
-  }, [settings]);
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      await Promise.all([
-        setDoc(doc(db, 'settings', 'profile'), { name: form.name || 'Alex Rivera', updatedAt: new Date().toISOString() }),
-        setDoc(doc(db, 'settings', 'hero'), { data: form.hero, updatedAt: new Date().toISOString() }),
-        setDoc(doc(db, 'settings', 'metrics'), { data: form.metrics, updatedAt: new Date().toISOString() }),
-        setDoc(doc(db, 'settings', 'contact'), { data: form.contact, updatedAt: new Date().toISOString() }),
-        setDoc(doc(db, 'settings', 'social'), { data: form.social, updatedAt: new Date().toISOString() }),
-        setDoc(doc(db, 'settings', 'footer'), { data: form.footer, updatedAt: new Date().toISOString() }),
-      ]);
-      showToast('Site settings updated across public portfolio!', 'success');
-      await refreshData();
-      await triggerRevalidation(['settings'], ['/', '/services', '/works', '/blog']);
-    } catch (err: any) {
-      showToast(err.message || 'Failed to update settings', 'error');
-    } finally {
-      setSaving(false);
-    }
-  };
-
+export const SettingsFields: React.FC<{
+  form: SiteSettings;
+  setForm: (f: SiteSettings) => void;
+  scope: 'home' | 'contact';
+}> = ({ form, setForm, scope }) => {
+  const isContact = scope === 'contact';
   return (
-    <form onSubmit={handleSave} className="flex flex-col gap-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-neutral-900 tracking-tight">Site Settings &amp; Global Copy</h2>
-          <p className="text-xs sm:text-sm text-neutral-600 mt-0.5">
-            Configure brand name, headline, subtext, 4 animated metrics, contact channels, and footer copy.
-          </p>
-        </div>
-
-        <button
-          type="submit"
-          disabled={saving}
-          className="px-6 py-2.5 rounded-xl bg-primary hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow transition-colors flex items-center gap-2 cursor-pointer self-start sm:self-auto disabled:opacity-50"
-        >
-          <span className="material-symbols-outlined text-[18px]">save</span>
-          <span>{saving ? 'Saving...' : 'Save All Settings'}</span>
-        </button>
-      </div>
-
+    <>
+      {!isContact && (
+      <>
       {/* 0. Brand & Personal Identity */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-neutral-200/80 shadow-sm space-y-4">
-        <h3 className="text-base font-bold text-neutral-900 border-b border-neutral-200 pb-3 flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-[20px]">badge</span>
-          <span>Brand &amp; Personal Identity</span>
-        </h3>
+      <Collapsible title="Brand &amp; Personal Identity" icon="badge" iconClass="text-primary" defaultOpen>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -82,14 +38,10 @@ export const AdminSettings: React.FC = () => {
             </p>
           </div>
         </div>
-      </div>
+      </Collapsible>
 
       {/* 1. Hero Section Settings */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-neutral-200/80 shadow-sm space-y-4">
-        <h3 className="text-base font-bold text-neutral-900 border-b border-neutral-200 pb-3 flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-[20px]">home</span>
-          <span>Hero Banner Copy &amp; Badges</span>
-        </h3>
+      <Collapsible title="Hero Banner Copy &amp; Badges" icon="home" iconClass="text-primary">
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -157,7 +109,7 @@ export const AdminSettings: React.FC = () => {
             <ImageField
               label="Hero Section Portrait / Cover Image"
               category="testimonials"
-              value={form.hero.avatar || form.hero.image || PORTFOLIO_DATA.profile.avatar}
+              value={form.hero.avatar || form.hero.image || ''}
               driveFileId={form.hero.driveFileId}
               aspectRatioClass="aspect-square max-w-[280px]"
               helperText="Alex Rivera portrait image displayed in the hero visual block with floating metric badges."
@@ -175,14 +127,10 @@ export const AdminSettings: React.FC = () => {
             />
           </div>
         </div>
-      </div>
+      </Collapsible>
 
       {/* 2. Four Metrics Bar Settings */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-neutral-200/80 shadow-sm space-y-4">
-        <h3 className="text-base font-bold text-neutral-900 border-b border-neutral-200 pb-3 flex items-center gap-2">
-          <span className="material-symbols-outlined text-secondary text-[20px]">query_stats</span>
-          <span>The 4 Animated Metric Cards</span>
-        </h3>
+      <Collapsible title="The 4 Animated Metric Cards" icon="query_stats" iconClass="text-secondary">
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Metric 1 */}
@@ -349,14 +297,14 @@ export const AdminSettings: React.FC = () => {
             />
           </div>
         </div>
-      </div>
+      </Collapsible>
 
-      {/* 3. Contact & Social Channels */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-neutral-200/80 shadow-sm space-y-4">
-        <h3 className="text-base font-bold text-neutral-900 border-b border-neutral-200 pb-3 flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-[20px]">contact_mail</span>
-          <span>Contact Channels &amp; Social Links</span>
-        </h3>
+      </>
+      )}
+
+      {isContact && (
+      <>
+      <Collapsible title="Contact Channels &amp; Social Links" icon="contact_mail" iconClass="text-primary" defaultOpen>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -419,14 +367,45 @@ export const AdminSettings: React.FC = () => {
             />
           </div>
         </div>
-      </div>
+      </Collapsible>
 
-      {/* 4. Footer Branding */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-neutral-200/80 shadow-sm space-y-4">
-        <h3 className="text-base font-bold text-neutral-900 border-b border-neutral-200 pb-3 flex items-center gap-2">
-          <span className="material-symbols-outlined text-neutral-700 text-[20px]">short_text</span>
-          <span>Footer Branding &amp; Tagline</span>
-        </h3>
+      <Collapsible title="Contact & About Labels" icon="label" iconClass="text-primary">
+        <p className="text-xs text-neutral-500">
+          Small captions shown next to your contact details on the home page (About block and Contact section).
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {([
+            ['headquarters', 'About block: location caption'],
+            ['directLine', 'About block: email caption'],
+            ['directEmail', 'Contact section: email caption'],
+            ['whatsapp', 'Contact section: phone caption'],
+            ['baseLocation', 'Contact section: location caption'],
+          ] as const).map(([key, label]) => (
+            <div key={key}>
+              <label className="text-xs font-bold text-neutral-800 block mb-1">{label}</label>
+              <input
+                type="text"
+                value={mergeHome(form.home).labels[key]}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    home: {
+                      ...mergeHome(form.home),
+                      labels: { ...mergeHome(form.home).labels, [key]: e.target.value },
+                    },
+                  })
+                }
+                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-sm"
+              />
+            </div>
+          ))}
+        </div>
+      </Collapsible>
+      </>
+      )}
+
+      {!isContact && (
+      <Collapsible title="Footer Branding &amp; Tagline" icon="short_text" iconClass="text-neutral-700">
 
         <div className="grid grid-cols-1 gap-4">
           <div>
@@ -449,7 +428,92 @@ export const AdminSettings: React.FC = () => {
             />
           </div>
         </div>
+      </Collapsible>
+
+      )}
+
+    </>
+  );
+};
+
+export const AdminSettings: React.FC<{ scope?: 'home' | 'contact' }> = ({ scope = 'home' }) => {
+  const isContact = scope === 'contact';
+  const { settings, refreshData, showToast } = usePortfolioData();
+  const [form, setForm] = useState<SiteSettings>(settings);
+  const [saving, setSaving] = useState<boolean>(false);
+
+  useEffect(() => {
+    setForm(settings);
+  }, [settings]);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const now = new Date().toISOString();
+      await Promise.all(
+        isContact
+          ? [
+              setDoc(doc(db, 'settings', 'contact'), { data: form.contact, updatedAt: now }),
+              setDoc(doc(db, 'settings', 'social'), { data: form.social, updatedAt: now }),
+              setDoc(
+                doc(db, 'settings', 'home'),
+                {
+                  data: {
+                    labels: (({ headquarters, directLine, directEmail, whatsapp, baseLocation }) => ({
+                      headquarters,
+                      directLine,
+                      directEmail,
+                      whatsapp,
+                      baseLocation,
+                    }))(mergeHome(form.home).labels),
+                  },
+                  updatedAt: now,
+                },
+                { merge: true }
+              ),
+            ]
+          : [
+              setDoc(doc(db, 'settings', 'profile'), { name: form.name || 'Alex Rivera', updatedAt: now }),
+              setDoc(doc(db, 'settings', 'hero'), { data: form.hero, updatedAt: now }),
+              setDoc(doc(db, 'settings', 'metrics'), { data: form.metrics, updatedAt: now }),
+              setDoc(doc(db, 'settings', 'footer'), { data: form.footer, updatedAt: now }),
+            ]
+      );
+      showToast('Site settings updated across public portfolio!', 'success');
+      await refreshData();
+      const revalidated = await triggerRevalidation(['settings'], ['/', '/services', '/works', '/blog']);
+      if (!revalidated) {
+        showToast('Saved, but the live site was NOT refreshed. Sign in again and retry.', 'error');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update settings', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSave} className="flex flex-col gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-neutral-900 tracking-tight">{isContact ? 'Contact Channels & Social Links' : 'Brand, Hero & Metrics'}</h2>
+          <p className="text-xs sm:text-sm text-neutral-600 mt-0.5">
+            {isContact ? 'Email, phone, WhatsApp, location and social profile links shown across the site.' : 'Configure brand name, headline, subtext, avatar, 4 animated metrics, and footer copy.'}
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          disabled={saving}
+          className="px-6 py-2.5 rounded-xl bg-primary hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow transition-colors flex items-center gap-2 cursor-pointer self-start sm:self-auto disabled:opacity-50"
+        >
+          <span className="material-symbols-outlined text-[18px]">save</span>
+          <span>{saving ? 'Saving...' : isContact ? 'Save Contact' : 'Save Settings'}</span>
+        </button>
       </div>
+
+      <SettingsFields form={form} setForm={setForm} scope={scope} />
 
       <div className="flex justify-end pt-2">
         <button
@@ -457,7 +521,7 @@ export const AdminSettings: React.FC = () => {
           disabled={saving}
           className="px-8 py-3 rounded-xl bg-primary hover:bg-blue-700 text-white font-bold text-sm shadow transition-colors cursor-pointer disabled:opacity-50"
         >
-          {saving ? 'Saving...' : 'Save All Settings'}
+          {saving ? 'Saving...' : isContact ? 'Save Contact' : 'Save Settings'}
         </button>
       </div>
     </form>

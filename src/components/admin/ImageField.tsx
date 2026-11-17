@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { uploadImage, listDriveImages, DriveFileInfo } from '../../lib/admin-service';
+import { uploadImage, listDriveImages, deleteImage, type StoredImage } from '../../lib/admin-service';
 import { driveImageUrl } from '../../lib/drive-image';
 import { usePortfolioData } from '../../context/PortfolioContext';
 
@@ -28,9 +28,9 @@ export const ImageField: React.FC<ImageFieldProps> = ({
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
   const [showDriveModal, setShowDriveModal] = useState<boolean>(false);
-  const [driveFiles, setDriveFiles] = useState<DriveFileInfo[]>([]);
+  const [driveFiles, setDriveFiles] = useState<StoredImage[]>([]);
   const [loadingDrive, setLoadingDrive] = useState<boolean>(false);
-  const [showManualUrl, setShowManualUrl] = useState<boolean>(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Normalize category folder name (e.g. poster -> posters, seo-site -> seo-sites, ad -> ads)
@@ -74,7 +74,7 @@ export const ImageField: React.FC<ImageFieldProps> = ({
     }
 
     setUploading(true);
-    showToast(`Compressing and uploading ${file.name} to Google Drive...`, 'info');
+    showToast(`Compressing and uploading ${file.name}...`, 'info');
 
     try {
       const res = await uploadImage(file, folderCategory);
@@ -83,16 +83,9 @@ export const ImageField: React.FC<ImageFieldProps> = ({
         driveFileId: res.id,
         alt: alt || file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
       });
-      showToast('Image uploaded to Google Drive successfully!', 'success');
+      showToast('Image uploaded to Firebase Storage!', 'success');
     } catch (err: any) {
-      if (err.message?.includes('signed in as an administrator')) {
-        showToast('Not authorized: please ensure you are signed in as an administrator.', 'error');
-      } else if (err.message?.includes('Google Apps Script URL is not configured')) {
-        showToast('Google Apps Script URL not configured in VITE_APPS_SCRIPT_URL. You can enter an image URL manually.', 'error');
-        setShowManualUrl(true);
-      } else {
-        showToast(err.message || 'Network failure while uploading to Drive.', 'error');
-      }
+      showToast(err.message || 'Upload failed. Please try again.', 'error');
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -126,23 +119,23 @@ export const ImageField: React.FC<ImageFieldProps> = ({
       const files = await listDriveImages(folderCategory);
       setDriveFiles(files);
       if (files.length === 0) {
-        showToast(`No images found in Google Drive folder "${folderCategory}". Upload your first image!`, 'info');
+        showToast(`No images in "${folderCategory}" yet. Upload your first image!`, 'info');
       }
     } catch (err: any) {
-      showToast(err.message || 'Could not list files from Google Drive.', 'error');
+      showToast(err.message || 'Could not load the image library.', 'error');
     } finally {
       setLoadingDrive(false);
     }
   };
 
-  const handleSelectDriveFile = (file: DriveFileInfo) => {
+  const handleSelectDriveFile = (file: StoredImage) => {
     onChange({
       image: file.url,
       driveFileId: file.id,
       alt: alt || file.name.replace(/\.[^/.]+$/, ''),
     });
     setShowDriveModal(false);
-    showToast(`Selected "${file.name}" from Google Drive`, 'success');
+    showToast(`Selected "${file.name}"`, 'success');
   };
 
   const handleRemove = () => {
@@ -151,6 +144,29 @@ export const ImageField: React.FC<ImageFieldProps> = ({
       driveFileId: undefined,
       alt: '',
     });
+  };
+
+  const isStorageUrl = (u?: string) => !!u && u.includes('firebasestorage.googleapis.com');
+  // Storage object path can always be recovered from the download URL (…/o/<encoded path>?alt=media)
+  const pathFromUrl = (u?: string): string => {
+    const m = u ? /\/o\/([^?]+)/.exec(u) : null;
+    return m ? decodeURIComponent(m[1]) : '';
+  };
+
+  // Permanently delete a file from Firebase Storage (and clear this field if it was the selected one)
+  const handleDeleteStored = async (path: string, url?: string) => {
+    if (!confirm('Permanently delete this image file from storage? Pages still using it will show a placeholder.')) return;
+    setDeleting(path);
+    try {
+      await deleteImage(path);
+      setDriveFiles((files) => files.filter((f) => f.id !== path));
+      if (url && url === value) onChange({ image: '', driveFileId: undefined, alt: '' });
+      showToast('Image deleted from storage.', 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Failed to delete image.', 'error');
+    } finally {
+      setDeleting(null);
+    }
   };
 
   const resolvedPreviewUrl = driveImageUrl(value, 600);
@@ -162,7 +178,7 @@ export const ImageField: React.FC<ImageFieldProps> = ({
         <label className="text-xs font-bold text-neutral-800 flex items-center gap-1.5">
           <span>{label}</span>
           <span className="text-[10px] text-neutral-400 font-normal">
-            (Google Drive folder: <span className="font-mono text-primary font-medium">{folderCategory}</span>)
+            (Storage folder: <span className="font-mono text-primary font-medium">{folderCategory}</span>)
           </span>
         </label>
 
@@ -172,17 +188,11 @@ export const ImageField: React.FC<ImageFieldProps> = ({
             onClick={handleOpenDriveModal}
             className="text-xs font-semibold text-primary hover:text-blue-700 flex items-center gap-1 transition-colors cursor-pointer py-1 px-2 rounded-lg hover:bg-blue-50"
           >
-            <span className="material-symbols-outlined text-[16px]">add_to_drive</span>
-            <span>Choose from Drive</span>
+            <span className="material-symbols-outlined text-[16px]">photo_library</span>
+            <span>Image library</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => setShowManualUrl(!showManualUrl)}
-            className="text-xs font-medium text-neutral-500 hover:text-neutral-800 transition-colors py-1 px-1.5 rounded-lg hover:bg-neutral-100"
-          >
-            {showManualUrl ? 'Hide URL input' : 'Manual URL'}
-          </button>
+
         </div>
       </div>
 
@@ -205,7 +215,7 @@ export const ImageField: React.FC<ImageFieldProps> = ({
             {driveFileId && (
               <div className="absolute top-2 left-2 bg-neutral-900/80 backdrop-blur-md text-white text-[10px] font-mono font-medium px-2 py-0.5 rounded-md flex items-center gap-1">
                 <span className="material-symbols-outlined text-[12px] text-blue-400">cloud_done</span>
-                <span>Drive ID: {driveFileId.slice(0, 8)}...</span>
+                <span>Firebase Storage</span>
               </div>
             )}
 
@@ -226,8 +236,8 @@ export const ImageField: React.FC<ImageFieldProps> = ({
                 onClick={handleOpenDriveModal}
                 className="px-3.5 py-2 rounded-xl bg-primary hover:bg-blue-700 text-white text-xs font-bold shadow-lg flex items-center gap-1.5 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[16px]">folder_open</span>
-                <span>From Drive</span>
+                <span className="material-symbols-outlined text-[16px]">photo_library</span>
+                <span>Library</span>
               </button>
 
               <button
@@ -235,9 +245,21 @@ export const ImageField: React.FC<ImageFieldProps> = ({
                 onClick={handleRemove}
                 className="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-lg flex items-center gap-1 cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[16px]">delete</span>
+                <span className="material-symbols-outlined text-[16px]">link_off</span>
                 <span>Remove</span>
               </button>
+
+              {isStorageUrl(value) && pathFromUrl(value) && (
+                <button
+                  type="button"
+                  disabled={deleting === pathFromUrl(value)}
+                  onClick={() => handleDeleteStored(pathFromUrl(value), value)}
+                  className="px-3 py-2 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold shadow-lg flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                >
+                  <span className="material-symbols-outlined text-[16px]">delete</span>
+                  <span>{deleting === pathFromUrl(value) ? 'Deleting…' : 'Delete file'}</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -265,7 +287,7 @@ export const ImageField: React.FC<ImageFieldProps> = ({
           <div>
             <p className="text-xs sm:text-sm font-semibold text-neutral-800">
               {uploading
-                ? 'Compressing & uploading to Google Drive...'
+                ? 'Compressing & uploading...'
                 : 'Click to upload or drag and drop image'}
             </p>
             <p className="text-[11px] text-neutral-500 mt-0.5">
@@ -292,8 +314,8 @@ export const ImageField: React.FC<ImageFieldProps> = ({
               onClick={handleOpenDriveModal}
               className="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-primary text-xs font-semibold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
-              <span className="material-symbols-outlined text-[16px]">add_to_drive</span>
-              <span>Browse Drive</span>
+              <span className="material-symbols-outlined text-[16px]">photo_library</span>
+              <span>Browse library</span>
             </button>
           </div>
         </div>
@@ -326,25 +348,6 @@ export const ImageField: React.FC<ImageFieldProps> = ({
         />
       </div>
 
-      {/* Manual URL Input Fallback */}
-      {showManualUrl && (
-        <div className="p-3 bg-neutral-100 rounded-xl space-y-1.5 text-left border border-neutral-200">
-          <label className="text-[11px] font-bold text-neutral-700 block">
-            Manual Image URL / Drive Link / ID (Fallback)
-          </label>
-          <input
-            type="text"
-            value={value}
-            placeholder="https://... or Google Drive File ID"
-            onChange={(e) => onChange({ image: e.target.value, driveFileId, alt })}
-            className="w-full px-3 py-2 rounded-lg bg-white border border-neutral-300 text-xs font-mono focus:outline-none focus:border-primary"
-          />
-          <p className="text-[10px] text-neutral-500">
-            Paste any direct image URL or Drive share link. Drive thumbnails will be generated automatically.
-          </p>
-        </div>
-      )}
-
       {/* Drive Picker Modal */}
       {showDriveModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-neutral-900/60 backdrop-blur-sm animate-fade-in">
@@ -353,10 +356,10 @@ export const ImageField: React.FC<ImageFieldProps> = ({
             <div className="p-5 border-b border-neutral-200 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 text-primary flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[22px]">add_to_drive</span>
+                  <span className="material-symbols-outlined text-[22px]">photo_library</span>
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-neutral-900">Google Drive Image Library</h3>
+                  <h3 className="text-base font-bold text-neutral-900">Image Library (Firebase Storage)</h3>
                   <p className="text-xs text-neutral-500">
                     Folder: <span className="font-mono font-bold text-primary">{folderCategory}</span>
                   </p>
@@ -377,7 +380,7 @@ export const ImageField: React.FC<ImageFieldProps> = ({
               {loadingDrive ? (
                 <div className="py-16 flex flex-col items-center justify-center gap-3 text-neutral-500">
                   <div className="w-8 h-8 rounded-full border-3 border-primary border-t-transparent animate-spin"></div>
-                  <span className="text-xs">Fetching images from Google Drive...</span>
+                  <span className="text-xs">Loading images...</span>
                 </div>
               ) : driveFiles.length === 0 ? (
                 <div className="py-12 text-center text-neutral-500 space-y-3">
@@ -386,7 +389,7 @@ export const ImageField: React.FC<ImageFieldProps> = ({
                   </div>
                   <p className="text-sm font-semibold text-neutral-700">No images found in "{folderCategory}"</p>
                   <p className="text-xs text-neutral-500 max-w-sm mx-auto">
-                    Upload an image using the upload button to automatically save it into this Google Drive folder.
+                    Upload an image and it will be saved to this folder in Firebase Storage.
                   </p>
                   <button
                     type="button"
@@ -423,7 +426,17 @@ export const ImageField: React.FC<ImageFieldProps> = ({
 
                       <div className="p-2 text-left">
                         <p className="text-[11px] font-medium text-neutral-800 line-clamp-1">{file.name}</p>
-                        <span className="text-[9px] text-neutral-400 font-mono block">ID: {file.id.slice(0, 10)}...</span>
+                        <button
+                          type="button"
+                          disabled={deleting === file.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteStored(file.id, file.url);
+                          }}
+                          className="mt-1 text-[10px] font-semibold text-rose-600 hover:underline cursor-pointer disabled:opacity-50"
+                        >
+                          {deleting === file.id ? 'Deleting…' : 'Delete'}
+                        </button>
                       </div>
                     </div>
                   ))}

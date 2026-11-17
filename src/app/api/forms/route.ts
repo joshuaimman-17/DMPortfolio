@@ -1,11 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminFirestore } from '@/lib/firebase-admin';
-import { sendGmail, appendSpreadsheetRow } from '@/lib/workspace';
+import { appendFormRowAsServiceAccount } from '@/lib/sheets-service';
+import { adminNotifyEmail, loadEmailTemplates, sendTemplatedMail } from '@/lib/mailer';
+import { getSiteSettings } from '@/lib/data';
+import type { FormKind, TemplateVars } from '@/types/email-templates';
+
+export const runtime = 'nodejs';
+
+// Light in-memory throttle so the public endpoint can't be used as a mail relay.
+// (Per serverless instance — a deterrent, not a hard guarantee.)
+const hits = new Map<string, number[]>();
+function throttled(key: string, max: number, windowMs: number): boolean {
+  const now = Date.now();
+  const recent = (hits.get(key) || []).filter((t) => now - t < windowMs);
+  if (recent.length >= max) {
+    hits.set(key, recent);
+    return true;
+  }
+  recent.push(now);
+  hits.set(key, recent);
+  if (hits.size > 5000) hits.clear();
+  return false;
+}
+
+const clip = (v: unknown, n: number) => String(v ?? '').trim().slice(0, n);
 
 export async function POST(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('Authorization') || '';
-    const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '';
+    const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || 'unknown';
+    if (throttled(`ip:${ip}`, 10, 60_000)) {
+      return NextResponse.json({ success: false, error: 'Too many requests. Please try again shortly.' }, { status: 429 });
+    }
 
     const body = await req.json();
     const {
@@ -23,7 +48,6 @@ export async function POST(req: NextRequest) {
       service,
       currentMetrics,
       sourcePage,
-      spreadsheetId,
     } = body || {};
 
     // 1. Silent bot honeypot rejection
@@ -32,143 +56,93 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Validate email
-    const cleanEmail = (email || '').trim().toLowerCase();
-    if (!cleanEmail || !cleanEmail.includes('@') || cleanEmail.length > 150) {
+    const cleanEmail = clip(email, 150).toLowerCase();
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      return NextResponse.json({ success: false, error: 'Please provide a valid email address.' }, { status: 400 });
+    }
+    if (throttled(`email:${cleanEmail}`, 3, 60 * 60_000)) {
       return NextResponse.json(
-        { success: false, error: 'Please provide a valid email address.' },
-        { status: 400 }
+        { success: false, error: 'We already received your request. We will be in touch soon.' },
+        { status: 429 }
       );
     }
 
     // 3. Validate name for audit / contact
-    const cleanName = (name || '').trim();
-    if (type !== 'newsletter' && (!cleanName || cleanName.length > 100)) {
-      return NextResponse.json(
-        { success: false, error: 'Please provide a valid name (1-100 characters).' },
-        { status: 400 }
-      );
+    const kind: FormKind = type === 'audit' ? 'audit' : type === 'newsletter' ? 'newsletter' : 'contact';
+    const cleanName = clip(name, 100);
+    if (kind !== 'newsletter' && !cleanName) {
+      return NextResponse.json({ success: false, error: 'Please provide a valid name (1-100 characters).' }, { status: 400 });
     }
+
+    const slotValue = clip(preferredSlot || slot, 100);
+    const vars: TemplateVars = {
+      siteName: '',
+      name: cleanName || cleanEmail.split('@')[0],
+      email: cleanEmail,
+      company: clip(company, 200),
+      website: clip(companyUrl || company, 200),
+      challenge: clip(challenge, 1000),
+      budget: clip(budget, 100),
+      slot: slotValue,
+      service: clip(service, 100),
+      message: clip(message, 2000),
+      page: clip(sourcePage, 200) || '/',
+      timestamp: new Date().toUTCString(),
+    };
 
     let sheetsSaved = false;
     let adminNotified = false;
     let userConfirmed = false;
 
-    // 4. Forward to Google Apps Script (handles Google Sheets + Gmail confirmation & notification)
-    const appsScriptUrl =
-      process.env.APPS_SCRIPT_URL ||
-      process.env.NEXT_PUBLIC_APPS_SCRIPT_URL ||
-      process.env.VITE_APPS_SCRIPT_URL ||
-      process.env.NEXT_PUBLIC_VITE_APPS_SCRIPT_URL;
-
-    if (appsScriptUrl) {
-      try {
-        const scriptPayload = {
-          action: 'submitForm',
-          type,
-          page: sourcePage || '/',
-          website: '', // honeypot passed clean
-          data: {
-            name: cleanName || cleanEmail.split('@')[0],
-            email: cleanEmail,
-            company: company || '',
-            companyUrl: companyUrl || website || company || '',
-            challenge: challenge || '',
-            budget: budget || '',
-            slot: preferredSlot || slot || '',
-            service: service || '',
-            message: message || '',
-          },
-        };
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-        const scriptRes = await fetch(appsScriptUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(scriptPayload),
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
-
-        if (scriptRes.ok) {
-          const resData = await scriptRes.json().catch(() => null);
-          if (resData && resData.ok !== false) {
-            sheetsSaved = resData.sheetsSaved !== false;
-            adminNotified = resData.adminNotified !== false;
-            userConfirmed = resData.userConfirmed !== false;
-          }
-        }
-      } catch (scriptErr) {
-        console.warn('[api/forms] Google Apps Script sync warning:', scriptErr);
-      }
+    // 4. Save to Google Sheet (Firebase service account)
+    try {
+      const saRes = await appendFormRowAsServiceAccount([
+        new Date().toISOString(),
+        kind,
+        cleanName,
+        cleanEmail,
+        vars.website || '',
+        vars.challenge || vars.service || '',
+        vars.budget || '',
+        slotValue,
+        vars.message || '',
+        vars.page || '/',
+      ]);
+      if (saRes.success) sheetsSaved = true;
+      else console.warn('[api/forms] Sheets warning:', saRes.error);
+    } catch (saErr) {
+      console.warn('[api/forms] Sheets error:', saErr);
     }
 
-    // 5. Direct Workspace Fallback: if bearerToken and spreadsheetId provided and not saved yet
-    if (bearerToken && spreadsheetId && !sheetsSaved) {
-      try {
-        const row = [
-          new Date().toISOString(),
-          cleanName,
-          cleanEmail,
-          companyUrl || company || '',
-          challenge || service || '',
-          budget || '',
-          preferredSlot || slot || '',
-          message || '',
-          sourcePage || '/',
-        ];
-        const targetSheet = type === 'audit' ? 'Growth Audits!A:I' : type === 'newsletter' ? 'Subscribers!A:C' : 'Contact Inquiries!A:I';
-        const sheetsRes = await appendSpreadsheetRow(bearerToken, spreadsheetId, targetSheet, row);
-        if (sheetsRes.success) {
-          sheetsSaved = true;
-        }
-      } catch (sheetsErr) {
-        console.warn('[api/forms] Direct Sheets append warning:', sheetsErr);
+    // 5. Emails (admin notification + visitor confirmation) from admin-editable templates.
+    //    Awaited before responding — serverless functions are frozen once the response is sent.
+    try {
+      const [config, settings] = await Promise.all([loadEmailTemplates(), getSiteSettings().catch(() => null)]);
+      vars.siteName = settings?.name || 'Our team';
+      const adminTo = adminNotifyEmail();
+
+      const [adminRes, visitorRes] = await Promise.allSettled([
+        sendTemplatedMail(config, `${kind}_admin`, adminTo, vars, cleanEmail),
+        sendTemplatedMail(config, `${kind}_visitor`, cleanEmail, vars, adminTo || undefined),
+      ]);
+      if (adminRes.status === 'fulfilled') {
+        adminNotified = adminRes.value.success;
+        if (adminRes.value.error) console.warn('[api/forms] Admin email failed:', adminRes.value.error);
       }
+      if (visitorRes.status === 'fulfilled') {
+        userConfirmed = visitorRes.value.success;
+        if (visitorRes.value.error) console.warn('[api/forms] Visitor email failed:', visitorRes.value.error);
+      }
+    } catch (mailErr) {
+      console.warn('[api/forms] Email step failed:', mailErr);
     }
 
-    // 6. Direct Gmail Fallback: if bearerToken provided and user not confirmed yet
-    if (bearerToken && !userConfirmed) {
-      try {
-        const userSubject =
-          type === 'audit'
-            ? 'Confirmed: Your Growth Audit with Alex Rivera'
-            : type === 'newsletter'
-            ? 'Welcome to Growth Dispatch — Alex Rivera'
-            : 'Message Received — Alex Rivera Growth Advisory';
-
-        const userHtml = `
-          <div style="font-family: sans-serif; max-width: 600px; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px;">
-            <h2 style="color: #2563eb;">Submission Confirmed</h2>
-            <p>Hi ${cleanName || 'there'},</p>
-            <p>Thank you for submitting your details. Your request has been recorded into our Google Sheets pipeline and Alex has been notified.</p>
-            <p>We will review your diagnostic notes and reply within 24 hours.</p>
-            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-            <p style="font-size: 12px; color: #64748b;">Alex Rivera &bull; Performance Marketing &amp; SEO Growth Portfolio</p>
-          </div>
-        `;
-
-        const gmailRes = await sendGmail(bearerToken, {
-          to: cleanEmail,
-          subject: userSubject,
-          htmlBody: userHtml,
-        });
-
-        if (gmailRes.success) {
-          userConfirmed = true;
-        }
-      } catch (gmailErr) {
-        console.warn('[api/forms] Direct Gmail send warning:', gmailErr);
-      }
-    }
-
-    // 7. Persist to Firestore
+    // 6. Persist to Firestore
     try {
       const firestore = getAdminFirestore();
       const now = new Date().toISOString();
 
-      if (type === 'newsletter') {
+      if (kind === 'newsletter') {
         const subscriberId = cleanEmail.replace(/[^a-zA-Z0-9@._-]/g, '_');
         await firestore.collection('subscribers').doc(subscriberId).set(
           {
@@ -183,19 +157,19 @@ export async function POST(req: NextRequest) {
         );
       } else {
         await firestore.collection('submissions').add({
-          type: type === 'audit' ? 'audit' : 'contact',
+          type: kind,
           name: cleanName,
           email: cleanEmail,
-          company: (company || '').trim().slice(0, 200),
-          website: (companyUrl || '').trim().slice(0, 200),
-          companyUrl: (companyUrl || '').trim().slice(0, 200),
-          message: (message || '').trim().slice(0, 2000),
-          challenge: (challenge || '').trim().slice(0, 1000),
-          budget: (budget || '').trim().slice(0, 100),
-          preferredSlot: (preferredSlot || slot || '').trim().slice(0, 100),
-          service: (service || '').trim().slice(0, 100),
-          currentMetrics: (currentMetrics || '').trim().slice(0, 500),
-          sourcePage: sourcePage || '/',
+          company: vars.company,
+          website: vars.website,
+          companyUrl: vars.website,
+          message: vars.message,
+          challenge: vars.challenge,
+          budget: vars.budget,
+          preferredSlot: slotValue,
+          service: vars.service,
+          currentMetrics: clip(currentMetrics, 500),
+          sourcePage: vars.page,
           status: 'New',
           sheetsSaved,
           adminNotified,
@@ -223,9 +197,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: any) {
     console.error('[api/forms] Request error:', err);
-    return NextResponse.json(
-      { success: false, error: err?.message || 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: err?.message || 'Internal server error' }, { status: 500 });
   }
 }

@@ -6,7 +6,6 @@ import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
 import { triggerRevalidation, uploadImage } from '../../lib/admin-service';
 import { PageMetadata, PageOpenGraphImage } from '@/types/settings';
-import { PORTFOLIO_DATA } from '@/data/portfolioData';
 
 interface PageItem {
   id: string; // Firestore document ID e.g. "route_home"
@@ -18,9 +17,9 @@ interface PageItem {
   defaultImage?: string;
 }
 
-export const AdminMetadata: React.FC = () => {
+export const AdminMetadata: React.FC<{ routeId?: string }> = ({ routeId }) => {
   const { settings, services, works, blogPosts, showToast } = usePortfolioData();
-  const siteName = settings?.name || PORTFOLIO_DATA.profile.name || 'Alex Rivera';
+  const siteName = settings?.name || '';
 
   // Build full inventory of public pages
   const allPages: PageItem[] = [
@@ -96,7 +95,7 @@ export const AdminMetadata: React.FC = () => {
     })),
   ];
 
-  const [selectedPage, setSelectedPage] = useState<PageItem>(allPages[0]);
+  const [selectedPage, setSelectedPage] = useState<PageItem>(allPages.find((p) => p.id === routeId) || allPages[0]);
   const [search, setSearch] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'hub' | 'service' | 'work' | 'blog'>('all');
   const [loadingDoc, setLoadingDoc] = useState<boolean>(false);
@@ -313,8 +312,12 @@ export const AdminMetadata: React.FC = () => {
       showToast(`Metadata for "${selectedPage.name}" saved to Firestore!`, 'success');
 
       // Trigger precise cache revalidation on the specific route path and metadata tag
-      await triggerRevalidation(['metadata', 'settings'], [selectedPage.routePath]);
-      showToast(`Cache revalidated for ${selectedPage.routePath}`, 'success');
+      const revalidated = await triggerRevalidation(['metadata', 'settings'], [selectedPage.routePath]);
+      if (revalidated) {
+        showToast(`Cache revalidated for ${selectedPage.routePath}`, 'success');
+      } else {
+        showToast(`Saved, but the live page was NOT refreshed for ${selectedPage.routePath}. Sign in again and retry.`, 'error');
+      }
     } catch (err: any) {
       showToast(err.message || 'Failed to save metadata', 'error');
     } finally {
@@ -337,7 +340,7 @@ export const AdminMetadata: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-neutral-900 tracking-tight">SEO &amp; OpenGraph Metadata</h2>
+          <h2 className="text-2xl font-bold text-neutral-900 tracking-tight">{routeId ? `SEO for ${selectedPage.name}` : 'SEO & OpenGraph Metadata'}</h2>
           <p className="text-xs sm:text-sm text-neutral-600 mt-0.5">
             Manage custom page titles, meta descriptions, canonical URLs, and 1200×630 social share cards across all public pages.
           </p>
@@ -357,7 +360,7 @@ export const AdminMetadata: React.FC = () => {
       {/* Main 2-Pane Console Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Pane: Page Directory */}
-        <div className="lg:col-span-4 bg-white rounded-3xl p-5 border border-neutral-200/80 shadow-sm space-y-4">
+        <div className={`${routeId ? 'hidden ' : ''}lg:col-span-4 bg-white rounded-3xl p-5 border border-neutral-200/80 shadow-sm space-y-4`}>
           <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
             <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">
               Site Pages ({allPages.length})
@@ -448,7 +451,7 @@ export const AdminMetadata: React.FC = () => {
         </div>
 
         {/* Right Pane: Metadata Form & Social Preview */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
+        <div className={`${routeId ? 'lg:col-span-12' : 'lg:col-span-8'} flex flex-col gap-6`}>
           <form onSubmit={handleSave} className="bg-white rounded-3xl p-6 sm:p-8 border border-neutral-200/80 shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-neutral-200">
               <div>

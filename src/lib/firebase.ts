@@ -11,7 +11,7 @@ import {
   type Firestore,
 } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
-import firebaseConfig from '../../firebase-applet-config.json';
+import firebaseConfig from './firebase-config';
 
 // Suppress benign gRPC idle stream disconnection notices
 try {

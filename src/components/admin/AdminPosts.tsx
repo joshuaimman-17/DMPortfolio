@@ -3,8 +3,9 @@ import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore'
 import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
 import { uploadMediaFile } from '../../lib/portfolioService';
-import { BlogPostDetail } from '../../data/portfolioData';
+import { BlogPostDetail } from '@/types/content';
 import { triggerRevalidation } from '../../lib/admin-service';
+import { ItemSeo } from './ItemSeo';
 import { ImageField } from './ImageField';
 
 export const AdminPosts: React.FC = () => {
@@ -477,6 +478,8 @@ export const AdminPosts: React.FC = () => {
               ))}
             </div>
           </div>
+
+          <ItemSeo kind="post" slug={editingItem?.slug} isNew={isNew} />
 
           {/* Action Bar */}
           <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-neutral-200">

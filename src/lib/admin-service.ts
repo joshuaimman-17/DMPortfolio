@@ -15,22 +15,15 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from './firebase-client';
 import {
-  PORTFOLIO_DATA,
   ServiceDetail,
   WorkDetail,
   ShowcaseItem,
   BlogPostDetail,
-} from '@/data/portfolioData';
+} from '@/types/content';
 import { DEFAULT_SETTINGS, SiteSettings } from '@/types/settings';
 import { driveImageUrl } from './drive-image';
 
-export const ADMIN_EMAILS = [
-  'joshuaimman8@gmail.com',
-  'joshuaimman2004@gmail.com',
-  'alex@growthmark.io',
-  'jashper078@gmail.com',
-  'YOUR_EMAIL@gmail.com',
-];
+export const ADMIN_EMAILS = ['premmohan0147@gmail.com'];
 
 export interface DriveFileInfo {
   id: string;
@@ -59,6 +52,10 @@ export async function triggerRevalidation(
       },
       body: JSON.stringify({ idToken, tags, paths }),
     });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      console.warn('[admin-service] revalidation rejected:', res.status, body?.error);
+    }
     return res.ok;
   } catch (err) {
     console.warn('[admin-service] triggerRevalidation failed:', err);
@@ -72,15 +69,7 @@ export async function triggerRevalidation(
 export async function checkIsAdmin(email?: string | null): Promise<boolean> {
   if (!email) return false;
   const cleanEmail = email.toLowerCase().trim();
-  if (ADMIN_EMAILS.map((e) => e.toLowerCase()).includes(cleanEmail)) {
-    return true;
-  }
-  try {
-    const adminDoc = await getDoc(doc(db, 'admins', cleanEmail));
-    return adminDoc.exists();
-  } catch {
-    return false;
-  }
+  return ADMIN_EMAILS.map((e) => e.toLowerCase()).includes(cleanEmail);
 }
 
 /**
@@ -108,209 +97,55 @@ export async function ensureAdminRecord(email?: string | null): Promise<void> {
 }
 
 /**
- * Seed database from local sample data and trigger cache revalidation
- */
-export async function seedDatabaseFromSampleData(
-  adminUserEmail?: string
-): Promise<{ success: boolean; message: string }> {
-  try {
-    const batch = writeBatch(db);
-
-    // 1. Seed Admins
-    const emailsToSeed = [...ADMIN_EMAILS];
-    if (adminUserEmail && !emailsToSeed.includes(adminUserEmail)) {
-      emailsToSeed.push(adminUserEmail);
-    }
-    for (const em of emailsToSeed) {
-      const adminRef = doc(db, 'admins', em.toLowerCase());
-      batch.set(adminRef, {
-        email: em.toLowerCase(),
-        role: 'admin',
-        addedAt: new Date().toISOString(),
-      });
-    }
-
-    // 2. Seed Settings
-    const settingsDocs: Record<string, any> = {
-      hero: DEFAULT_SETTINGS.hero,
-      metrics: DEFAULT_SETTINGS.metrics,
-      contact: DEFAULT_SETTINGS.contact,
-      social: DEFAULT_SETTINGS.social,
-      footer: DEFAULT_SETTINGS.footer,
-      integrations: DEFAULT_SETTINGS.integrations,
-    };
-    for (const [key, data] of Object.entries(settingsDocs)) {
-      const sRef = doc(db, 'settings', key);
-      batch.set(sRef, { data, updatedAt: new Date().toISOString() });
-    }
-
-    // 3. Seed Services
-    PORTFOLIO_DATA.services.forEach((srv, index) => {
-      const sRef = doc(db, 'services', srv.slug);
-      batch.set(sRef, {
-        ...srv,
-        status: 'published',
-        order: index + 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    });
-
-    // 4. Seed Works
-    PORTFOLIO_DATA.works.forEach((wrk, index) => {
-      const wRef = doc(db, 'works', wrk.slug);
-      batch.set(wRef, {
-        ...wrk,
-        status: 'published',
-        order: index + 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    });
-
-    // 5. Seed Showcase
-    PORTFOLIO_DATA.showcase.forEach((sc, index) => {
-      const scRef = doc(db, 'showcase', sc.id);
-      batch.set(scRef, {
-        ...sc,
-        status: 'published',
-        order: index + 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    });
-
-    // 6. Seed Blog Posts
-    PORTFOLIO_DATA.blogPosts.forEach((post, index) => {
-      const pRef = doc(db, 'posts', post.slug);
-      batch.set(pRef, {
-        ...post,
-        status: 'published',
-        order: index + 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    });
-
-    // 7. Seed Testimonials
-    PORTFOLIO_DATA.testimonials.forEach((t, index) => {
-      const tId = `testimonial-${index + 1}`;
-      const tRef = doc(db, 'testimonials', tId);
-      batch.set(tRef, {
-        ...t,
-        id: tId,
-        status: 'published',
-        order: index + 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    });
-
-    await batch.commit();
-
-    // Revalidate all tags and primary public page paths
-    await triggerRevalidation(
-      [
-        'services',
-        'works',
-        'showcase',
-        'posts',
-        'testimonials',
-        'settings',
-      ],
-      ['/', '/services', '/works', '/blog']
-    );
-
-    return {
-      success: true,
-      message:
-        'Database successfully seeded and cache revalidated across all collections!',
-    };
-  } catch (error: any) {
-    return { success: false, message: error?.message || 'Failed to seed database' };
-  }
-}
-
-/**
  * Resizes and uploads image via server proxy route /api/upload
  */
-export async function uploadImage(
-  file: File,
-  category: string
-): Promise<{ id: string; url: string; viewUrl?: string }> {
+export interface StoredImage {
+  id: string; // Firebase Storage path, e.g. images/works/1731...-cover.webp
+  name: string;
+  url: string;
+  thumbnail?: string;
+}
+
+async function authToken(action: string): Promise<string> {
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error(`You must be signed in as an administrator to ${action}.`);
+  return currentUser.getIdToken();
+}
+
+async function callImageApi(payload: Record<string, any>) {
+  const res = await fetch('/api/upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Request failed with status ${res.status}`);
+  return data;
+}
+
+/** Compresses in the browser, then uploads to Firebase Storage via the admin API. */
+export async function uploadImage(file: File, category: string): Promise<{ id: string; url: string }> {
   const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
   if (!allowedTypes.includes(file.type)) {
     throw new Error('Invalid file type. Please upload a JPG, PNG, or WebP image.');
   }
-
-  const currentUser = auth.currentUser;
-  if (!currentUser) {
-    throw new Error('You must be signed in as an administrator to upload images.');
-  }
-
-  const idToken = await currentUser.getIdToken();
+  const idToken = await authToken('upload images');
   const { base64, mimeType } = await resizeAndCompressImage(file, 2000, 0.85);
-
-  const res = await fetch('/api/upload', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'upload',
-      idToken,
-      category,
-      filename: file.name,
-      mimeType,
-      base64,
-    }),
-  });
-
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.error || `Upload failed with status ${res.status}`);
-  }
-
-  const response = await res.json();
-  const driveId = response.id || response.fileId || '';
-  const url = response.url || (driveId ? driveImageUrl(driveId, 1600) : '');
-  const viewUrl = response.viewUrl || (driveId ? `https://drive.google.com/file/d/${driveId}/view` : url);
-
-  return { id: driveId, url, viewUrl };
+  const data = await callImageApi({ action: 'upload', idToken, category, filename: file.name, mimeType, base64 });
+  return { id: data.id, url: data.url };
 }
 
-/**
- * Lists Drive images via server proxy route /api/upload
- */
-export async function listDriveImages(category: string): Promise<any[]> {
-  const currentUser = auth.currentUser;
-  if (!currentUser) {
-    throw new Error('You must be signed in to view Google Drive files.');
-  }
+/** Lists images stored in Firebase Storage for a category folder. */
+export async function listDriveImages(category: string): Promise<StoredImage[]> {
+  const idToken = await authToken('view the image library');
+  const data = await callImageApi({ action: 'list', idToken, category });
+  return (data.files || []).map((f: any) => ({ id: f.id, name: f.name, url: f.url, thumbnail: f.url }));
+}
 
-  const idToken = await currentUser.getIdToken();
-  const res = await fetch('/api/upload', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'listFiles',
-      idToken,
-      category,
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `Failed to list files (${res.status})`);
-  }
-
-  const response = await res.json();
-  const files = response.files || response.data || [];
-  return files.map((f: any) => ({
-    id: f.id,
-    name: f.name || 'Untitled Image',
-    url: f.url || driveImageUrl(f.id, 1600),
-    viewUrl: f.viewUrl || `https://drive.google.com/file/d/${f.id}/view`,
-    thumbnail: driveImageUrl(f.id, 600),
-  }));
+/** Permanently deletes an image file from Firebase Storage. */
+export async function deleteImage(path: string): Promise<void> {
+  const idToken = await authToken('delete images');
+  await callImageApi({ action: 'delete', idToken, path });
 }
 
 function resizeAndCompressImage(

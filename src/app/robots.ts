@@ -1,23 +1,20 @@
 import type { MetadataRoute } from 'next';
+import { getSiteUrl } from '@/lib/site-url';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.APP_URL
-    ? process.env.APP_URL.replace(/\/$/, '')
-    : 'https://alexriveragrowth.com';
+  const baseUrl = getSiteUrl();
 
   return {
     rules: [
       {
+        // All crawlers (search engines and AI bots): every public page allowed,
+        // admin console and API endpoints blocked.
         userAgent: '*',
-        allow: ['/', '/llms.txt', '/llms-full.txt'],
-        disallow: ['/admin', '/api/'],
-      },
-      {
-        userAgent: ['GPTBot', 'ChatGPT-User', 'Google-Extended', 'Anthropic-AI', 'ClaudeBot', 'PerplexityBot', 'cohere-ai'],
-        allow: ['/', '/llms.txt', '/llms-full.txt'],
-        disallow: ['/admin', '/api/'],
+        allow: '/',
+        disallow: ['/admin', '/admin/', '/api/'],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl,
   };
 }

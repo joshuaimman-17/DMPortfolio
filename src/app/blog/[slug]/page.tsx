@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPostBySlug, getPosts, getSiteSettings, getPageMetadata } from '@/lib/data';
-import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { SiteShell } from '@/context/ModalContext';
 import { DriveImage } from '@/components/common/DriveImage';
 import { AuditButton } from '@/components/common/ActionButtons';
@@ -82,12 +81,12 @@ export default async function BlogDetailPage({ params }: Props) {
     notFound();
   }
 
-  const postsList = allPosts.length > 0 ? allPosts : PORTFOLIO_DATA.blogPosts;
+  const postsList = allPosts;
   const relatedPosts = postsList.filter(
     (p) => post.relatedSlugs?.includes(p.slug) || (p.slug !== post.slug && p.category === post.category)
   );
 
-  const jsonLd = getArticleJsonLd(post);
+  const jsonLd = getArticleJsonLd(post, settings);
 
   return (
     <SiteShell settings={settings}>

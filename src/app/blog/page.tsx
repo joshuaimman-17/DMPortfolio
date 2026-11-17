@@ -1,7 +1,6 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { getPosts, getSiteSettings, getPageMetadata } from '@/lib/data';
-import { PORTFOLIO_DATA } from '@/data/portfolioData';
 import { SiteShell } from '@/context/ModalContext';
 import { BlogListClient } from '@/components/blog/BlogListClient';
 
@@ -50,7 +49,7 @@ export default async function BlogHubPage() {
     getSiteSettings(),
   ]);
 
-  const allPosts = posts.length > 0 ? posts : PORTFOLIO_DATA.blogPosts;
+  const allPosts = posts;
 
   return (
     <SiteShell settings={settings}>

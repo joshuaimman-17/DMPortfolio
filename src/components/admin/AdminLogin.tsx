@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePortfolioData } from '../../context/PortfolioContext';
 
 export const AdminLogin: React.FC = () => {
-  const { user, isAdmin, loginWithGoogle, logout, authLoading } = usePortfolioData();
+  const { user, isAdmin, loginWithGoogle, loginWithEmail, logout, authLoading } = usePortfolioData();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [busy, setBusy] = useState(false);
 
   if (authLoading) {
     return (
@@ -74,6 +77,44 @@ export const AdminLogin: React.FC = () => {
             Manage services, case studies, visual deliverables, playbooks, and client diagnostic inboxes.
           </p>
         </div>
+
+        <form
+          className="w-full flex flex-col gap-3 text-left"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setBusy(true);
+            await loginWithEmail(email, password);
+            setBusy(false);
+          }}
+        >
+          <input
+            type="email"
+            required
+            autoComplete="username"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+          />
+          <input
+            type="password"
+            required
+            autoComplete="current-password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+          />
+          <button
+            type="submit"
+            disabled={busy}
+            className="w-full py-3 px-5 rounded-2xl bg-neutral-900 hover:bg-neutral-800 disabled:opacity-60 text-white font-bold text-sm transition-colors cursor-pointer"
+          >
+            {busy ? 'Signing in…' : 'Sign in'}
+          </button>
+        </form>
+
+        <div className="text-[11px] uppercase tracking-wider text-neutral-400">or</div>
 
         <button
           onClick={loginWithGoogle}

@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { BlogPostDetail } from '@/data/portfolioData';
+import { BlogPostDetail } from '@/types/content';
 import { DriveImage } from '@/components/common/DriveImage';
 import { subscribeNewsletter } from '@/lib/client-api';
 

@@ -9,3 +9,7 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Service account key (never commit)
+serviceAcountKey.json
+serviceAccountKey.json

@@ -1,8 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import { DEFAULT_HOME, type HomeContent } from '@/types/home-content';
 
-export const RoasCalculator: React.FC<{ onBookAudit: () => void }> = ({ onBookAudit }) => {
+export const RoasCalculator: React.FC<{ onBookAudit: () => void; content?: HomeContent['roas'] }> = ({
+  onBookAudit,
+  content,
+}) => {
+  const t = content || DEFAULT_HOME.roas;
   const [monthlySpend, setMonthlySpend] = useState<number>(500000); // 5 Lakhs INR default
   const [conversionRate, setConversionRate] = useState<number>(2.4); // 2.4%
   const [averageOrderValue, setAverageOrderValue] = useState<number>(3200); // 3200 INR
@@ -28,18 +33,18 @@ export const RoasCalculator: React.FC<{ onBookAudit: () => void }> = ({ onBookAu
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-fixed text-primary font-label-sm text-xs font-semibold uppercase tracking-wider mb-2">
             <span className="material-symbols-outlined text-[16px]">calculate</span>
-            Interactive Growth Modeler
+            {t.badge}
           </div>
           <h3 className="font-headline-lg text-headline-lg text-on-surface">
-            Estimate Your Revenue &amp; ROAS Potential
+            {t.title}
           </h3>
           <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
-            Adjust budget, conversion rate, and average ticket size to project channel output with audited campaign hygiene.
+            {t.description}
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg bg-surface-container-lowest text-secondary border border-neutral-200">
           <span className="material-symbols-outlined text-[16px]">verified</span>
-          Live Modeling Engine
+          {t.engine}
         </div>
       </div>
 
@@ -49,7 +54,7 @@ export const RoasCalculator: React.FC<{ onBookAudit: () => void }> = ({ onBookAu
           {/* Monthly Spend Slider */}
           <div>
             <div className="flex items-center justify-between text-sm mb-2">
-              <span className="font-semibold text-on-surface">Monthly Ad Spend Budget</span>
+              <span className="font-semibold text-on-surface">{t.spendLabel}</span>
               <span className="font-bold text-primary font-mono text-base">{formatCurrency(monthlySpend)}</span>
             </div>
             <input
@@ -72,7 +77,7 @@ export const RoasCalculator: React.FC<{ onBookAudit: () => void }> = ({ onBookAu
           {/* Average Order Value (AOV) Slider */}
           <div>
             <div className="flex items-center justify-between text-sm mb-2">
-              <span className="font-semibold text-on-surface">Average Order Value / Deal Size</span>
+              <span className="font-semibold text-on-surface">{t.aovLabel}</span>
               <span className="font-bold text-on-surface font-mono text-base">{formatCurrency(averageOrderValue)}</span>
             </div>
             <input
@@ -96,7 +101,7 @@ export const RoasCalculator: React.FC<{ onBookAudit: () => void }> = ({ onBookAu
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <div className="flex items-center justify-between text-sm mb-2">
-                <span className="font-semibold text-on-surface">Conversion Rate</span>
+                <span className="font-semibold text-on-surface">{t.conversionLabel}</span>
                 <span className="font-bold text-secondary font-mono text-base">{conversionRate}%</span>
               </div>
               <input
@@ -111,7 +116,7 @@ export const RoasCalculator: React.FC<{ onBookAudit: () => void }> = ({ onBookAu
             </div>
             <div>
               <div className="flex items-center justify-between text-sm mb-2">
-                <span className="font-semibold text-on-surface">Target CPC (Blended)</span>
+                <span className="font-semibold text-on-surface">{t.cpcLabel}</span>
                 <span className="font-bold text-on-surface font-mono text-base">₹{costPerClick}</span>
               </div>
               <input
@@ -131,7 +136,7 @@ export const RoasCalculator: React.FC<{ onBookAudit: () => void }> = ({ onBookAu
         <div className="lg:col-span-5 bg-surface-container-lowest rounded-xl p-4 sm:p-6 border border-neutral-200/90 shadow-lg flex flex-col justify-between gap-5">
           <div className="border-b border-neutral-200 pb-4">
             <span className="text-xs uppercase tracking-wider text-on-surface-variant font-semibold block">
-              Projected Outcome
+              {t.outcomeLabel}
             </span>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-4xl font-extrabold text-primary tracking-tight font-mono">
@@ -139,26 +144,26 @@ export const RoasCalculator: React.FC<{ onBookAudit: () => void }> = ({ onBookAu
               </span>
               <span className="text-sm font-semibold text-secondary flex items-center gap-0.5">
                 <span className="material-symbols-outlined text-[18px]">trending_up</span>
-                Target Return
+                {t.returnLabel}
               </span>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="bg-surface-container-low p-3 rounded-lg">
-              <span className="text-[11px] text-on-surface-variant font-medium block">Monthly Revenue</span>
+              <span className="text-[11px] text-on-surface-variant font-medium block">{t.revenueLabel}</span>
               <span className="font-bold text-on-surface font-mono text-base">{formatCurrency(estimatedRevenue)}</span>
             </div>
             <div className="bg-surface-container-low p-3 rounded-lg">
-              <span className="text-[11px] text-on-surface-variant font-medium block">Target CAC</span>
+              <span className="text-[11px] text-on-surface-variant font-medium block">{t.cacLabel}</span>
               <span className="font-bold text-secondary font-mono text-base">₹{acquisitionCost}</span>
             </div>
             <div className="bg-surface-container-low p-3 rounded-lg">
-              <span className="text-[11px] text-on-surface-variant font-medium block">Est. Customers</span>
+              <span className="text-[11px] text-on-surface-variant font-medium block">{t.customersLabel}</span>
               <span className="font-bold text-on-surface font-mono text-base">{estimatedConversions.toLocaleString('en-IN')} / mo</span>
             </div>
             <div className="bg-surface-container-low p-3 rounded-lg">
-              <span className="text-[11px] text-on-surface-variant font-medium block">Est. Gross Margin</span>
+              <span className="text-[11px] text-on-surface-variant font-medium block">{t.marginLabel}</span>
               <span className="font-bold text-primary font-mono text-base">{formatCurrency(netMargin)}</span>
             </div>
           </div>
@@ -167,7 +172,7 @@ export const RoasCalculator: React.FC<{ onBookAudit: () => void }> = ({ onBookAu
             onClick={onBookAudit}
             className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-primary-container text-on-primary font-label-md text-sm shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] hover:bg-primary transition-all font-semibold"
           >
-            <span>Audit My Funnel for This ROAS</span>
+            <span>{t.ctaLabel}</span>
             <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
           </button>
         </div>

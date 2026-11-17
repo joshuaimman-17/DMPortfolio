@@ -1,15 +1,14 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { User, onAuthStateChanged, signInWithPopup, signOut, GoogleAuthProvider } from 'firebase/auth';
+import { User, onAuthStateChanged, signInWithPopup, signInWithEmailAndPassword, signOut, GoogleAuthProvider } from 'firebase/auth';
 import { auth, googleProvider, setCachedAccessToken } from '../lib/firebase';
 import {
-  PORTFOLIO_DATA,
   ServiceDetail,
   WorkDetail,
   ShowcaseItem,
   BlogPostDetail,
-} from '../data/portfolioData';
+} from '@/types/content';
 import { SiteSettings, DEFAULT_SETTINGS } from '../types/settings';
 import {
   checkIsAdmin,
@@ -45,6 +44,7 @@ interface PortfolioContextType {
   isAdmin: boolean;
   authLoading: boolean;
   loginWithGoogle: () => Promise<boolean>;
+  loginWithEmail: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
 
   // Toast notifications
@@ -55,11 +55,11 @@ interface PortfolioContextType {
 const PortfolioContext = createContext<PortfolioContextType | undefined>(undefined);
 
 export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [services, setServices] = useState<ServiceDetail[]>(PORTFOLIO_DATA.services);
-  const [works, setWorks] = useState<WorkDetail[]>(PORTFOLIO_DATA.works);
-  const [showcase, setShowcase] = useState<ShowcaseItem[]>(PORTFOLIO_DATA.showcase);
-  const [blogPosts, setBlogPosts] = useState<BlogPostDetail[]>(PORTFOLIO_DATA.blogPosts);
-  const [testimonials, setTestimonials] = useState<any[]>(PORTFOLIO_DATA.testimonials);
+  const [services, setServices] = useState<ServiceDetail[]>([]);
+  const [works, setWorks] = useState<WorkDetail[]>([]);
+  const [showcase, setShowcase] = useState<ShowcaseItem[]>([]);
+  const [blogPosts, setBlogPosts] = useState<BlogPostDetail[]>([]);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -131,6 +131,24 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const loginWithEmail = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const result = await signInWithEmailAndPassword(auth, email.trim(), password);
+      const adminStatus = await checkIsAdmin(result.user.email);
+      setIsAdmin(adminStatus);
+      if (!adminStatus) {
+        await signOut(auth);
+        showToast('Access denied: not an authorized administrator.', 'error');
+        return false;
+      }
+      showToast('Welcome back!', 'success');
+      return true;
+    } catch {
+      showToast('Invalid email or password.', 'error');
+      return false;
+    }
+  };
+
   const logout = async () => {
     try {
       await signOut(auth);
@@ -149,11 +167,11 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setLoading(true);
       const [fetchedServices, fetchedWorks, fetchedShowcase, fetchedPosts, fetchedTestimonials, fetchedSettings] =
         await Promise.all([
-          fetchPublishedCollection<ServiceDetail>('services', PORTFOLIO_DATA.services),
-          fetchPublishedCollection<WorkDetail>('works', PORTFOLIO_DATA.works),
-          fetchPublishedCollection<ShowcaseItem>('showcase', PORTFOLIO_DATA.showcase),
-          fetchPublishedCollection<BlogPostDetail>('posts', PORTFOLIO_DATA.blogPosts),
-          fetchPublishedCollection<any>('testimonials', PORTFOLIO_DATA.testimonials),
+          fetchPublishedCollection<ServiceDetail>('services', []),
+          fetchPublishedCollection<WorkDetail>('works', []),
+          fetchPublishedCollection<ShowcaseItem>('showcase', []),
+          fetchPublishedCollection<BlogPostDetail>('posts', []),
+          fetchPublishedCollection<any>('testimonials', []),
           fetchSiteSettings(),
         ]);
 
@@ -165,11 +183,11 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setSettings(fetchedSettings);
     } catch {
       // Fallback to sample data gracefully
-      setServices(PORTFOLIO_DATA.services);
-      setWorks(PORTFOLIO_DATA.works);
-      setShowcase(PORTFOLIO_DATA.showcase);
-      setBlogPosts(PORTFOLIO_DATA.blogPosts);
-      setTestimonials(PORTFOLIO_DATA.testimonials);
+      setServices([]);
+      setWorks([]);
+      setShowcase([]);
+      setBlogPosts([]);
+      setTestimonials([]);
       setSettings(DEFAULT_SETTINGS);
     } finally {
       setLoading(false);
@@ -213,6 +231,7 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         isAdmin,
         authLoading,
         loginWithGoogle,
+        loginWithEmail,
         logout,
         toast,
         showToast,
@@ -251,21 +270,22 @@ export const usePortfolioData = () => {
   const context = useContext(PortfolioContext);
   if (!context) {
     return {
-      services: PORTFOLIO_DATA.services,
-      works: PORTFOLIO_DATA.works,
-      showcase: PORTFOLIO_DATA.showcase,
-      blogPosts: PORTFOLIO_DATA.blogPosts,
-      testimonials: PORTFOLIO_DATA.testimonials,
+      services: [],
+      works: [],
+      showcase: [],
+      blogPosts: [],
+      testimonials: [],
       settings: DEFAULT_SETTINGS,
       loading: false,
       refreshData: async () => {},
-      findService: (slug: string) => PORTFOLIO_DATA.services.find((s) => s.slug === slug),
-      findWork: (slug: string) => PORTFOLIO_DATA.works.find((w) => w.slug === slug),
-      findPost: (slug: string) => PORTFOLIO_DATA.blogPosts.find((p) => p.slug === slug),
+      findService: (_slug: string) => undefined,
+      findWork: (_slug: string) => undefined,
+      findPost: (_slug: string) => undefined,
       user: null,
       isAdmin: false,
       authLoading: false,
       loginWithGoogle: async () => false,
+      loginWithEmail: async () => false,
       logout: async () => {},
       toast: null,
       showToast: () => {},

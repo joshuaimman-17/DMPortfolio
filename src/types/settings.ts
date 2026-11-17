@@ -1,4 +1,6 @@
-import { PORTFOLIO_DATA } from '@/data/portfolioData';
+import type { HomeContent } from './home-content';
+export { DEFAULT_HOME, mergeHome } from './home-content';
+export type { HomeContent } from './home-content';
 
 export interface SiteSettings {
   name?: string;
@@ -10,6 +12,7 @@ export interface SiteSettings {
     badge2: string;
     badge3: string;
     avatar?: string;
+    logo?: string;
     image?: string;
     driveFileId?: string;
   };
@@ -38,6 +41,7 @@ export interface SiteSettings {
     googleSheetUrl: string;
     driveFolderUrl: string;
   };
+  home?: HomeContent;
 }
 
 /** OpenGraph image — `width`/`height` are pixel dimensions of the shared card. */
@@ -86,15 +90,17 @@ export type PageMetadata = {
 };
 
 export const DEFAULT_SETTINGS: SiteSettings = {
-  name: PORTFOLIO_DATA.profile.name || 'Alex Rivera',
+  name: '',
   hero: {
-    roleTag: PORTFOLIO_DATA.profile.roleTag,
+    roleTag: '',
     headline: 'I help brands grow with SEO and performance marketing',
-    subtext: PORTFOLIO_DATA.profile.subtext,
+    subtext: '',
     badge1: '+120% Organic Traffic Growth',
     badge2: '4.5x Average ROAS Blended Acquisition',
     badge3: 'Meta & Google Partner',
-    avatar: PORTFOLIO_DATA.profile.avatar,
+    // Images come from Firebase only — no static fallback.
+    avatar: '',
+    logo: '',
   },
   metrics: {
     metric1: { value: '+120%', label: 'Organic Traffic', desc: 'Avg. 6-Month Organic Uplift Across Audited Clients' },
@@ -103,9 +109,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     metric4: { value: '#1 SERP', label: 'Top-3 Rankings', desc: 'First Page Search Positions Secured for Competitive Queries' },
   },
   contact: {
-    email: PORTFOLIO_DATA.profile.email,
-    phone: PORTFOLIO_DATA.profile.phone,
-    location: PORTFOLIO_DATA.profile.location,
+    email: '',
+    phone: '',
+    location: '',
     whatsapp: '+1 (555) 234-8900',
   },
   social: {

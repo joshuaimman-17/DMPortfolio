@@ -3,8 +3,9 @@ import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore'
 import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
 import { uploadMediaFile } from '../../lib/portfolioService';
-import { WorkDetail, ShowcaseItem } from '../../data/portfolioData';
+import { WorkDetail, ShowcaseItem } from '@/types/content';
 import { triggerRevalidation } from '../../lib/admin-service';
+import { ItemSeo } from './ItemSeo';
 import { ImageField } from './ImageField';
 
 export const AdminWorks: React.FC = () => {
@@ -631,6 +632,8 @@ export const AdminWorks: React.FC = () => {
               })}
             </div>
           </div>
+
+          <ItemSeo kind="work" slug={editingItem?.slug} isNew={isNew} />
 
           {/* Status & Action Buttons */}
           <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-neutral-200">

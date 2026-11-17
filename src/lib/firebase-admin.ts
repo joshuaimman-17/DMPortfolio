@@ -2,7 +2,8 @@ import 'server-only';
 import { getApps, initializeApp, cert, type App } from 'firebase-admin/app';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 import { getAuth, type Auth } from 'firebase-admin/auth';
-import firebaseConfig from '../../firebase-applet-config.json';
+import { getStorage } from 'firebase-admin/storage';
+import firebaseConfig from './firebase-config';
 
 function isValidPemKey(key: string | undefined): boolean {
   if (!key || typeof key !== 'string') return false;
@@ -52,6 +53,7 @@ function getAdminApp(): App {
           clientEmail,
           privateKey,
         }),
+        storageBucket: firebaseConfig.storageBucket,
       });
     } catch (err) {
       console.warn('[firebase-admin] Notice: Service account cert init failed, using project fallback.');
@@ -61,6 +63,7 @@ function getAdminApp(): App {
   // Graceful fallback without cert (uses Application Default Credentials or projectId)
   return initializeApp({
     projectId: firebaseConfig.projectId,
+    storageBucket: firebaseConfig.storageBucket,
   });
 }
 
@@ -68,6 +71,10 @@ export function getAdminFirestore(): Firestore {
   const app = getAdminApp();
   const dbId = (firebaseConfig as any).firestoreDatabaseId;
   return dbId && dbId !== '(default)' ? getFirestore(app, dbId) : getFirestore(app);
+}
+
+export function getAdminBucket() {
+  return getStorage(getAdminApp()).bucket();
 }
 
 export function getAdminAuth(): Auth {
