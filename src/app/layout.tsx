@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { getSiteUrl } from '@/lib/site-url';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -12,12 +13,12 @@ export const metadata: Metadata = {
   title: 'Alex Rivera | Growth Marketer - Performance Portfolio',
   description:
     'Performance marketing portfolio and client acquisition platform for senior digital marketing expert Alex Rivera. Featuring full-funnel case studies, verified organic SERP rankings, interactive ROAS calculator, and growth audit booking.',
-  metadataBase: new URL('https://alexriveragrowth.com'),
+  metadataBase: new URL(getSiteUrl()),
   openGraph: {
     title: 'Alex Rivera | Growth Marketer - Performance Portfolio',
     description:
       'Performance marketing portfolio and client acquisition platform for senior digital marketing expert Alex Rivera.',
-    url: 'https://alexriveragrowth.com',
+    url: getSiteUrl(),
     siteName: 'Alex Rivera Portfolio',
     type: 'website',
   },

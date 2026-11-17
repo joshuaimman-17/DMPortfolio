@@ -6,6 +6,7 @@ import { uploadMediaFile } from '../../lib/portfolioService';
 import { BlogPostDetail } from '@/types/content';
 import { triggerRevalidation } from '../../lib/admin-service';
 import { ItemSeo } from './ItemSeo';
+import { validateSlug } from '../../lib/slug';
 import { ImageField } from './ImageField';
 
 export const AdminPosts: React.FC = () => {
@@ -173,8 +174,9 @@ export const AdminPosts: React.FC = () => {
       showToast('Please enter an article title', 'error');
       return;
     }
-    if (!formData.slug.trim()) {
-      showToast('Please enter a unique URL slug', 'error');
+    const slugError = validateSlug(formData.slug);
+    if (slugError) {
+      showToast(slugError, 'error');
       return;
     }
 

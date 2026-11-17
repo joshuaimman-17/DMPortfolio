@@ -115,9 +115,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     whatsapp: '+1 (555) 234-8900',
   },
   social: {
-    linkedin: 'https://linkedin.com/in/alexriveragrowth',
-    twitter: 'https://twitter.com/alexgrowthmark',
-    github: 'https://github.com/alexrivera-growth',
+    linkedin: '',
+    twitter: '',
+    github: '',
   },
   footer: {
     tagline: 'Empowering ambitious brands with compound growth architectures.',

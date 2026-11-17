@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
+import { getSiteUrl } from '../../lib/site-url';
 import { triggerRevalidation, uploadImage } from '../../lib/admin-service';
 import { PageMetadata, PageOpenGraphImage } from '@/types/settings';
 
@@ -20,6 +21,13 @@ interface PageItem {
 export const AdminMetadata: React.FC<{ routeId?: string }> = ({ routeId }) => {
   const { settings, services, works, blogPosts, showToast } = usePortfolioData();
   const siteName = settings?.name || '';
+  const siteHost = (() => {
+    try {
+      return new URL(getSiteUrl()).host;
+    } catch {
+      return '';
+    }
+  })();
 
   // Build full inventory of public pages
   const allPages: PageItem[] = [
@@ -112,7 +120,7 @@ export const AdminMetadata: React.FC<{ routeId?: string }> = ({ routeId }) => {
     openGraph: {
       title: allPages[0].defaultTitle,
       description: allPages[0].defaultDescription,
-      url: `https://alexriveragrowth.com${allPages[0].routePath}`,
+      url: `${getSiteUrl()}${allPages[0].routePath}`,
       siteName: siteName,
       locale: 'en_US',
       type: 'website',
@@ -162,7 +170,7 @@ export const AdminMetadata: React.FC<{ routeId?: string }> = ({ routeId }) => {
             openGraph: {
               title: d.openGraph?.title || d.title || selectedPage.defaultTitle,
               description: d.openGraph?.description || d.description || selectedPage.defaultDescription,
-              url: d.openGraph?.url || `https://alexriveragrowth.com${selectedPage.routePath}`,
+              url: d.openGraph?.url || `${getSiteUrl()}${selectedPage.routePath}`,
               siteName: siteName,
               locale: 'en_US',
               type: 'website',
@@ -195,7 +203,7 @@ export const AdminMetadata: React.FC<{ routeId?: string }> = ({ routeId }) => {
             openGraph: {
               title: selectedPage.defaultTitle,
               description: selectedPage.defaultDescription,
-              url: `https://alexriveragrowth.com${selectedPage.routePath}`,
+              url: `${getSiteUrl()}${selectedPage.routePath}`,
               siteName: siteName,
               locale: 'en_US',
               type: 'website',
@@ -536,7 +544,7 @@ export const AdminMetadata: React.FC<{ routeId?: string }> = ({ routeId }) => {
                       alternates: { canonical: e.target.value },
                       openGraph: {
                         ...formData.openGraph,
-                        url: `https://alexriveragrowth.com${e.target.value}`,
+                        url: `${getSiteUrl()}${e.target.value}`,
                       },
                     })
                   }
@@ -755,7 +763,7 @@ export const AdminMetadata: React.FC<{ routeId?: string }> = ({ routeId }) => {
                 </div>
                 <div className="p-3.5 space-y-1 bg-neutral-50 border-t border-neutral-200">
                   <span className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider block">
-                    alexriveragrowth.com
+                    {siteHost}
                   </span>
                   <div className="text-xs font-bold text-neutral-900 line-clamp-2 leading-tight">
                     {formData.openGraph.title || formData.title}
@@ -783,7 +791,7 @@ export const AdminMetadata: React.FC<{ routeId?: string }> = ({ routeId }) => {
                     </div>
                   )}
                   <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/75 backdrop-blur-xs text-white text-[10px] font-semibold flex items-center gap-1">
-                    <span>alexriveragrowth.com</span>
+                    <span>{siteHost}</span>
                   </div>
                 </div>
                 <div className="p-3.5 space-y-1">
@@ -804,7 +812,7 @@ export const AdminMetadata: React.FC<{ routeId?: string }> = ({ routeId }) => {
                   <div className="w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center text-[9px] font-bold">
                     AR
                   </div>
-                  <span className="text-[11px] text-neutral-700 font-medium">alexriveragrowth.com</span>
+                  <span className="text-[11px] text-neutral-700 font-medium">{siteHost}</span>
                   <span className="text-neutral-400">›</span>
                   <span className="text-[11px] text-neutral-500 font-mono">
                     {selectedPage.routePath.replace(/^\//, '') || 'home'}

@@ -22,6 +22,7 @@ import {
 } from '@/types/content';
 import { SiteSettings, DEFAULT_SETTINGS, PageMetadata } from '@/types/settings';
 import { mergeHome } from '@/types/home-content';
+import { getSiteUrl } from '@/lib/site-url';
 export { type SiteSettings, DEFAULT_SETTINGS, type PageMetadata };
 
 // Suppress benign gRPC idle stream disconnection notices on the server
@@ -237,7 +238,7 @@ export async function getPageMetadata(
 ): Promise<PageMetadata> {
   const settings = await getSiteSettings();
   const siteName = settings.name || 'Alex Rivera';
-  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://alexriveragrowth.com';
+  const siteUrl = getSiteUrl();
   const cleanPath = fallback.path.startsWith('/') ? fallback.path : `/${fallback.path}`;
   const fullUrl = `${siteUrl.replace(/\/$/, '')}${cleanPath}`;
   const defaultImage = fallback.image || settings.hero.avatar || settings.hero.image || '';

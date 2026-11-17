@@ -13,8 +13,7 @@ import {
   serverTimestamp,
   writeBatch,
 } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from './firebase';
+import { db } from './firebase';
 import { submitForm } from './backend';
 import {
   ServiceDetail,
@@ -95,9 +94,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     whatsapp: '+1 (555) 234-8900',
   },
   social: {
-    linkedin: 'https://linkedin.com',
-    twitter: 'https://x.com',
-    github: 'https://github.com',
+    linkedin: '',
+    twitter: '',
+    github: '',
   },
   footer: {
     tagline: 'Helping high-growth B2B SaaS and D2C brands scale with quantitative SEO, performance marketing, and server-side tracking integrity.',
@@ -360,10 +359,12 @@ export async function subscribeNewsletter(email: string, honeypot = ''): Promise
 }
 
 // Upload file to Firebase Storage if available, returns download URL
+/**
+ * Uploads an image to Firebase Storage through the admin-only server route (/api/upload).
+ * (Direct browser uploads need Storage security rules; the server route uses the service account.)
+ */
 export async function uploadMediaFile(file: File, folder = 'uploads'): Promise<string> {
-  const fileExt = file.name.split('.').pop() || 'jpg';
-  const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
-  const fileRef = ref(storage, fileName);
-  await uploadBytes(fileRef, file);
-  return await getDownloadURL(fileRef);
+  const { uploadImage } = await import('./admin-service');
+  const res = await uploadImage(file, folder);
+  return res.url;
 }

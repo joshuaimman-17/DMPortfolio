@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { subscribeNewsletter } from '@/lib/client-api';
+import { cleanSocialUrl } from '@/lib/social';
 import { SiteSettings, DEFAULT_SETTINGS } from '@/types/settings';
 
 interface FooterProps {
@@ -20,6 +21,9 @@ export const Footer: React.FC<FooterProps> = ({
   const [honeypot, setHoneypot] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const linkedinUrl = cleanSocialUrl(settings?.social?.linkedin);
+  const twitterUrl = cleanSocialUrl(settings?.social?.twitter);
+  const githubUrl = cleanSocialUrl(settings?.social?.github);
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,33 +70,39 @@ export const Footer: React.FC<FooterProps> = ({
               Helping high-growth B2B SaaS and D2C brands scale with quantitative SEO, performance marketing, and server-side tracking integrity.
             </p>
             <div className="flex items-center gap-3 pt-1">
+              {linkedinUrl && (
               <a
                 aria-label="LinkedIn"
                 className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors font-bold text-xs"
-                href="https://linkedin.com"
+                href={linkedinUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
               >
                 in
               </a>
+              )}
+              {twitterUrl && (
               <a
                 aria-label="X / Twitter"
                 className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors font-bold text-xs"
-                href="https://x.com"
+                href={twitterUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
               >
                 𝕏
               </a>
+              )}
+              {githubUrl && (
               <a
                 aria-label="GitHub"
                 className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
-                href="https://github.com"
+                href={githubUrl}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
               >
                 <span className="material-symbols-outlined text-[18px]">code</span>
               </a>
+              )}
             </div>
           </div>
 
@@ -258,14 +268,6 @@ export const Footer: React.FC<FooterProps> = ({
                 Schedule Strategy Call
               </button>
             )}
-            <Link
-              href="/admin"
-              className="text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-semibold border-l border-slate-700 pl-4"
-              title="Open Firebase Admin Dashboard"
-            >
-              <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
-              <span>Admin Console</span>
-            </Link>
           </div>
         </div>
       </div>

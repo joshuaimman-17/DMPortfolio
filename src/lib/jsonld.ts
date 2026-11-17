@@ -1,5 +1,6 @@
 import type { SiteSettings } from '@/types/settings';
 import { getSiteUrl } from '@/lib/site-url';
+import { cleanSocialUrl } from '@/lib/social';
 
 /** All structured data is built from Firestore content (settings, services, posts) — nothing hard-coded. */
 
@@ -17,9 +18,9 @@ function clean<T extends Record<string, any>>(obj: T): T {
 }
 
 function socialLinks(settings: SiteSettings): string[] {
-  return Object.values(settings.social || {}).filter(
-    (u): u is string => typeof u === 'string' && /^https?:\/\//.test(u.trim())
-  );
+  return Object.values(settings.social || {})
+    .map((u) => cleanSocialUrl(u))
+    .filter(Boolean);
 }
 
 export function getPersonJsonLd(settings: SiteSettings, services: { title: string }[] = []) {

@@ -1,6 +1,7 @@
 import { getServices, getWorks, getPosts, getTestimonials, getSiteSettings } from '@/lib/data';
 import { mergeHome } from '@/types/home-content';
 import { getSiteUrl } from '@/lib/site-url';
+import { cleanSocialUrl } from '@/lib/social';
 
 /**
  * Builds llms.txt / llms-full.txt purely from live Firestore content (cached with tags, so any
@@ -146,7 +147,8 @@ export async function buildLlmsText(full: boolean): Promise<string> {
   if (settings.contact?.whatsapp) push(`- WhatsApp: ${settings.contact.whatsapp}`);
   if (settings.contact?.location) push(`- Location: ${settings.contact.location}`);
   for (const [k, v] of Object.entries(settings.social || {})) {
-    if (typeof v === 'string' && /^https?:\/\//.test(v)) push(`- ${k[0].toUpperCase() + k.slice(1)}: ${v}`);
+    const url = cleanSocialUrl(v);
+    if (url) push(`- ${k[0].toUpperCase() + k.slice(1)}: ${url}`);
   }
   push(`- Book a growth diagnostic: ${baseUrl}/#contact`);
   push(full ? `- Short summary: ${baseUrl}/llms.txt` : `- Full documentation: ${baseUrl}/llms-full.txt`);

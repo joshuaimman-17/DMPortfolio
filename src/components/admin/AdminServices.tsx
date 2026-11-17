@@ -5,6 +5,7 @@ import { usePortfolioData } from '../../context/PortfolioContext';
 import { ServiceDetail } from '@/types/content';
 import { triggerRevalidation } from '../../lib/admin-service';
 import { ItemSeo } from './ItemSeo';
+import { validateSlug } from '../../lib/slug';
 
 export const AdminServices: React.FC = () => {
   const { services: cachedServices, refreshData, showToast } = usePortfolioData();
@@ -139,8 +140,9 @@ export const AdminServices: React.FC = () => {
       showToast('Please enter a service title', 'error');
       return;
     }
-    if (!formData.slug.trim()) {
-      showToast('Please enter a unique URL slug', 'error');
+    const slugError = validateSlug(formData.slug);
+    if (slugError) {
+      showToast(slugError, 'error');
       return;
     }
 

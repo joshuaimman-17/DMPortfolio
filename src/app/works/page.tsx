@@ -14,7 +14,10 @@ type Props = {
 
 export const revalidate = false;
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  // Filtered views (/works?type=...) stay out of the index; canonical remains /works
+  const sp = await searchParams;
+  const isFiltered = sp.type !== undefined;
   const pageMeta = await getPageMetadata('route_works', {
     title: 'Proof of Work & Case Studies',
     description:
@@ -25,6 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: pageMeta.title,
     description: pageMeta.description,
+    ...(isFiltered ? { robots: { index: false, follow: true } } : {}),
     alternates: {
       canonical: pageMeta.alternates.canonical,
     },
