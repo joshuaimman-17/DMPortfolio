@@ -29,11 +29,11 @@ export const NON_INDEXABLE_PREFIXES = [
 ] as const;
 
 /**
- * Query-string variants of otherwise indexable pages that should stay out of the index.
- * These are NOT part of the "private routes" rule above: they are duplicate filtered views
- * (canonical points at the unfiltered page) and are intentionally noindex, follow.
+ * Query-string variants of otherwise indexable pages that should be noindex (e.g. duplicate filtered views).
+ * Currently EMPTY on purpose: /works?type=X filter views are indexable. Add { path, param } here to noindex a variant.
+ * These are NOT part of the "private routes" rule above.
  */
-export const NOINDEX_QUERY_VARIANTS = [{ path: '/works', param: 'type' }] as const;
+export const NOINDEX_QUERY_VARIANTS: ReadonlyArray<{ path: string; param: string }> = [];
 
 /** robots.txt Disallow entries (each prefix with and without trailing slash). */
 export const ROBOTS_DISALLOW: string[] = NON_INDEXABLE_PREFIXES.flatMap((p) => [p, `${p}/`]);
