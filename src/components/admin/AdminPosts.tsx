@@ -4,7 +4,8 @@ import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
 import { uploadMediaFile } from '../../lib/portfolioService';
 import { BlogPostDetail } from '@/types/content';
-import { triggerRevalidation } from '../../lib/admin-service';
+import { triggerRevalidation, saveItemViaApi } from '../../lib/admin-service';
+import { SlugField } from './SlugField';
 import { ItemSeo } from './ItemSeo';
 import { validateSlug } from '../../lib/slug';
 import { ImageField } from './ImageField';
@@ -203,12 +204,19 @@ export const AdminPosts: React.FC = () => {
     };
 
     try {
-      await setDoc(doc(db, 'posts', formData.slug), payload);
-      showToast(`Article "${formData.title}" saved!`, 'success');
+      // Server-side, rename-safe save: moves the doc + SEO metadata + references when the slug changed,
+      // records the old slug for 308 redirects, and revalidates the affected pages.
+      const oldSlug: string | null = isNew ? null : editingItem.slug || editingItem.id;
+      const result = await saveItemViaApi({ kind: 'post', oldSlug, newSlug: formData.slug, payload });
+      showToast(
+        result.renamed
+          ? `Article "${formData.title}" saved. /blog/${oldSlug} now redirects to /blog/${result.slug}.`
+          : `Article "${formData.title}" saved!`,
+        'success'
+      );
       setEditingItem(null);
       await loadAllPosts();
       await refreshData();
-      await triggerRevalidation(['posts'], ['/', '/blog', `/blog/${formData.slug}`]);
     } catch (err: any) {
       showToast(err.message || 'Failed to save article', 'error');
     }
@@ -311,16 +319,15 @@ export const AdminPosts: React.FC = () => {
               />
             </div>
 
-            <div>
-              <label className="text-xs font-bold text-neutral-800 block mb-1">URL Slug (Unique ID) *</label>
-              <input
-                type="text"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                placeholder="e.g. core-update-recovery"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-sm font-mono"
-              />
-            </div>
+            <SlugField
+              kind="post"
+              value={formData.slug}
+              onChange={(slug) => setFormData({ ...formData, slug })}
+              title={formData.title}
+              savedSlug={isNew ? null : editingItem?.slug || editingItem?.id || null}
+              previousSlugs={isNew ? [] : editingItem?.previousSlugs || []}
+              placeholder="e.g. core-update-recovery"
+            />
 
             <div>
               <label className="text-xs font-bold text-neutral-800 block mb-1">Category</label>

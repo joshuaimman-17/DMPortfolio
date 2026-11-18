@@ -63,6 +63,37 @@ export async function triggerRevalidation(
   }
 }
 
+export interface SaveItemResponse {
+  renamed: boolean;
+  slug: string;
+  previousSlugs: string[];
+}
+
+/**
+ * Rename-safe save for a service / work / post via the server (/api/admin/items/save).
+ * The server moves the document, its SEO metadata and any references when the slug changes,
+ * records the old slug for 308 redirects, and revalidates the affected pages.
+ * Throws an Error with a user-presentable message on failure.
+ */
+export async function saveItemViaApi(args: {
+  kind: 'service' | 'work' | 'post';
+  oldSlug: string | null;
+  newSlug: string;
+  payload: Record<string, any>;
+}): Promise<SaveItemResponse> {
+  const user = auth.currentUser;
+  if (!user) throw new Error('You are signed out. Please sign in again.');
+  const idToken = await user.getIdToken();
+  const res = await fetch('/api/admin/items/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idToken, ...args }),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body?.error || `Save failed (${res.status})`);
+  return body as SaveItemResponse;
+}
+
 /**
  * Check admin status for UI gate
  */

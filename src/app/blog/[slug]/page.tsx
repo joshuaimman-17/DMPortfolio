@@ -1,8 +1,8 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { getPostBySlug, getPosts, getSiteSettings, getPageMetadata } from '@/lib/data';
+import { notFound, permanentRedirect } from 'next/navigation';
+import { getPostBySlug, getPosts, getRenamedSlugTarget, getSiteSettings, getPageMetadata } from '@/lib/data';
 import { SiteShell } from '@/context/ModalContext';
 import { DriveImage } from '@/components/common/DriveImage';
 import { AuditButton } from '@/components/common/ActionButtons';
@@ -78,6 +78,9 @@ export default async function BlogDetailPage({ params }: Props) {
   ]);
 
   if (!post) {
+    // Renamed in the admin? Send the old URL to the current one (308) instead of a 404.
+    const current = await getRenamedSlugTarget('post', slug);
+    if (current) permanentRedirect(`/blog/${current}`);
     notFound();
   }
 

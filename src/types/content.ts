@@ -1,6 +1,8 @@
 // Content shapes stored in Firestore (services, works, showcase, posts).
 export interface ServiceDetail {
   slug: string;
+  /** Former slugs, newest last. Requests for these 308-redirect to the current slug. */
+  previousSlugs?: string[];
   title: string;
   icon: string;
   summary: string;
@@ -15,6 +17,8 @@ export interface ServiceDetail {
 
 export interface WorkDetail {
   slug: string;
+  /** Former slugs, newest last. Requests for these 308-redirect to the current slug. */
+  previousSlugs?: string[];
   client: string;
   title: string;
   industry: string;
@@ -50,6 +54,8 @@ export interface ShowcaseItem {
 
 export interface BlogPostDetail {
   slug: string;
+  /** Former slugs, newest last. Requests for these 308-redirect to the current slug. */
+  previousSlugs?: string[];
   title: string;
   category: string;
   excerpt: string;

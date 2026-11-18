@@ -3,7 +3,8 @@ import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore'
 import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
 import { ServiceDetail } from '@/types/content';
-import { triggerRevalidation } from '../../lib/admin-service';
+import { triggerRevalidation, saveItemViaApi } from '../../lib/admin-service';
+import { SlugField } from './SlugField';
 import { ItemSeo } from './ItemSeo';
 import { validateSlug } from '../../lib/slug';
 
@@ -167,12 +168,19 @@ export const AdminServices: React.FC = () => {
     };
 
     try {
-      await setDoc(doc(db, 'services', formData.slug), payload);
-      showToast(`Service "${formData.title}" saved successfully!`, 'success');
+      // Server-side, rename-safe save: moves the doc + SEO metadata + references when the slug changed,
+      // records the old slug for 308 redirects, and revalidates the affected pages.
+      const oldSlug: string | null = isNew ? null : editingItem.slug || editingItem.id;
+      const result = await saveItemViaApi({ kind: 'service', oldSlug, newSlug: formData.slug, payload });
+      showToast(
+        result.renamed
+          ? `Service "${formData.title}" saved. /services/${oldSlug} now redirects to /services/${result.slug}.`
+          : `Service "${formData.title}" saved successfully!`,
+        'success'
+      );
       setEditingItem(null);
       await loadAllServices();
       await refreshData();
-      await triggerRevalidation(['services'], ['/', '/services', `/services/${formData.slug}`]);
     } catch (err: any) {
       showToast(err.message || 'Failed to save service', 'error');
     }
@@ -277,16 +285,15 @@ export const AdminServices: React.FC = () => {
               />
             </div>
 
-            <div>
-              <label className="text-xs font-bold text-neutral-800 block mb-1">URL Slug (Unique ID) *</label>
-              <input
-                type="text"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                placeholder="e.g. seo-search-architecture"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
+            <SlugField
+              kind="service"
+              value={formData.slug}
+              onChange={(slug) => setFormData({ ...formData, slug })}
+              title={formData.title}
+              savedSlug={isNew ? null : editingItem?.slug || editingItem?.id || null}
+              previousSlugs={isNew ? [] : editingItem?.previousSlugs || []}
+              placeholder="e.g. seo-search-architecture"
+            />
 
             <div>
               <label className="text-xs font-bold text-neutral-800 block mb-1">Google Material Symbol Icon</label>

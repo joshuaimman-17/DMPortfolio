@@ -4,7 +4,8 @@ import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
 import { uploadMediaFile } from '../../lib/portfolioService';
 import { WorkDetail, ShowcaseItem } from '@/types/content';
-import { triggerRevalidation } from '../../lib/admin-service';
+import { triggerRevalidation, saveItemViaApi } from '../../lib/admin-service';
+import { SlugField } from './SlugField';
 import { ItemSeo } from './ItemSeo';
 import { validateSlug } from '../../lib/slug';
 import { ImageField } from './ImageField';
@@ -207,12 +208,19 @@ export const AdminWorks: React.FC = () => {
     };
 
     try {
-      await setDoc(doc(db, 'works', formData.slug), payload);
-      showToast(`Case Study "${formData.title}" saved successfully!`, 'success');
+      // Server-side, rename-safe save: moves the doc + SEO metadata + references when the slug changed,
+      // records the old slug for 308 redirects, and revalidates the affected pages.
+      const oldSlug: string | null = isNew ? null : editingItem.slug || editingItem.id;
+      const result = await saveItemViaApi({ kind: 'work', oldSlug, newSlug: formData.slug, payload });
+      showToast(
+        result.renamed
+          ? `Case Study "${formData.title}" saved. /works/${oldSlug} now redirects to /works/${result.slug}.`
+          : `Case Study "${formData.title}" saved successfully!`,
+        'success'
+      );
       setEditingItem(null);
       await loadAllWorks();
       await refreshData();
-      await triggerRevalidation(['works'], ['/', '/works', `/works/${formData.slug}`]);
     } catch (err: any) {
       showToast(err.message || 'Failed to save case study', 'error');
     }
@@ -338,16 +346,15 @@ export const AdminWorks: React.FC = () => {
               />
             </div>
 
-            <div>
-              <label className="text-xs font-bold text-neutral-800 block mb-1">URL Slug (Unique ID) *</label>
-              <input
-                type="text"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                placeholder="e.g. payflow-systems"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
+            <SlugField
+              kind="work"
+              value={formData.slug}
+              onChange={(slug) => setFormData({ ...formData, slug })}
+              title={formData.title}
+              savedSlug={isNew ? null : editingItem?.slug || editingItem?.id || null}
+              previousSlugs={isNew ? [] : editingItem?.previousSlugs || []}
+              placeholder="e.g. payflow-systems"
+            />
 
             <div>
               <label className="text-xs font-bold text-neutral-800 block mb-1">Duration &amp; Timeline</label>

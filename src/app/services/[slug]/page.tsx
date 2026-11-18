@@ -1,8 +1,8 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { getServiceBySlug, getWorks, getSiteSettings, getServices, getPageMetadata } from '@/lib/data';
+import { notFound, permanentRedirect } from 'next/navigation';
+import { getServiceBySlug, getWorks, getRenamedSlugTarget, getSiteSettings, getServices, getPageMetadata } from '@/lib/data';
 import { SiteShell } from '@/context/ModalContext';
 import { AuditButton } from '@/components/common/ActionButtons';
 import { DriveImage } from '@/components/common/DriveImage';
@@ -78,6 +78,9 @@ export default async function ServiceDetailPage({ params }: Props) {
   ]);
 
   if (!service) {
+    // Renamed in the admin? Send the old URL to the current one (308) instead of a 404.
+    const current = await getRenamedSlugTarget('service', slug);
+    if (current) permanentRedirect(`/services/${current}`);
     notFound();
   }
 

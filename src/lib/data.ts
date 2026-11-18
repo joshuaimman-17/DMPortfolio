@@ -23,6 +23,7 @@ import {
 import { SiteSettings, DEFAULT_SETTINGS, PageMetadata } from '@/types/settings';
 import { mergeHome } from '@/types/home-content';
 import { getSiteUrl } from '@/lib/site-url';
+import { findCurrentSlug } from '@/lib/slug-redirects';
 export { type SiteSettings, DEFAULT_SETTINGS, type PageMetadata };
 
 // Suppress benign gRPC idle stream disconnection notices on the server
@@ -220,6 +221,16 @@ export async function getWorkBySlug(slug: string): Promise<WorkDetail | undefine
 export async function getPostBySlug(slug: string): Promise<BlogPostDetail | undefined> {
   const all = await getPosts();
   return all.find((p) => p.slug === slug);
+}
+
+/**
+ * If `slug` is a retired URL of a published item (it was renamed in the admin), returns that item's
+ * current slug so the detail page can 308-redirect; otherwise null. Uses the same cached lists as
+ * the pages, which the admin save revalidates.
+ */
+export async function getRenamedSlugTarget(kind: 'service' | 'work' | 'post', slug: string): Promise<string | null> {
+  const items = kind === 'service' ? await getServices() : kind === 'work' ? await getWorks() : await getPosts();
+  return findCurrentSlug(items, slug);
 }
 
 /**

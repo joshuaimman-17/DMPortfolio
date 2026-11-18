@@ -1,8 +1,8 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { getWorkBySlug, getWorks, getShowcase, getSiteSettings, getPageMetadata } from '@/lib/data';
+import { notFound, permanentRedirect } from 'next/navigation';
+import { getWorkBySlug, getWorks, getRenamedSlugTarget, getShowcase, getSiteSettings, getPageMetadata } from '@/lib/data';
 import { SiteShell } from '@/context/ModalContext';
 import { AuditButton, LightboxTrigger } from '@/components/common/ActionButtons';
 import { DriveImage } from '@/components/common/DriveImage';
@@ -79,6 +79,9 @@ export default async function WorkDetailPage({ params }: Props) {
   ]);
 
   if (!work) {
+    // Renamed in the admin? Send the old URL to the current one (308) instead of a 404.
+    const current = await getRenamedSlugTarget('work', slug);
+    if (current) permanentRedirect(`/works/${current}`);
     notFound();
   }
 

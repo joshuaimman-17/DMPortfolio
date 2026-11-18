@@ -13,3 +13,13 @@ export function validateSlug(slug: string): string | null {
   }
   return null;
 }
+
+/** Builds a valid slug from a title (lowercase, hyphen-separated, trimmed to SLUG_MAX_LENGTH). */
+export function slugifyTitle(title: string): string {
+  return (title || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, SLUG_MAX_LENGTH)
+    .replace(/-+$/g, '');
+}
