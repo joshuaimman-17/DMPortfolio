@@ -13,3 +13,6 @@ coverage/
 # Service account key (never commit)
 serviceAcountKey.json
 serviceAccountKey.json
+
+# migration backups (full copies of Firestore docs)
+scripts/.backups/

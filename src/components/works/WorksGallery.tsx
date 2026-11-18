@@ -114,9 +114,9 @@ function GalleryView({ works, showcase, lightboxItems, activeType }: GalleryProp
                     <div className="text-[11px] font-bold text-primary uppercase tracking-wider mb-1">
                       {wrk.client} · {wrk.duration}
                     </div>
-                    <h3 className="font-headline-md text-base font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-2">
+                    <h2 className="font-headline-md text-base font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-2">
                       {wrk.title}
-                    </h3>
+                    </h2>
                     <p className="text-xs text-on-surface-variant mt-2 line-clamp-2 leading-relaxed">
                       {wrk.challenge}
                     </p>
@@ -163,9 +163,9 @@ function GalleryView({ works, showcase, lightboxItems, activeType }: GalleryProp
                   <div className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider">
                     {sc.client}
                   </div>
-                  <h4 className="font-bold text-sm text-on-surface mt-1 line-clamp-1 group-hover:text-primary transition-colors">
+                  <h2 className="font-bold text-sm text-on-surface mt-1 line-clamp-1 group-hover:text-primary transition-colors">
                     {sc.title}
-                  </h4>
+                  </h2>
                   {sc.highlight && (
                     <p className="text-xs text-secondary font-semibold mt-1 line-clamp-1">{sc.highlight}</p>
                   )}

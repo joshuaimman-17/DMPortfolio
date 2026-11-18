@@ -22,7 +22,9 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   // render inside <head> for every crawler instead of being streamed into <body>.
   const { type } = await searchParams;
   const filter = typeof type === 'string' && FILTER_TYPES.includes(type) ? type : null;
-  const pageMeta = await getPageMetadata('route_works', {
+  // Filter views read their own Firestore doc (pages_metadata/route_works_<type>), never the generic route_works one.
+  // If that doc doesn't exist yet, getPageMetadata falls back to the defaults below (the generic /works copy).
+  const pageMeta = await getPageMetadata(filter ? `route_works_${filter}` : 'route_works', {
     title: 'Proof of Work & Case Studies',
     description:
       'Forensic case studies, unedited Google Search Console curves, and high-converting ad creative assets across B2B SaaS and D2C brands.',
