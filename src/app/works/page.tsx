@@ -8,14 +8,25 @@ import { LightboxItem } from '@/components/LightboxModal';
 
 export const revalidate = false;
 
-export async function generateMetadata(): Promise<Metadata> {
-  // Static: no searchParams. Filtered views (/works?type=...) are noindexed via the X-Robots-Tag
-  // rule in src/lib/indexing.ts; their canonical stays this fixed /works path.
+// The only filter values that get their own canonical URL (hardcoded: must match the chip ids in
+// components/works/WorksGallery.tsx). Anything else (unknown ?type=, tracking params, ...) canonicalizes to /works.
+const FILTER_TYPES = ['case-studies', 'poster', 'analytics', 'seo-site', 'social', 'ad', 'email'];
+
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  // Each known filter view self-canonicalizes (/works?type=poster -> itself) and is indexable.
+  // Reading searchParams makes this route dynamic; next.config.ts sets htmlLimitedBots so the tags still
+  // render inside <head> for every crawler instead of being streamed into <body>.
+  const { type } = await searchParams;
+  const filter = typeof type === 'string' && FILTER_TYPES.includes(type) ? type : null;
   const pageMeta = await getPageMetadata('route_works', {
     title: 'Proof of Work & Case Studies',
     description:
       'Forensic case studies, unedited Google Search Console curves, and high-converting ad creative assets across B2B SaaS and D2C brands.',
-    path: '/works',
+    path: filter ? `/works?type=${filter}` : '/works',
   });
 
   return {

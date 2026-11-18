@@ -24,6 +24,9 @@ const cspReportOnly = [
 const nextConfig: NextConfig = {
   output: 'standalone',
   reactStrictMode: true,
+  // Resolve metadata before streaming for ALL user agents, so <title>/canonical/OG/Twitter tags are always in
+  // <head> even on routes that read searchParams (/works). Default only does this for a short list of bots.
+  htmlLimitedBots: /.*/,
   async headers() {
     return [
       // Site-wide security headers (specific /admin and /api rules below are listed last so they take precedence)
