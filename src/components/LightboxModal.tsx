@@ -105,6 +105,8 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
       >
         <div className="relative overflow-hidden rounded-2xl shadow-2xl bg-neutral-950 max-h-[72vh] flex items-center justify-center border border-white/10">
           <img
+            width={1200}
+            height={800}
             src={currentItem.image}
             alt={currentItem.title}
             className="max-h-[72vh] w-auto max-w-full object-contain transition-transform duration-300"

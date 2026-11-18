@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { indexingHeaders } from './src/lib/indexing';
 
 const isDev = process.env.NODE_ENV !== 'production';
 const authDomain = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN;
@@ -36,10 +37,11 @@ const nextConfig: NextConfig = {
           { key: 'X-Content-Type-Options', value: 'nosniff' },
         ],
       },
+      // noindex rules for /admin, /login, /api, auth routes and ?type= filters come from the central policy
+      ...indexingHeaders(),
       {
         source: '/admin/:path*',
         headers: [
-          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
           { key: 'Cache-Control', value: 'no-store' },
           { key: 'X-Frame-Options', value: 'DENY' },
         ],

@@ -57,6 +57,8 @@ export const Footer: React.FC<FooterProps> = ({
             <div className="flex items-center gap-3">
               {settings?.hero?.logo && (
                 <img
+                  width={32}
+                  height={32}
                   alt={`${settings?.name || ''} Logo`}
                   className="h-8 w-auto object-contain brightness-0 invert"
                   src={settings.hero.logo}

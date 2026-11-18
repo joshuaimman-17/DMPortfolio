@@ -247,7 +247,8 @@ export async function getPageMetadata(
     title: `${fallback.title} | ${siteName}`,
     description: fallback.description,
     alternates: {
-      canonical: cleanPath,
+      // Absolute URL = env-based site URL + code-defined path. Never taken from Firestore.
+      canonical: fullUrl,
     },
     openGraph: {
       title: `${fallback.title} | ${siteName}`,
@@ -281,12 +282,16 @@ export async function getPageMetadata(
       title: data.title ? (data.title.includes(siteName) ? data.title : `${data.title} | ${siteName}`) : defaultMeta.title,
       description: data.description || defaultMeta.description,
       alternates: {
-        canonical: data.alternates?.canonical || defaultMeta.alternates.canonical,
+        // Canonical is fixed by code (static pages: hardcoded path; dynamic pages: route + slug).
+        // Any alternates.canonical stored in Firestore is intentionally ignored so it cannot drift.
+        canonical: defaultMeta.alternates.canonical,
       },
       openGraph: {
         title: data.openGraph?.title || data.title || defaultMeta.openGraph.title,
         description: data.openGraph?.description || data.description || defaultMeta.openGraph.description,
-        url: data.openGraph?.url || defaultMeta.openGraph.url,
+        // og:url always mirrors the resolved canonical; the stored openGraph.url is ignored
+        // (it was hardcoded to a stale domain). Other OG fields stay editable in Firestore.
+        url: defaultMeta.alternates.canonical,
         siteName: siteName,
         locale: 'en_US',
         type: 'website',

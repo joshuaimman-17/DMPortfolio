@@ -1,4 +1,11 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getSiteUrl } from '@/lib/site-url';
+
+export const metadata: Metadata = {
+  // Env-based site root (NEXT_PUBLIC_SITE_URL). Next adds noindex to not-found pages automatically.
+  alternates: { canonical: getSiteUrl() },
+};
 
 export default function NotFound() {
   return (

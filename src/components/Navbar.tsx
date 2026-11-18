@@ -115,6 +115,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
           >
             {settings?.hero?.logo && (
               <img
+                width={32}
+                height={32}
                 alt={`${settings?.name || ''} Logo`}
                 className="h-7 sm:h-8 w-auto object-contain transition-transform group-hover:scale-105 shrink-0"
                 src={settings.hero.logo}
@@ -166,6 +168,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
 
             {settings?.hero?.avatar && (
               <img
+                width={512}
+                height={512}
                 alt={settings?.name || ''}
                 className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20 hidden sm:inline-block"
                 src={settings.hero.avatar}

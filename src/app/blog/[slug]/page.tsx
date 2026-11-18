@@ -283,9 +283,9 @@ export default async function BlogDetailPage({ params }: Props) {
                       <span className="text-[10px] font-bold uppercase text-primary tracking-wider">
                         {rPost.category}
                       </span>
-                      <h4 className="font-bold text-sm text-on-surface mt-1 line-clamp-2 group-hover:text-primary transition-colors">
+                      <h3 className="font-bold text-sm text-on-surface mt-1 line-clamp-2 group-hover:text-primary transition-colors">
                         {rPost.title}
-                      </h4>
+                      </h3>
                     </div>
                   </div>
                   <div className="p-5 pt-0">

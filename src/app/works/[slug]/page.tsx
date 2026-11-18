@@ -188,9 +188,9 @@ export default async function WorkDetailPage({ params }: Props) {
             <span className="text-xs font-bold uppercase tracking-wider text-primary block mb-2">
               01. The Objective
             </span>
-            <h3 className="font-headline-md text-lg font-bold text-on-surface mb-3">
+            <h2 className="font-headline-md text-lg font-bold text-on-surface mb-3">
               Growth Milestone
-            </h3>
+            </h2>
             <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
               {work.goal}
             </p>
@@ -200,9 +200,9 @@ export default async function WorkDetailPage({ params }: Props) {
             <span className="text-xs font-bold uppercase tracking-wider text-rose-600 block mb-2">
               02. The Friction Point
             </span>
-            <h3 className="font-headline-md text-lg font-bold text-on-surface mb-3">
+            <h2 className="font-headline-md text-lg font-bold text-on-surface mb-3">
               Core Challenge
-            </h3>
+            </h2>
             <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
               {work.challenge}
             </p>
@@ -212,9 +212,9 @@ export default async function WorkDetailPage({ params }: Props) {
             <span className="text-xs font-bold uppercase tracking-wider text-secondary block mb-2">
               03. The Protocol
             </span>
-            <h3 className="font-headline-md text-lg font-bold text-on-surface mb-3">
+            <h2 className="font-headline-md text-lg font-bold text-on-surface mb-3">
               Engineering Strategy
-            </h3>
+            </h2>
             <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
               {work.strategy}
             </p>
@@ -243,7 +243,7 @@ export default async function WorkDetailPage({ params }: Props) {
                     <span className="text-[11px] font-mono font-bold text-primary uppercase block mb-1">
                       {step.step}
                     </span>
-                    <h4 className="font-bold text-sm text-on-surface mb-2">{step.title}</h4>
+                    <h3 className="font-bold text-sm text-on-surface mb-2">{step.title}</h3>
                     <p className="text-xs text-on-surface-variant leading-relaxed">{step.desc}</p>
                   </div>
                 </div>
@@ -260,9 +260,9 @@ export default async function WorkDetailPage({ params }: Props) {
                 <span className="text-xs font-bold uppercase tracking-wider text-primary">
                   Artifact Verification
                 </span>
-                <h3 className="font-headline-md text-2xl font-bold text-on-surface mt-1">
+                <h2 className="font-headline-md text-2xl font-bold text-on-surface mt-1">
                   Deliverables &amp; SERP Curves
-                </h3>
+                </h2>
               </div>
               <span className="text-xs text-on-surface-variant">Click to expand preview</span>
             </div>
