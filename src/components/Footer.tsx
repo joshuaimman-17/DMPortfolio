@@ -55,21 +55,12 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Col 1: Bio & Branding */}
           <div className="lg:col-span-4 flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              {settings?.hero?.logo && (
-                <img
-                  width={32}
-                  height={32}
-                  alt={`${settings?.name || ''} Logo`}
-                  className="h-8 w-auto object-contain brightness-0 invert"
-                  src={settings.hero.logo}
-                />
-              )}
               <span className="text-xl text-white font-bold tracking-tight">
                 {settings?.name || ''}
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-400 max-w-sm leading-relaxed">
-              Helping high-growth B2B SaaS and D2C brands scale with quantitative SEO, performance marketing, and server-side tracking integrity.
+              {settings?.footer?.tagline}
             </p>
             <div className="flex items-center gap-3 pt-1">
               {linkedinUrl && (
@@ -239,7 +230,7 @@ export const Footer: React.FC<FooterProps> = ({
 
         {/* Bottom Legal / Copyright Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>{settings?.footer?.copyright || `© ${new Date().getFullYear()} Alex Rivera. All rights reserved.`}</p>
+          <p>{settings?.footer?.copyright || `© ${new Date().getFullYear()} ${settings?.name || ''}. All rights reserved.`}</p>
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 sm:gap-6">
             <Link
               href="/#contact"

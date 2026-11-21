@@ -9,23 +9,6 @@ export interface HomeContent {
     avatarAlt: string;
   };
   metricsBar: { items: { icon: string; tag: string }[] };
-  roas: {
-    badge: string;
-    title: string;
-    description: string;
-    engine: string;
-    spendLabel: string;
-    aovLabel: string;
-    conversionLabel: string;
-    cpcLabel: string;
-    outcomeLabel: string;
-    returnLabel: string;
-    revenueLabel: string;
-    cacLabel: string;
-    customersLabel: string;
-    marginLabel: string;
-    ctaLabel: string;
-  };
   inquiryForm: {
     title: string;
     intro: string;
@@ -51,7 +34,7 @@ export interface HomeContent {
     toolsEyebrow: string;
     toolsHeading: string;
     toolsNote: string;
-    tools: { name: string; icon: string; level: string; color?: string }[];
+    tools: { name: string; icon: string; brand?: string; level: string; color?: string }[];
   };
   services: { eyebrow: string; heading: string; subtext: string; viewAllLabel: string };
   works: {
@@ -109,24 +92,6 @@ export const DEFAULT_HOME: HomeContent = {
       { icon: 'payments', tag: 'Capital' },
       { icon: 'verified_user', tag: 'Track Record' },
     ],
-  },
-  roas: {
-    badge: 'Interactive Growth Modeler',
-    title: 'Estimate Your Revenue & ROAS Potential',
-    description:
-      'Adjust budget, conversion rate, and average ticket size to project channel output with audited campaign hygiene.',
-    engine: 'Live Modeling Engine',
-    spendLabel: 'Monthly Ad Spend Budget',
-    aovLabel: 'Average Order Value / Deal Size',
-    conversionLabel: 'Conversion Rate',
-    cpcLabel: 'Target CPC (Blended)',
-    outcomeLabel: 'Projected Outcome',
-    returnLabel: 'Target Return',
-    revenueLabel: 'Monthly Revenue',
-    cacLabel: 'Target CAC',
-    customersLabel: 'Est. Customers',
-    marginLabel: 'Est. Gross Margin',
-    ctaLabel: 'Audit My Funnel for This ROAS',
   },
   inquiryForm: {
     title: 'Direct Project Inquiry',

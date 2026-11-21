@@ -80,14 +80,14 @@ function GalleryView({ works, showcase, lightboxItems, activeType }: GalleryProp
       </div>
 
       {/* Unified Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <section className="columns-1 md:columns-2 lg:columns-3 gap-6">
         {filteredItems.map((item) => {
           if (item.kind === 'work') {
             const wrk = item.data;
             return (
               <div
                 key={`work-${wrk.slug}`}
-                className="bg-surface-container-lowest rounded-2xl overflow-hidden border border-neutral-200 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between group"
+                className="mb-6 break-inside-avoid bg-surface-container-lowest rounded-2xl overflow-hidden border border-neutral-200 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between group"
               >
                 <div>
                   <div className="relative aspect-[16/10] overflow-hidden">
@@ -142,11 +142,12 @@ function GalleryView({ works, showcase, lightboxItems, activeType }: GalleryProp
               key={`showcase-${sc.id}`}
               index={item.originalIndex}
               items={lightboxItems}
-              className="group"
+              className="group mb-6 block break-inside-avoid"
             >
-              <div className="bg-surface-container-lowest rounded-2xl overflow-hidden border border-neutral-200 shadow-sm hover:shadow-lg transition-all h-full flex flex-col justify-between">
-                <div className="relative aspect-[16/10] overflow-hidden bg-neutral-100">
+              <div className="bg-surface-container-lowest rounded-2xl overflow-hidden border border-neutral-200 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between">
+                <div className="relative overflow-hidden bg-neutral-100">
                   <DriveImage
+                    natural
                     src={sc.image}
                     alt={sc.title}
                     title={sc.title}

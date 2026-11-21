@@ -1,3 +1,4 @@
+import { IconPicker } from './IconPicker';
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -295,21 +296,12 @@ export const AdminServices: React.FC = () => {
               placeholder="e.g. seo-search-architecture"
             />
 
-            <div>
-              <label className="text-xs font-bold text-neutral-800 block mb-1">Google Material Symbol Icon</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={formData.icon}
-                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                  placeholder="e.g. search_check, campaign, analytics"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-                <div className="w-10 h-10 rounded-xl bg-blue-50 text-primary flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-[22px]">{formData.icon}</span>
-                </div>
-              </div>
-            </div>
+            <IconPicker
+              label="Icon"
+              labelClassName="text-xs font-bold text-neutral-800 block mb-1"
+              value={formData.icon}
+              onChange={(v) => setFormData({ ...formData, icon: v })}
+            />
 
             <div>
               <label className="text-xs font-bold text-neutral-800 block mb-1">Category Tag / Subtitle</label>

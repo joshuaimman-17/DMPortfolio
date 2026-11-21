@@ -15,8 +15,8 @@ import { DEFAULT_HOME } from '@/types/home-content';
 import { SiteShell } from '@/context/ModalContext';
 import { AuditButton, LightboxTrigger } from '@/components/common/ActionButtons';
 import { DriveImage } from '@/components/common/DriveImage';
+import { ToolLogo } from '@/components/home/ToolLogo';
 import { HomeMetricsBar } from '@/components/home/HomeMetricsBar';
-import { HomeRoasWrapper } from '@/components/home/HomeRoasWrapper';
 import { HomeContactForm } from '@/components/home/HomeContactForm';
 import { HomeFaqAccordion } from '@/components/home/HomeFaqAccordion';
 import { MotionReveal } from '@/components/common/MotionWrapper';
@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const pageMeta = await getPageMetadata('route_home', {
     title: 'Alex Rivera | Growth Marketer - Performance Portfolio',
     description:
-      'Performance marketing portfolio and client acquisition platform for senior digital marketing expert. Featuring full-funnel case studies, verified organic SERP rankings, interactive ROAS calculator, and growth audit booking.',
+      'Performance marketing portfolio and client acquisition platform for senior digital marketing expert. Featuring full-funnel case studies, verified organic SERP rankings, and growth audit booking.',
     path: '/',
   });
 
@@ -75,6 +75,7 @@ export default async function HomePage() {
   const home = settings.home || DEFAULT_HOME;
 
   const activeShowcase = showcase;
+  const focusAreas = (settings.hero.roleTag || '').split('|').map((t) => t.trim()).filter(Boolean);
   const activeServices = services;
   const activeWorks = works;
   const activePosts = posts;
@@ -240,91 +241,139 @@ export default async function HomePage() {
         </section>
 
         {/* =========================================================================
-            SECTION 2: #about (ABOUT ALEX + TOOLS + CERTIFICATIONS)
+            SECTION 2: #about (STORY + EXPERIENCE TIMELINE + TOOLS)
            ========================================================================= */}
         <section id="about" className="scroll-mt-28">
           <MotionReveal direction="up">
             <div className="rounded-3xl bg-surface-container-lowest border border-neutral-200/90 shadow-xl p-6 sm:p-10 md:p-14">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-                {/* Left Text */}
-                <div className="lg:col-span-7 flex flex-col gap-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                    {home.about.eyebrow}
-                  </span>
-                  <h2 className="font-headline-xl text-2xl sm:text-4xl font-bold text-on-surface tracking-tight">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+                {/* Left: story */}
+                <div className="lg:col-span-7 flex flex-col gap-5">
+                  <div className="flex items-center gap-3">
+                    {heroAvatar && (
+                      <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-primary/20 shrink-0">
+                        <Image src={heroAvatar} alt={settings.name || ''} fill sizes="48px" className="object-cover object-top" />
+                      </div>
+                    )}
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-primary block">
+                        {home.about.eyebrow}
+                      </span>
+                      {settings.name && <span className="text-sm font-semibold text-on-surface">{settings.name}</span>}
+                    </div>
+                  </div>
+
+                  <h2 className="font-headline-xl text-2xl sm:text-4xl font-bold text-on-surface tracking-tight leading-tight">
                     {home.about.heading}
                   </h2>
                   <p className="text-sm sm:text-base text-on-surface-variant leading-relaxed">
                     {home.about.paragraph1}
                   </p>
-                  <p className="text-sm sm:text-base text-on-surface-variant leading-relaxed">
+                  <p className="text-sm sm:text-base text-on-surface-variant leading-relaxed border-l-4 border-primary/30 pl-4">
                     {home.about.paragraph2}
                   </p>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-2">
-                    <div className="p-3.5 sm:p-4 rounded-xl bg-surface-container-low border border-neutral-200">
-                      <div className="text-xs text-on-surface-variant font-medium">{home.labels.headquarters}</div>
-                      <div className="text-sm font-bold text-on-surface mt-0.5">{settings.contact.location}</div>
-                    </div>
-                    <div className="p-3.5 sm:p-4 rounded-xl bg-surface-container-low border border-neutral-200">
-                      <div className="text-xs text-on-surface-variant font-medium">{home.labels.directLine}</div>
-                      <div className="text-sm font-bold text-on-surface mt-0.5 break-all">{settings.contact.email}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Profile Photo */}
-                <div className="lg:col-span-5 flex flex-col items-center">
-                  <div className="w-full max-w-sm rounded-3xl overflow-hidden border-2 border-primary/20 shadow-2xl relative aspect-square">
-                    {heroAvatar && (
-                      <Image
-                        src={heroAvatar}
-                        alt={`${settings.name || ''} - ${home.hero.avatarAlt}`}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 400px"
-                        className="object-cover"
-                        priority
-                      />
-                    )}
-                  </div>
-                  <div className="text-center mt-3">
-                    <span className="text-sm font-bold text-on-surface block">{settings.name || 'Alex Rivera'}</span>
-                    <span className="text-xs text-on-surface-variant">{settings.hero.roleTag || home.hero.roleFallback}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tools & Certifications Matrix */}
-              <div className="mt-12 pt-10 border-t border-neutral-200/80">
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
-                  <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-secondary">
-                      {home.about.toolsEyebrow}
-                    </span>
-                    <h3 className="font-headline-md text-xl font-bold text-on-surface mt-1">
-                      {home.about.toolsHeading}
-                    </h3>
-                  </div>
-                  <span className="text-xs text-on-surface-variant">{home.about.toolsNote}</span>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                  {(home.about.tools || []).map((t) => (
-                    <div
-                      key={t.name}
-                      className="p-3.5 rounded-xl bg-surface-container-low border border-neutral-200/70 hover:border-primary/40 transition-all flex flex-col justify-between"
-                    >
-                      <span className={`material-symbols-outlined text-[24px] ${t.color}`}>
-                        {t.icon}
-                      </span>
-                      <div className="mt-2">
-                        <div className="text-xs font-bold text-on-surface">{t.name}</div>
-                        <div className="text-[10px] text-on-surface-variant">{t.level}</div>
+                  {/* Focus areas, taken from the role tag ("A | B | C") */}
+                  {focusAreas.length > 1 && (
+                    <div>
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 mb-2">Focus areas</div>
+                      <div className="flex flex-wrap gap-2">
+                        {focusAreas.map((a) => (
+                          <span
+                            key={a}
+                            className="px-3 py-1.5 rounded-full bg-primary-fixed/40 text-primary text-xs font-semibold border border-primary/10"
+                          >
+                            {a}
+                          </span>
+                        ))}
                       </div>
                     </div>
-                  ))}
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-1">
+                    <div className="p-3.5 sm:p-4 rounded-xl bg-surface-container-low border border-neutral-200 flex items-start gap-3">
+                      <span className="material-symbols-outlined text-primary text-[22px]">location_on</span>
+                      <div>
+                        <div className="text-xs text-on-surface-variant font-medium">{home.labels.headquarters}</div>
+                        <div className="text-sm font-bold text-on-surface mt-0.5">{settings.contact.location}</div>
+                      </div>
+                    </div>
+                    <div className="p-3.5 sm:p-4 rounded-xl bg-surface-container-low border border-neutral-200 flex items-start gap-3 min-w-0">
+                      <span className="material-symbols-outlined text-primary text-[22px]">mail</span>
+                      <div className="min-w-0">
+                        <div className="text-xs text-on-surface-variant font-medium">{home.labels.directLine}</div>
+                        <div className="text-sm font-bold text-on-surface mt-0.5 break-all">{settings.contact.email}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: career timeline (from published works / experience entries) */}
+                <div className="lg:col-span-5">
+                  <div className="rounded-2xl bg-[#0F172A] text-white p-6 sm:p-7 shadow-xl">
+                    <div className="flex items-center gap-2 mb-5">
+                      <span className="material-symbols-outlined text-blue-300 text-[20px]">work_history</span>
+                      <span className="text-xs font-bold uppercase tracking-wider text-blue-300">Experience</span>
+                    </div>
+                    <ol className="relative border-l border-white/15 ml-1.5 space-y-6">
+                      {works.map((w) => (
+                        <li key={w.slug} className="pl-6 relative">
+                          <span className="absolute -left-[7px] top-1.5 w-3 h-3 rounded-full bg-blue-400 ring-4 ring-[#0F172A]"></span>
+                          <div className="text-[11px] font-semibold text-blue-200">{w.duration}</div>
+                          <Link href={`/works/${w.slug}`} className="text-sm font-bold text-white hover:text-blue-300 transition-colors block mt-0.5">
+                            {w.title}
+                          </Link>
+                          <div className="text-xs text-slate-300">{w.client}</div>
+                          {w.industry && <div className="text-[11px] text-slate-400 mt-1 leading-snug">{w.industry}</div>}
+                        </li>
+                      ))}
+                    </ol>
+                    {settings.social.linkedin && (
+                      <a
+                        href={settings.social.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-6 inline-flex items-center gap-1.5 text-xs font-bold text-blue-300 hover:text-white transition-colors"
+                      >
+                        <span>View full profile on LinkedIn</span>
+                        <span className="material-symbols-outlined text-[16px]">arrow_outward</span>
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
+
+              {/* Tools & Certifications Matrix (hidden while no tools are set) */}
+              {(home.about.tools || []).length > 0 && (
+                <div className="mt-12 pt-10 border-t border-neutral-200/80">
+                  <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-secondary">
+                        {home.about.toolsEyebrow}
+                      </span>
+                      <h3 className="font-headline-md text-xl font-bold text-on-surface mt-1">
+                        {home.about.toolsHeading}
+                      </h3>
+                    </div>
+                    <span className="text-xs text-on-surface-variant">{home.about.toolsNote}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    {(home.about.tools || []).map((t) => (
+                      <div
+                        key={t.name}
+                        className="p-3.5 rounded-xl bg-surface-container-low border border-neutral-200/70 hover:border-primary/40 transition-all flex flex-col justify-between"
+                      >
+                        <ToolLogo brand={t.brand} icon={t.icon} name={t.name} color={t.color} />
+                        <div className="mt-2">
+                          <div className="text-xs font-bold text-on-surface">{t.name}</div>
+                          <div className="text-[10px] text-on-surface-variant">{t.level}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </MotionReveal>
         </section>
@@ -525,16 +574,17 @@ export default async function HomePage() {
                 <span className="text-xs text-on-surface-variant">Click any thumbnail for full-resolution inspection</span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-6 gap-4">
                 {activeShowcase.slice(0, 12).map((item, idx) => (
                   <LightboxTrigger
                     key={item.id}
                     index={idx}
                     items={lightboxItems}
-                    className="group"
+                    className="group mb-4 block break-inside-avoid"
                   >
-                    <div className="rounded-xl overflow-hidden border border-neutral-200 hover:border-primary transition-all shadow-sm hover:shadow-md aspect-square relative bg-neutral-100">
+                    <div className="rounded-xl overflow-hidden border border-neutral-200 hover:border-primary transition-all shadow-sm hover:shadow-md relative bg-neutral-100">
                       <DriveImage
+                        natural
                         src={item.image}
                         alt={item.title}
                         title={item.title}
@@ -600,15 +650,6 @@ export default async function HomePage() {
                 ))}
               </div>
             </div>
-          </MotionReveal>
-        </section>
-
-        {/* =========================================================================
-            SECTION 6: ROAS CALCULATOR
-           ========================================================================= */}
-        <section id="calculator" className="scroll-mt-28">
-          <MotionReveal direction="up">
-            <HomeRoasWrapper content={home.roas} />
           </MotionReveal>
         </section>
 

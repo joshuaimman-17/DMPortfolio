@@ -113,13 +113,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
             }}
             className="flex items-center gap-2 sm:gap-2.5 text-left focus:outline-none group cursor-pointer min-w-0"
           >
-            {settings?.hero?.logo && (
+            {settings?.hero?.avatar && (
               <img
-                width={32}
-                height={32}
-                alt={`${settings?.name || ''} Logo`}
-                className="h-7 sm:h-8 w-auto object-contain transition-transform group-hover:scale-105 shrink-0"
-                src={settings.hero.logo}
+                width={512}
+                height={512}
+                alt={settings?.name || ''}
+                className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20 shrink-0"
+                src={settings.hero.avatar}
               />
             )}
             <span className="font-bold text-sm sm:text-base md:text-lg text-on-surface truncate max-w-[130px] xs:max-w-[200px] sm:max-w-none">
@@ -157,7 +157,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
             })}
           </nav>
 
-          {/* Right Action: Hire Me + Profile Avatar + Hamburger */}
+          {/* Right Action: Hire Me + Hamburger */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={onOpenAudit}
@@ -165,16 +165,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
             >
               Hire Me
             </button>
-
-            {settings?.hero?.avatar && (
-              <img
-                width={512}
-                height={512}
-                alt={settings?.name || ''}
-                className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20 hidden sm:inline-block"
-                src={settings.hero.avatar}
-              />
-            )}
 
             {/* Mobile Hamburger Button */}
             <button
@@ -199,7 +189,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
             </span>
             {[
               { id: 'home' as NavRoute, label: 'Home', icon: 'home' },
-              { id: 'about' as NavRoute, label: 'About Alex', icon: 'person' },
+              { id: 'about' as NavRoute, label: settings?.name ? `About ${settings.name}` : 'About', icon: 'person' },
               { id: 'services' as NavRoute, label: 'Services & Practice Areas', icon: 'room_service' },
               { id: 'works' as NavRoute, label: 'Works & Case Studies', icon: 'work' },
               { id: 'blog' as NavRoute, label: 'Blog & Playbooks', icon: 'article' },
@@ -242,7 +232,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAudit, settings }) => {
             </button>
 
             <div className="text-center text-xs text-on-surface-variant font-medium">
-              Direct Advisory with Alex Rivera
+              {settings?.name ? `Direct Advisory with ${settings.name}` : 'Direct Advisory'}
             </div>
           </div>
         </div>

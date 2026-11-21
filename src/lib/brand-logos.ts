@@ -1,0 +1,35 @@
+// Official brand logos served by Simple Icons (https://simpleicons.org, CC0). `slug` is the Simple Icons slug.
+// Only brands that exist in the set are listed; others (e.g. Ahrefs, Klaviyo, VWO, Canva) fall back to a Material icon.
+export const BRAND_LOGOS: { slug: string; label: string }[] = [
+  { slug: 'googleanalytics', label: 'Google Analytics' },
+  { slug: 'googlesearchconsole', label: 'Google Search Console' },
+  { slug: 'googletagmanager', label: 'Google Tag Manager' },
+  { slug: 'googleads', label: 'Google Ads' },
+  { slug: 'googlebigquery', label: 'BigQuery' },
+  { slug: 'looker', label: 'Looker / Looker Studio' },
+  { slug: 'googlesheets', label: 'Google Sheets' },
+  { slug: 'googledrive', label: 'Google Drive' },
+  { slug: 'semrush', label: 'SEMrush' },
+  { slug: 'similarweb', label: 'Similarweb' },
+  { slug: 'meta', label: 'Meta' },
+  { slug: 'facebook', label: 'Facebook' },
+  { slug: 'instagram', label: 'Instagram' },
+  { slug: 'youtube', label: 'YouTube' },
+  { slug: 'hotjar', label: 'Hotjar' },
+  { slug: 'hubspot', label: 'HubSpot' },
+  { slug: 'mailchimp', label: 'Mailchimp' },
+  { slug: 'zapier', label: 'Zapier' },
+  { slug: 'zoho', label: 'Zoho' },
+  { slug: 'wordpress', label: 'WordPress' },
+  { slug: 'shopify', label: 'Shopify' },
+  { slug: 'wix', label: 'Wix' },
+  { slug: 'webflow', label: 'Webflow' },
+  { slug: 'figma', label: 'Figma' },
+  { slug: 'notion', label: 'Notion' },
+  { slug: 'clickup', label: 'ClickUp' },
+  { slug: 'trello', label: 'Trello' },
+  { slug: 'asana', label: 'Asana' },
+  { slug: 'claude', label: 'Claude' },
+];
+
+export const brandLogoUrl = (slug: string) => `https://cdn.simpleicons.org/${encodeURIComponent(slug)}`;

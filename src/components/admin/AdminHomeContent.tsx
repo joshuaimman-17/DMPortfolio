@@ -4,6 +4,8 @@ import { db } from '../../lib/firebase';
 import { usePortfolioData } from '../../context/PortfolioContext';
 import { triggerRevalidation } from '../../lib/admin-service';
 import { Collapsible } from './Collapsible';
+import { IconPicker } from './IconPicker';
+import { BRAND_LOGOS } from '../../lib/brand-logos';
 import { DEFAULT_HOME, mergeHome, type HomeContent } from '../../types/home-content';
 
 const inputCls =
@@ -95,7 +97,7 @@ export const HomeContentFields: React.FC<{
         {form.metricsBar.items.map((m, i) => (
           <div key={i} className="grid sm:grid-cols-2 gap-3">
             <Field label={`Metric ${i + 1} tag`} value={m.tag} onChange={(v) => set('metricsBar', { items: setItem(form.metricsBar.items, i, { tag: v }) })} />
-            <Field label={`Metric ${i + 1} icon (Material Symbol)`} value={m.icon} onChange={(v) => set('metricsBar', { items: setItem(form.metricsBar.items, i, { icon: v }) })} />
+            <IconPicker label={`Metric ${i + 1} icon`} value={m.icon} onChange={(v) => set('metricsBar', { items: setItem(form.metricsBar.items, i, { icon: v }) })} />
           </div>
         ))}
       </Card>
@@ -120,9 +122,23 @@ export const HomeContentFields: React.FC<{
             onAdd={() => set('about', { tools: [...form.about.tools, { name: '', icon: 'build', level: '' }] })}
           />
           {form.about.tools.map((t, i) => (
-            <div key={i} className="grid sm:grid-cols-[1fr_1fr_1fr_auto] gap-3 items-end">
+            <div key={i} className="grid sm:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-3 items-end">
               <Field label="Name" value={t.name} onChange={(v) => set('about', { tools: setItem(form.about.tools, i, { name: v }) })} />
-              <Field label="Icon (Material Symbol)" value={t.icon} onChange={(v) => set('about', { tools: setItem(form.about.tools, i, { icon: v }) })} />
+              <label className="flex flex-col gap-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Brand logo</span>
+                <select
+                  className={inputCls}
+                  value={t.brand || ''}
+                  onChange={(e) => set('about', { tools: setItem(form.about.tools, i, { brand: e.target.value }) })}
+                >
+                  <option value="">None (use icon)</option>
+                  {t.brand && !BRAND_LOGOS.some((b) => b.slug === t.brand) && <option value={t.brand}>{t.brand}</option>}
+                  {BRAND_LOGOS.map((b) => (
+                    <option key={b.slug} value={b.slug}>{b.label}</option>
+                  ))}
+                </select>
+              </label>
+              <IconPicker label="Fallback icon" value={t.icon} onChange={(v) => set('about', { tools: setItem(form.about.tools, i, { icon: v }) })} />
               <Field label="Level" value={t.level} onChange={(v) => set('about', { tools: setItem(form.about.tools, i, { level: v }) })} />
               <RemoveBtn onClick={() => set('about', { tools: form.about.tools.filter((_, idx) => idx !== i) })} />
             </div>
@@ -176,7 +192,7 @@ export const HomeContentFields: React.FC<{
               <Field label="Number" value={s.step} onChange={(v) => set('process', { steps: setItem(form.process.steps, i, { step: v }) })} />
               <Field label="Title" value={s.title} onChange={(v) => set('process', { steps: setItem(form.process.steps, i, { title: v }) })} />
               <Field label="Timeframe" value={s.timeframe} onChange={(v) => set('process', { steps: setItem(form.process.steps, i, { timeframe: v }) })} />
-              <Field label="Icon" value={s.icon} onChange={(v) => set('process', { steps: setItem(form.process.steps, i, { icon: v }) })} />
+              <IconPicker label="Icon" value={s.icon} onChange={(v) => set('process', { steps: setItem(form.process.steps, i, { icon: v }) })} />
             </div>
             <Field label="Description" multiline value={s.desc} onChange={(v) => set('process', { steps: setItem(form.process.steps, i, { desc: v }) })} />
             <RemoveBtn onClick={() => set('process', { steps: form.process.steps.filter((_, idx) => idx !== i) })} />
@@ -234,28 +250,6 @@ export const HomeContentFields: React.FC<{
         <p className="text-xs text-neutral-500">
           Email, phone, location and WhatsApp are edited in the “Hero &amp; Metrics” tab.
         </p>
-      </Card>
-
-      <Card title="ROAS calculator">
-        <div className="grid sm:grid-cols-2 gap-4">
-          <Field label="Badge" value={form.roas.badge} onChange={(v) => set('roas', { badge: v })} />
-          <Field label="Engine tag" value={form.roas.engine} onChange={(v) => set('roas', { engine: v })} />
-        </div>
-        <Field label="Title" value={form.roas.title} onChange={(v) => set('roas', { title: v })} />
-        <Field label="Description" multiline value={form.roas.description} onChange={(v) => set('roas', { description: v })} />
-        <div className="grid sm:grid-cols-2 gap-4">
-          <Field label="Spend slider label" value={form.roas.spendLabel} onChange={(v) => set('roas', { spendLabel: v })} />
-          <Field label="Order value slider label" value={form.roas.aovLabel} onChange={(v) => set('roas', { aovLabel: v })} />
-          <Field label="Conversion slider label" value={form.roas.conversionLabel} onChange={(v) => set('roas', { conversionLabel: v })} />
-          <Field label="CPC slider label" value={form.roas.cpcLabel} onChange={(v) => set('roas', { cpcLabel: v })} />
-          <Field label="Outcome label" value={form.roas.outcomeLabel} onChange={(v) => set('roas', { outcomeLabel: v })} />
-          <Field label="Return label" value={form.roas.returnLabel} onChange={(v) => set('roas', { returnLabel: v })} />
-          <Field label="Revenue label" value={form.roas.revenueLabel} onChange={(v) => set('roas', { revenueLabel: v })} />
-          <Field label="CAC label" value={form.roas.cacLabel} onChange={(v) => set('roas', { cacLabel: v })} />
-          <Field label="Customers label" value={form.roas.customersLabel} onChange={(v) => set('roas', { customersLabel: v })} />
-          <Field label="Gross margin label" value={form.roas.marginLabel} onChange={(v) => set('roas', { marginLabel: v })} />
-        </div>
-        <Field label="Button text" value={form.roas.ctaLabel} onChange={(v) => set('roas', { ctaLabel: v })} />
       </Card>
 
       <Card title="Inquiry form">

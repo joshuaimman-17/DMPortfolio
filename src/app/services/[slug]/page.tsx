@@ -139,17 +139,9 @@ export default async function ServiceDetailPage({ params }: Props) {
 
             <div className="flex flex-wrap items-center gap-4 pt-3">
               <AuditButton className="px-6 py-3.5 rounded-xl bg-primary text-white font-bold text-sm shadow-[0_4px_14px_0_rgba(37,99,235,0.35)] hover:bg-blue-700 transition-all inline-flex items-center gap-2 cursor-pointer">
-                <span>Book Diagnostic for This Service</span>
-                <span className="material-symbols-outlined text-[18px]">calendar_today</span>
+                <span>Get in Touch</span>
+                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
               </AuditButton>
-
-              <a
-                href="#pricing"
-                className="px-6 py-3.5 rounded-xl bg-surface-container-low text-on-surface font-semibold text-sm hover:bg-neutral-200/80 transition-all inline-flex items-center gap-2 border border-neutral-200"
-              >
-                <span>Pricing &amp; Engagements</span>
-                <span className="material-symbols-outlined text-[18px]">payments</span>
-              </a>
             </div>
           </div>
         </section>

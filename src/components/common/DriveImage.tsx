@@ -16,6 +16,8 @@ export interface DriveImageProps {
   containerClassName?: string;
   priority?: boolean;
   unoptimized?: boolean;
+  /** Show the whole image at its own aspect ratio (no cropping, frame height follows the image). */
+  natural?: boolean;
 }
 
 export const DriveImage: React.FC<DriveImageProps> = ({
@@ -30,6 +32,7 @@ export const DriveImage: React.FC<DriveImageProps> = ({
   containerClassName = '',
   priority = false,
   unoptimized,
+  natural = false,
 }) => {
   const [error, setError] = useState<boolean>(false);
 
@@ -85,7 +88,7 @@ export const DriveImage: React.FC<DriveImageProps> = ({
   if (!resolvedSrc || error) {
     return (
       <div
-        className={`relative overflow-hidden bg-neutral-900 ${aspectRatioClass} ${containerClassName}`}
+        className={`relative overflow-hidden bg-neutral-900 ${natural ? 'aspect-[4/5]' : aspectRatioClass} ${containerClassName}`}
       >
         <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-gradient-to-br from-slate-900 via-neutral-900 to-blue-950 text-white select-none">
           <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mb-2 shadow-inner">
@@ -109,6 +112,22 @@ export const DriveImage: React.FC<DriveImageProps> = ({
     resolvedSrc.includes('googleusercontent.com') ||
     resolvedSrc.includes('drive.google.com') ||
     resolvedSrc.includes('unsplash.com');
+
+  if (natural) {
+    return (
+      <div className={`relative overflow-hidden bg-neutral-100 ${containerClassName}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={resolvedSrc}
+          alt={alt || 'Image'}
+          loading={priority ? 'eager' : 'lazy'}
+          referrerPolicy="no-referrer"
+          onError={() => setError(true)}
+          className={`block w-full h-auto ${className}`}
+        />
+      </div>
+    );
+  }
 
   return (
     <div

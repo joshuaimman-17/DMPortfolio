@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { getSiteUrl } from '@/lib/site-url';
+import { getPageMetadata } from '@/lib/data';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -9,26 +10,42 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
-export const metadata: Metadata = {
-  title: 'Alex Rivera | Growth Marketer - Performance Portfolio',
-  description:
-    'Performance marketing portfolio and client acquisition platform for senior digital marketing expert Alex Rivera. Featuring full-funnel case studies, verified organic SERP rankings, interactive ROAS calculator, and growth audit booking.',
-  metadataBase: new URL(getSiteUrl()),
-  openGraph: {
+// Site-wide default metadata comes from the homepage doc (pages_metadata/route_home), so pages without
+// their own generateMetadata (e.g. /admin, a client component) inherit it. Canonical/url are intentionally
+// omitted so inheriting pages never claim the homepage URL.
+export async function generateMetadata(): Promise<Metadata> {
+  const pageMeta = await getPageMetadata('route_home', {
     title: 'Alex Rivera | Growth Marketer - Performance Portfolio',
     description:
-      'Performance marketing portfolio and client acquisition platform for senior digital marketing expert Alex Rivera.',
-    url: getSiteUrl(),
-    siteName: 'Alex Rivera Portfolio',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Alex Rivera | Growth Marketer - Performance Portfolio',
-    description:
-      'Performance marketing portfolio and client acquisition platform for senior digital marketing expert Alex Rivera.',
-  },
-};
+      'Performance marketing portfolio and client acquisition platform for senior digital marketing expert. Featuring full-funnel case studies, verified organic SERP rankings, and growth audit booking.',
+    path: '/',
+  });
+
+  return {
+    title: pageMeta.title,
+    description: pageMeta.description,
+    metadataBase: new URL(getSiteUrl()),
+    openGraph: {
+      title: pageMeta.openGraph.title,
+      description: pageMeta.openGraph.description,
+      siteName: pageMeta.openGraph.siteName,
+      locale: pageMeta.openGraph.locale,
+      type: pageMeta.openGraph.type,
+      images: pageMeta.openGraph.images.map((img) => ({
+        url: img.url,
+        width: img.width,
+        height: img.height,
+        alt: img.alt,
+      })),
+    },
+    twitter: {
+      card: pageMeta.twitter.card,
+      title: pageMeta.twitter.title,
+      description: pageMeta.twitter.description,
+      images: pageMeta.twitter.images,
+    },
+  };
+}
 
 export default function RootLayout({
   children,
